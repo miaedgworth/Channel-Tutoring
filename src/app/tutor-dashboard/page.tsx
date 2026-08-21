@@ -1,0 +1,114 @@
+import Link from "next/link";
+import type { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/current-user";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { formatCurrencyGBP } from "@/lib/utils";
+
+export const metadata: Metadata = { title: "Tutor Overview" };
+export const dynamic = "force-dynamic";
+
+export default async function TutorOverviewPage() {
+  const user = await requireUser("TUTOR");
+  const profile = await prisma.tutorProfile.findUnique({
+    where: { userId: user.id },
+  });
+
+  if (!profile) {
+    return (
+      <Card>
+        <CardContent>
+          <p className="text-sm text-navy/60">
+            We couldn&apos;t find your tutor profile. Please contact support.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const [upcomingBookings, unreadMessages] = await Promise.all([
+    prisma.booking.count({
+      where: { tutorId: profile.id, status: "CONFIRMED", startsAt: { gte: new Date() } },
+    }),
+    prisma.message.count({
+      where: {
+        conversation: { tutorProfileId: profile.id },
+        readAt: null,
+        senderId: { not: user.id },
+      },
+    }),
+  ]);
+
+  return (
+    <div className="space-y-6">
+      {!profile.isPublished && (
+        <Card className="border-gold-dark/40 bg-gold/5">
+          <CardContent>
+            <p className="text-sm text-navy">
+              Your profile is not published yet.{" "}
+              <Link href="/tutor-dashboard/profile" className="font-semibold underline">
+                Complete your profile
+              </Link>{" "}
+              so clients can find and book you.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card>
+          <CardContent>
+            <p className="text-sm text-navy/60">Profile status</p>
+            <div className="mt-2">
+              <Badge variant={profile.isPublished ? "success" : "warning"}>
+                {profile.isPublished ? "Live" : "Unpublished"}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <p className="text-sm text-navy/60">Upcoming confirmed sessions</p>
+            <p className="mt-2 font-heading text-3xl font-bold text-navy">
+              {upcomingBookings}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <p className="text-sm text-navy/60">Unread messages</p>
+            <p className="mt-2 font-heading text-3xl font-bold text-navy">
+              {unreadMessages}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Card>
+          <CardContent>
+            <p className="text-sm text-navy/60">Available balance</p>
+            <p className="mt-2 font-heading text-3xl font-bold text-navy">
+              {formatCurrencyGBP(profile.balancePence)}
+            </p>
+            <Link
+              href="/tutor-dashboard/earnings"
+              className="mt-3 inline-block text-sm font-semibold text-navy underline"
+            >
+              View earnings &amp; withdraw
+            </Link>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <p className="text-sm text-navy/60">Total earned to date</p>
+            <p className="mt-2 font-heading text-3xl font-bold text-navy">
+              {formatCurrencyGBP(profile.totalEarnedPence)}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
