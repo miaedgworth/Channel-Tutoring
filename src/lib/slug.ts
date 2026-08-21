@@ -19,3 +19,14 @@ export async function uniqueTutorSlug(name: string) {
   }
   return slug;
 }
+
+export async function uniquePostSlug(title: string) {
+  const base = slugify(title) || "post";
+  let slug = base;
+  let suffix = 1;
+  while (await prisma.post.findUnique({ where: { slug } })) {
+    suffix += 1;
+    slug = `${base}-${suffix}`;
+  }
+  return slug;
+}
