@@ -23,6 +23,23 @@ export async function subscribeEmail(rawEmail: string, source: string) {
   return subscription;
 }
 
+export async function unsubscribeEmailForUser(rawEmail: string) {
+  const email = rawEmail.trim().toLowerCase();
+  const subscription = await prisma.newsletterSubscription.findUnique({ where: { email } });
+  if (!subscription || !subscription.subscribed) return;
+
+  await prisma.newsletterSubscription.update({
+    where: { id: subscription.id },
+    data: { subscribed: false, unsubscribedAt: new Date() },
+  });
+
+  const resend = getResend();
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
+  if (resend && audienceId) {
+    await resend.contacts.update({ email, audienceId, unsubscribed: true });
+  }
+}
+
 export async function unsubscribeEmail(token: string) {
   const subscription = await prisma.newsletterSubscription.findUnique({
     where: { unsubscribeToken: token },
