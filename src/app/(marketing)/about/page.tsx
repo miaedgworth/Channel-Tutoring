@@ -51,9 +51,6 @@ export default function AboutPage() {
           <LinkButton href="/find-a-tutor" variant="gold">
             Find a Tutor
           </LinkButton>
-          <LinkButton href="/join-as-a-tutor" variant="outline">
-            Become a Tutor
-          </LinkButton>
         </div>
       </Container>
     </div>

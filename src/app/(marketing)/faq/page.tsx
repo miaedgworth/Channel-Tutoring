@@ -28,20 +28,12 @@ const FAQS = [
     a: "Each tutor sets their own hourly rate, shown on their profile before you book. There are no hidden fees for clients.",
   },
   {
-    q: "How do tutors get paid?",
-    a: "Tutors connect a bank account via Stripe. After a session is paid for, the tutor's share (their rate minus our flat £15 platform fee) is added to their balance, which they can withdraw on demand.",
-  },
-  {
     q: "Can I leave a review?",
     a: "Yes — after a completed session, you can leave a rating and review for your tutor from your bookings dashboard.",
   },
   {
     q: "What subjects and levels do you cover?",
     a: "We cover the core GCSE and A-Level subjects across the main UK exam boards used in Guernsey (AQA, Edexcel, OCR, WJEC/Eduqas and others). Use Find a Tutor to filter by subject, level and exam board.",
-  },
-  {
-    q: "How do I apply to become a tutor?",
-    a: "Fill out our tutor application form with your subjects, experience, qualifications and DBS status. Once approved, you'll get an email to set up your account and publish your profile.",
   },
 ];
 
