@@ -13,20 +13,13 @@ const columns = [
     ],
   },
   {
-    heading: "For Tutors",
-    links: [
-      { href: "/join-as-a-tutor", label: "Apply to Tutor" },
-      { href: "/how-it-works#tutors", label: "How Tutoring Works" },
-      { href: "/legal/tutor-agreement", label: "Tutor Agreement" },
-    ],
-  },
-  {
     heading: "Company",
     links: [
       { href: "/about", label: "About Us" },
       { href: "/news", label: "News" },
       { href: "/blog", label: "Blog" },
       { href: "/contact", label: "Contact" },
+      { href: "/join-as-a-tutor", label: "Become a Tutor" },
     ],
   },
   {
@@ -37,6 +30,7 @@ const columns = [
       { href: "/legal/cookie-policy", label: "Cookie Policy" },
       { href: "/legal/safeguarding-policy", label: "Safeguarding Policy" },
       { href: "/legal/cancellation-refund-policy", label: "Cancellation & Refunds" },
+      { href: "/legal/tutor-agreement", label: "Tutor Agreement" },
       { href: "/legal/acceptable-use-policy", label: "Acceptable Use Policy" },
     ],
   },
@@ -46,7 +40,7 @@ export function SiteFooter() {
   return (
     <footer className="border-t border-navy/10 bg-navy text-white/90">
       <Container className="py-12">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-6">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold text-navy-dark font-heading text-lg font-bold">

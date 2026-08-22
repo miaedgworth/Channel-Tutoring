@@ -62,9 +62,6 @@ export default async function HomePage() {
             <LinkButton href="/find-a-tutor" variant="gold" size="lg">
               Find a Tutor
             </LinkButton>
-            <LinkButton href="/join-as-a-tutor" variant="outline" size="lg">
-              Become a Tutor
-            </LinkButton>
           </div>
         </Container>
       </section>
