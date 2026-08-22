@@ -21,9 +21,8 @@ export async function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-navy/10 bg-white/95 backdrop-blur">
       <Container className="flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-navy text-gold font-heading text-lg font-bold">
-            CT
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-icon.svg" alt="" className="h-10 w-auto" />
           <span className="font-heading text-lg font-bold text-navy hidden sm:inline">
             Channel Tutoring
           </span>

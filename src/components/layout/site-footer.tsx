@@ -43,8 +43,9 @@ export function SiteFooter() {
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold text-navy-dark font-heading text-lg font-bold">
-                CT
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/95 p-1">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo-icon.svg" alt="" className="h-full w-auto" />
               </span>
               <span className="font-heading text-lg font-bold text-white">
                 Channel Tutoring
