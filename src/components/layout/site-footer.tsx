@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Container } from "@/components/ui/container";
 import { NewsletterForm } from "@/components/marketing/newsletter-form";
 
@@ -44,8 +45,13 @@ export function SiteFooter() {
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2">
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/95 p-1">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo-icon.svg" alt="" className="h-full w-auto" />
+                <Image
+                  src="/logo-icon.png"
+                  alt="Channel Tutoring"
+                  width={449}
+                  height={419}
+                  className="h-full w-auto"
+                />
               </span>
               <span className="font-heading text-lg font-bold text-white">
                 Channel Tutoring
