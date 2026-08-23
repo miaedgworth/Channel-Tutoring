@@ -29,6 +29,10 @@ const TRUST_POINTS = [
     title: "Face-to-face and Remote Learning Available",
     body: "Choose whichever format suits your family, in person or online.",
   },
+  {
+    title: "Supported by the University of Cambridge",
+    body: "Backed by the Homerton College Changemakers Catalyst Fund Award, recognising our work widening access to education in Guernsey.",
+  },
 ];
 
 const STEPS = [
