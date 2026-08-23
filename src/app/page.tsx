@@ -9,10 +9,26 @@ import { SUBJECTS } from "@/lib/constants";
 export const dynamic = "force-dynamic";
 
 const TRUST_POINTS = [
-  { title: "DBS-checked tutors", body: "Every tutor is vetted and DBS-checked before their profile goes live." },
-  { title: "Guernsey-based", body: "Local knowledge of GCSE and A-Level exam boards used across the island." },
-  { title: "Secure payments", body: "Pay securely online — no cash, no awkward conversations." },
-  { title: "Monitored messaging", body: "All communication happens on-platform, with safeguarding oversight." },
+  {
+    title: "High-Quality Tutors Who Are Experts in Their Subjects",
+    body: "Every tutor is a subject specialist, vetted and DBS-checked before their profile goes live.",
+  },
+  {
+    title: "Tailored Learning Plans",
+    body: "Sessions built around your child's specific goals, exam board and pace.",
+  },
+  {
+    title: "Affordable Pricing",
+    body: "Fixed, transparent pricing by level, with no hidden fees.",
+  },
+  {
+    title: "Building Confidence and Academic Excellence",
+    body: "We focus on genuine understanding, not just short-term results.",
+  },
+  {
+    title: "Face-to-face and Remote Learning Available",
+    body: "Choose whichever format suits your family, in person or online.",
+  },
 ];
 
 const STEPS = [
@@ -79,7 +95,7 @@ export default async function HomePage() {
 
       <section className="py-14">
         <Container>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {TRUST_POINTS.map((point) => (
               <div key={point.title} className="rounded-xl border border-navy/10 p-5">
                 <h3 className="font-heading text-base font-semibold text-navy">
