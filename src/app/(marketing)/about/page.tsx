@@ -5,7 +5,7 @@ import { LinkButton } from "@/components/ui/button";
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "Channel Tutoring is a Guernsey-based tutoring company connecting students and parents with vetted GCSE and A-Level tutors.",
+    "Channel Tutoring is a Guernsey-based tutoring service providing high-quality academic support from KS3 through GCSEs, A-Levels and university admissions.",
 };
 
 export default function AboutPage() {
@@ -18,32 +18,32 @@ export default function AboutPage() {
 
         <div className="prose-navy mt-8 space-y-6 text-navy/80">
           <p>
-            Channel Tutoring was founded to make it simple and safe for
-            Guernsey families to find brilliant, trustworthy GCSE and
-            A-Level tutors — and just as simple for great tutors to find
-            students, without the admin headache.
+            Channel Tutoring is a Guernsey-based tutoring service dedicated
+            to providing high-quality academic support across a wide range
+            of subjects and levels. From KS3 through GCSEs, A-Levels, and
+            university admissions, we help students build confidence,
+            strengthen their understanding, and achieve their academic
+            goals.
           </p>
           <p>
-            As a small island community, word of mouth has always mattered
-            here. We built Channel Tutoring to keep that personal, local
-            feel while adding the things a good tutoring platform should
-            offer: proper vetting, DBS checks, secure online payments, and
-            oversight that protects both students and tutors.
+            Mia founded Channel Tutoring while studying at Cambridge
+            University, inspired by the academic environment around her and
+            driven by a deep passion for education. Having personally
+            benefited from tutoring on her journey to Cambridge, she
+            understands its value firsthand. Her goal is to make
+            high-quality tutoring in Guernsey more accessible through
+            affordable pricing. Through personalised support, students can
+            build confidence and develop a genuine love of learning,
+            enabling them to excel academically.
           </p>
           <p>
-            Every tutor on our platform goes through an application and
-            approval process before their profile goes live. We take
-            safeguarding seriously, especially given the number of our
-            students who are under 18 — messaging is monitored, personal
-            contact details stay off the platform, and every booking is
-            recorded.
-          </p>
-          <p>
-            Whether you&apos;re a parent looking for extra support before
-            exams, a student wanting to build confidence in a tricky
-            subject, or an experienced tutor looking for a better way to
-            manage your bookings and payments, we&apos;d love to have you
-            on Channel Tutoring.
+            She believes education should empower individuals not only to
+            succeed in exams, but also to think independently, ask
+            questions, and develop skills that last a lifetime. Through
+            Channel Tutoring, she aims to create a supportive and inspiring
+            environment where students feel motivated, capable, and
+            equipped to reach their full potential both inside and outside
+            the classroom.
           </p>
         </div>
 
