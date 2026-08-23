@@ -21,7 +21,7 @@ export default async function BlogPostPage({
 }: PageProps<"/blog/[slug]">) {
   const { slug } = await params;
   const post = await prisma.post.findUnique({ where: { slug, status: "PUBLISHED" } });
-  if (!post || post.type !== "BLOG") notFound();
+  if (!post || !["BLOG", "NEWS"].includes(post.type)) notFound();
 
   return (
     <div className="py-16">
