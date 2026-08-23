@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/button";
@@ -53,7 +54,17 @@ export default async function HomePage() {
           <h1 className="mx-auto max-w-3xl font-heading text-4xl font-bold leading-tight text-navy sm:text-5xl">
             Unlock Your Potential with Channel Tutoring
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-lg text-navy/70">
+          <div className="relative mx-auto mt-8 aspect-[3/2] w-full max-w-2xl overflow-hidden rounded-2xl shadow-md">
+            <Image
+              src="/home-hero.webp"
+              alt="A Channel Tutoring tutor working through a session with a student"
+              fill
+              priority
+              sizes="(min-width: 672px) 672px, 100vw"
+              className="object-cover"
+            />
+          </div>
+          <p className="mx-auto mt-8 max-w-2xl text-lg text-navy/70">
             Channel Tutoring connects students and parents with vetted,
             experienced tutors — with simple online booking, secure payments
             and safeguarding built in.
