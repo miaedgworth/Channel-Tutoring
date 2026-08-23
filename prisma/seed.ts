@@ -62,6 +62,34 @@ async function main() {
     },
   });
 
+  await prisma.course.upsert({
+    where: { slug: "summer-school-2026" },
+    update: {},
+    create: {
+      title: "Summer School 2026",
+      slug: "summer-school-2026",
+      description:
+        "Our summer school has just taken place. More details and highlights coming soon.",
+      status: "PAST",
+      startDate: new Date("2026-08-04"),
+      endDate: new Date("2026-08-14"),
+    },
+  });
+
+  await prisma.course.upsert({
+    where: { slug: "october-half-term-course" },
+    update: {},
+    create: {
+      title: "October Half Term Course",
+      slug: "october-half-term-course",
+      description:
+        "Full details are coming soon. Express your interest below and we'll be in touch as soon as booking opens.",
+      status: "UPCOMING",
+      startDate: null,
+      endDate: null,
+    },
+  });
+
   console.log("Seed complete.");
   console.log("Admin login:  admin@channeltutoring.gg / AdminPass123!");
   console.log("Tutor login:  tutor@channeltutoring.gg / TutorPass123!");

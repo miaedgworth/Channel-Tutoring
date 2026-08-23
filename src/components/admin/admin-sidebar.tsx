@@ -13,6 +13,7 @@ const NAV = [
   { href: "/admin/messages", label: "Messages" },
   { href: "/admin/revenue", label: "Revenue" },
   { href: "/admin/content", label: "Content" },
+  { href: "/admin/courses", label: "Courses" },
 ];
 
 export function AdminSidebar() {

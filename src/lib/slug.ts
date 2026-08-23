@@ -30,3 +30,14 @@ export async function uniquePostSlug(title: string) {
   }
   return slug;
 }
+
+export async function uniqueCourseSlug(title: string) {
+  const base = slugify(title) || "course";
+  let slug = base;
+  let suffix = 1;
+  while (await prisma.course.findUnique({ where: { slug } })) {
+    suffix += 1;
+    slug = `${base}-${suffix}`;
+  }
+  return slug;
+}

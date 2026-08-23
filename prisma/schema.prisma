@@ -83,6 +83,11 @@ enum PostStatus {
   PUBLISHED
 }
 
+enum CourseStatus {
+  UPCOMING
+  PAST
+}
+
 // ---------- Core auth / users ----------
 
 model User {
@@ -363,6 +368,38 @@ model Post {
   featuredTutor TutorProfile? @relation("TutorSpotlightPosts", fields: [featuredTutorId], references: [id])
 
   @@index([type, status, publishedAt])
+}
+
+// ---------- Courses ----------
+
+model Course {
+  id          String       @id @default(cuid())
+  title       String
+  slug        String       @unique
+  description String
+  status      CourseStatus @default(UPCOMING)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  interests CourseInterest[]
+
+  @@index([status])
+}
+
+model CourseInterest {
+  id        String   @id @default(cuid())
+  courseId  String
+  name      String
+  email     String
+  phone     String?
+  message   String?
+  createdAt DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
 }
 
 // ---------- Newsletter & contact ----------
