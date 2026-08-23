@@ -24,9 +24,6 @@ export default function PricingPage() {
           <h1 className="font-heading text-3xl font-bold text-navy sm:text-4xl">
             Pricing
           </h1>
-          <p className="mx-auto mt-3 max-w-xl text-navy/70">
-            Simple, fixed pricing by level &mdash; the same for every tutor.
-          </p>
         </div>
 
         <div className="mt-12">
@@ -52,11 +49,6 @@ export default function PricingPage() {
               </table>
             </CardContent>
           </Card>
-          <p className="mt-3 text-sm text-navy/60">
-            These prices are for one-to-one lessons. There are no extra
-            booking fees for clients: the price you see is the price you
-            pay.
-          </p>
         </div>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -82,16 +74,6 @@ export default function PricingPage() {
               applied automatically at checkout.
             </p>
           </div>
-        </div>
-
-        <div className="mt-8 rounded-xl border border-navy/10 bg-navy/[0.02] p-6">
-          <h2 className="font-heading text-lg font-semibold text-navy">
-            Example
-          </h2>
-          <p className="mt-2 text-sm text-navy/70">
-            A 60-minute GCSE session: the client pays{" "}
-            {formatCurrencyGBP(LEVEL_PRICE_PENCE.GCSE)} in total.
-          </p>
         </div>
 
         <p className="mt-8 text-center text-sm text-navy/50">
