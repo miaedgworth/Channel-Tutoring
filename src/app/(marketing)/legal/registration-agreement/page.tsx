@@ -98,7 +98,7 @@ export default function RegistrationAgreementPage() {
       <p>
         If you have any issues or concerns about a tutor or a session,
         please raise these with Channel Tutoring at{" "}
-        <a href="mailto:hello@channeltutoring.gg">hello@channeltutoring.gg</a>{" "}
+        <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>{" "}
         rather than directly with the tutor, so we can look into it
         properly.
       </p>
@@ -118,7 +118,7 @@ export default function RegistrationAgreementPage() {
       <h2>Contact</h2>
       <p>
         Questions about this agreement or your registration? Email{" "}
-        <a href="mailto:hello@channeltutoring.gg">hello@channeltutoring.gg</a>.
+        <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>.
       </p>
     </LegalPage>
   );

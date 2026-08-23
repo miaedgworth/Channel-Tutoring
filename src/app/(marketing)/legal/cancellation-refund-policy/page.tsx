@@ -40,7 +40,7 @@ export default function CancellationRefundPolicyPage() {
         If a payment fails, the booking is not confirmed and the time slot
         remains available for others to book. If you believe a payment was
         taken in error, contact us at{" "}
-        <a href="mailto:hello@channeltutoring.gg">hello@channeltutoring.gg</a>{" "}
+        <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>{" "}
         and we&apos;ll investigate.
       </p>
 
@@ -55,7 +55,7 @@ export default function CancellationRefundPolicyPage() {
       <h2>Contact</h2>
       <p>
         Questions about a specific booking? Email{" "}
-        <a href="mailto:hello@channeltutoring.gg">hello@channeltutoring.gg</a>{" "}
+        <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>{" "}
         with your booking details.
       </p>
     </LegalPage>

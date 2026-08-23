@@ -45,8 +45,8 @@ export default function AcceptableUsePolicyPage() {
       <p>
         If you experience or witness a breach of this policy, please
         contact us at{" "}
-        <a href="mailto:safeguarding@channeltutoring.gg">
-          safeguarding@channeltutoring.gg
+        <a href="mailto:info@channeltutoring.com">
+          info@channeltutoring.com
         </a>
         .
       </p>

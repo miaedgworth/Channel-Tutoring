@@ -237,7 +237,7 @@ export function TutorApplicationForm() {
         </div>
         <p className="text-xs text-navy/50">
           No file yet? Share a Google Drive/Dropbox link, or email documents
-          to tutors@channeltutoring.gg after applying.
+          to info@channeltutoring.com after applying.
         </p>
       </section>
 

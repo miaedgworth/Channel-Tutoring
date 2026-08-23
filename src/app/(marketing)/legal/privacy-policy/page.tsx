@@ -155,7 +155,7 @@ export default function PrivacyPolicyPage() {
         any questions or queries regarding how your personal data is being
         managed, please contact us by writing to Mia Edgworth or by
         emailing{" "}
-        <a href="mailto:channel.tutoring@hotmail.com">channel.tutoring@hotmail.com</a>.
+        <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>.
       </p>
 
       <h2>Contacting the regulator</h2>

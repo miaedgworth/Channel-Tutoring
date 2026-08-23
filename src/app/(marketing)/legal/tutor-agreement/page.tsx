@@ -108,7 +108,7 @@ export default function TutorAgreementPage() {
       <h2>9. Contact</h2>
       <p>
         Questions about this agreement? Email{" "}
-        <a href="mailto:tutors@channeltutoring.gg">tutors@channeltutoring.gg</a>.
+        <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>.
       </p>
     </LegalPage>
   );

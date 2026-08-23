@@ -89,7 +89,7 @@ export function TutorProfileForm({
         </Badge>
         {profile.dbsStatus !== "VERIFIED" && (
           <span className="text-xs text-navy/50">
-            Your profile can&apos;t go live until this is verified — contact us at tutors@channeltutoring.gg.
+            Your profile can&apos;t go live until this is verified — contact us at info@channeltutoring.com.
           </span>
         )}
       </div>

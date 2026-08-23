@@ -27,8 +27,8 @@ export default function ContactPage() {
 
         <p className="mt-8 text-center text-sm text-navy/50">
           You can also email us directly at{" "}
-          <a href="mailto:hello@channeltutoring.gg" className="underline">
-            hello@channeltutoring.gg
+          <a href="mailto:info@channeltutoring.com" className="underline">
+            info@channeltutoring.com
           </a>
         </p>
       </Container>

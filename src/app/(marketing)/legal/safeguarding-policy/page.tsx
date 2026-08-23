@@ -47,8 +47,8 @@ export default function SafeguardingPolicyPage() {
         If you have a safeguarding concern about a tutor, a client, or
         anything you&apos;ve seen on the platform, please contact us
         immediately at{" "}
-        <a href="mailto:safeguarding@channeltutoring.gg">
-          safeguarding@channeltutoring.gg
+        <a href="mailto:info@channeltutoring.com">
+          info@channeltutoring.com
         </a>
         . We take every report seriously and will investigate promptly,
         which may include suspending an account while we look into it.

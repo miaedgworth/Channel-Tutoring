@@ -10,4 +10,4 @@ export function getResend(): Resend | null {
 }
 
 export const FROM_EMAIL =
-  process.env.RESEND_FROM_EMAIL ?? "Channel Tutoring <hello@channeltutoring.gg>";
+  process.env.RESEND_FROM_EMAIL ?? "Channel Tutoring <info@channeltutoring.com>";

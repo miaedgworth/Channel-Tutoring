@@ -76,7 +76,7 @@ export default function TermsPage() {
       <h2>9. Contact</h2>
       <p>
         Questions about these terms? Email{" "}
-        <a href="mailto:hello@channeltutoring.gg">hello@channeltutoring.gg</a>.
+        <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>.
       </p>
     </LegalPage>
   );

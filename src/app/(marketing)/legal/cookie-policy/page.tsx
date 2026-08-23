@@ -48,7 +48,7 @@ export default function CookiePolicyPage() {
       <h2>Contact</h2>
       <p>
         Questions about our use of cookies? Email{" "}
-        <a href="mailto:privacy@channeltutoring.gg">privacy@channeltutoring.gg</a>.
+        <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>.
       </p>
     </LegalPage>
   );
