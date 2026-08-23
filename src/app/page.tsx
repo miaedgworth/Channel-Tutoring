@@ -51,7 +51,7 @@ export default async function HomePage() {
       <section className="border-b border-navy/10 bg-gradient-to-b from-navy/[0.03] to-white py-20">
         <Container className="text-center">
           <h1 className="mx-auto max-w-3xl font-heading text-4xl font-bold leading-tight text-navy sm:text-5xl">
-            Trusted GCSE &amp; A-Level tutoring, right here in Guernsey
+            Unlock Your Potential with Channel Tutoring
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-navy/70">
             Channel Tutoring connects students and parents with vetted,
