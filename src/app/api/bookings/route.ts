@@ -86,14 +86,22 @@ export async function POST(request: Request) {
       ? Math.round(fullPricePence * (1 - BLOCK_BOOKING_DISCOUNT_RATE))
       : fullPricePence;
     const discountPence = fullPricePence - discountedPricePence;
-    const platformFeePence = PLATFORM_FEE_PENCE;
-    const tutorPayoutPence = discountedPricePence - platformFeePence;
+    // The tutor is always paid as if there were no discount; the block
+    // booking discount comes entirely out of the platform's fee.
+    const tutorPayoutPence = fullPricePence - PLATFORM_FEE_PENCE;
+    const platformFeePence = discountedPricePence - tutorPayoutPence;
     return { slot, discountedPricePence, discountPence, platformFeePence, tutorPayoutPence };
   });
 
   if (bookingsData.some((b) => b.tutorPayoutPence <= 0)) {
     return NextResponse.json(
       { error: "This session's price doesn't cover the platform fee. Please contact us." },
+      { status: 409 },
+    );
+  }
+  if (bookingsData.some((b) => b.platformFeePence <= 0)) {
+    return NextResponse.json(
+      { error: "This discount can't be applied to sessions this short. Please contact us." },
       { status: 409 },
     );
   }
