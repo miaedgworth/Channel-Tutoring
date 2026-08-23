@@ -1,10 +1,8 @@
-import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/button";
 import { TutorCard } from "@/components/tutors/tutor-card";
-import { SUBJECTS } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -113,24 +111,14 @@ export default async function HomePage() {
       </section>
 
       <section className="bg-navy/[0.02] py-16">
-        <Container>
-          <h2 className="text-center font-heading text-2xl font-bold text-navy sm:text-3xl">
-            Subjects we cover
-          </h2>
-          <p className="mx-auto mt-2 max-w-xl text-center text-navy/60">
-            GCSE and A-Level tuition across the core subjects, taught by
-            tutors who know the exam boards used in Guernsey.
+        <Container className="text-center">
+          <p className="mx-auto max-w-xl text-lg text-navy/70">
+            We offer tuition across a range of subjects and levels.
           </p>
-          <div className="mx-auto mt-8 flex max-w-4xl flex-wrap justify-center gap-2">
-            {SUBJECTS.map((subject) => (
-              <Link
-                key={subject}
-                href={`/find-a-tutor?subject=${encodeURIComponent(subject)}`}
-                className="rounded-full border border-navy/15 bg-white px-4 py-1.5 text-sm font-medium text-navy/80 transition-colors hover:border-gold-dark hover:text-navy"
-              >
-                {subject}
-              </Link>
-            ))}
+          <div className="mt-6">
+            <LinkButton href="/find-a-tutor" variant="gold">
+              Find a Tutor
+            </LinkButton>
           </div>
         </Container>
       </section>
