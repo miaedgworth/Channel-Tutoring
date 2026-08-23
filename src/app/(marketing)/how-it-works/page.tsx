@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const CLIENT_STEPS = [
   {
     title: "1. Search for a tutor",
-    body: "Use Find a Tutor to filter by subject, level (GCSE or A-Level), exam board and price. Every tutor's profile shows their experience, qualifications and reviews.",
+    body: "Use Find a Tutor to filter by subject and level (KS3, GCSE, A-Level or university admissions). Every tutor's profile shows their experience, qualifications and reviews. Pricing is fixed by level, so it's the same wherever you book.",
   },
   {
     title: "2. Pick a time and book",

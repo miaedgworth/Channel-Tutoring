@@ -33,7 +33,7 @@ const FAQS = [
   },
   {
     q: "What subjects and levels do you cover?",
-    a: "We cover the core GCSE and A-Level subjects across the main UK exam boards used in Guernsey (AQA, Edexcel, OCR, WJEC/Eduqas and others). Use Find a Tutor to filter by subject, level and exam board.",
+    a: "We cover core subjects from KS3 through GCSE, A-Level and university admissions, across the main UK exam boards used in Guernsey (AQA, Edexcel, OCR, WJEC/Eduqas and others). Use Find a Tutor to filter by subject and level, and let us know your exam board when you book a session.",
   },
 ];
 
