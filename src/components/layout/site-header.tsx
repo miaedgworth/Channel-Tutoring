@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/button";
 import { auth } from "@/lib/auth";
@@ -21,9 +22,14 @@ export async function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-navy/10 bg-white/95 backdrop-blur">
       <Container className="flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-navy text-gold font-heading text-lg font-bold">
-            CT
-          </span>
+          <Image
+            src="/logo-icon.png"
+            alt="Channel Tutoring"
+            width={449}
+            height={419}
+            priority
+            className="h-10 w-auto"
+          />
           <span className="font-heading text-lg font-bold text-navy hidden sm:inline">
             Channel Tutoring
           </span>
