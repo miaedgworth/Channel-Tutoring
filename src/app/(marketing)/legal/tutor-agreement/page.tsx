@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/legal-page";
+import { LEVELS, TUTOR_PAYOUT_PENCE } from "@/lib/constants";
+import { formatCurrencyGBP } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Tutor Agreement" };
 
 export default function TutorAgreementPage() {
   return (
-    <LegalPage title="Tutor Agreement" lastUpdated="21 August 2026">
+    <LegalPage title="Tutor Agreement" lastUpdated="23 August 2026">
       <p>
         This agreement applies to anyone approved as a tutor on the Channel
         Tutoring platform. By completing your tutor application and
@@ -29,15 +31,35 @@ export default function TutorAgreementPage() {
         <li>You must notify us immediately of any change to your DBS status or any safeguarding-relevant matter.</li>
       </ul>
 
-      <h2>3. Fees</h2>
+      <h2>3. What you&apos;re paid</h2>
       <p>
-        Session prices are fixed by Channel Tutoring according to level
-        (see our <a href="/pricing">Pricing</a> page) and are the same for
-        every tutor. Channel Tutoring retains a flat platform fee
-        (currently <strong>£15</strong>) from each completed session,
-        deducted automatically via Stripe Connect at the time of payment;
-        the remainder is paid to you. This fee structure may be updated
-        from time to time, with reasonable notice.
+        Session prices are fixed by Channel Tutoring according to level and
+        are the same for every tutor. You are paid the following per hour,
+        deducted automatically via Stripe Connect at the time of payment:
+      </p>
+      <table className="w-full border-collapse text-left text-sm">
+        <thead>
+          <tr className="border-b border-navy/15">
+            <th className="py-2 pr-4 font-semibold text-navy">Level</th>
+            <th className="py-2 font-semibold text-navy">You&apos;re paid</th>
+          </tr>
+        </thead>
+        <tbody>
+          {LEVELS.map((l) => (
+            <tr key={l.value} className="border-b border-navy/10 last:border-0">
+              <td className="py-2 pr-4">{l.label}</td>
+              <td className="py-2 font-semibold">
+                {formatCurrencyGBP(TUTOR_PAYOUT_PENCE[l.value])}/hour
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p>
+        This applies however a session is booked, including block bookings
+        &mdash; a discount for booking multiple sessions in advance never
+        reduces what you&apos;re paid. These rates may be updated from time
+        to time, with reasonable notice.
       </p>
 
       <h2>4. Payments and payouts</h2>

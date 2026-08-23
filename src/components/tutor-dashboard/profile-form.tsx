@@ -2,11 +2,12 @@
 
 import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { SUBJECTS, LEVELS, DBS_STATUS_LABELS } from "@/lib/constants";
+import { SUBJECTS, LEVELS, DBS_STATUS_LABELS, TUTOR_PAYOUT_PENCE } from "@/lib/constants";
 import { CheckboxGroup } from "@/components/ui/checkbox-group";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { updateTutorProfile } from "@/lib/actions/tutor-profile";
+import { formatCurrencyGBP } from "@/lib/utils";
 import type { DbsStatus } from "@prisma/client";
 
 const inputClass =
@@ -162,12 +163,20 @@ export function TutorProfileForm({
           Experience
         </h2>
         <div className="rounded-md border border-navy/10 bg-navy/[0.02] p-4 text-sm text-navy/70">
-          Session prices are fixed by Channel Tutoring based on level (see{" "}
-          <a href="/pricing" className="underline" target="_blank" rel="noreferrer">
-            Pricing
-          </a>
-          ) and the same for every tutor. Channel Tutoring retains a flat
-          £15 platform fee per completed session; you keep the rest.
+          <p>
+            Session prices are fixed by Channel Tutoring and the same for
+            every tutor. You&apos;re paid:
+          </p>
+          <ul className="mt-2 space-y-1">
+            {LEVELS.map((l) => (
+              <li key={l.value} className="flex items-center justify-between">
+                <span>{l.label}</span>
+                <span className="font-semibold text-navy">
+                  {formatCurrencyGBP(TUTOR_PAYOUT_PENCE[l.value])}/hour
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
         <div className="grid gap-5 sm:grid-cols-2">
           <div>

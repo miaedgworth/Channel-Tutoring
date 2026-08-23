@@ -66,6 +66,12 @@ export const DBS_STATUS_LABELS: Record<string, string> = {
 
 export const PLATFORM_FEE_PENCE = Number(process.env.PLATFORM_FEE_PENCE ?? 1500);
 
+// What a tutor is paid per level, after the platform fee. Shown to tutors
+// instead of the fee amount itself.
+export const TUTOR_PAYOUT_PENCE: Record<string, number> = Object.fromEntries(
+  Object.entries(LEVEL_PRICE_PENCE).map(([level, price]) => [level, price - PLATFORM_FEE_PENCE]),
+);
+
 // Book and pay for this many sessions with the same tutor/subject/level in
 // one go to receive the block-booking discount.
 export const BLOCK_BOOKING_MIN_SESSIONS = 5;

@@ -23,7 +23,7 @@ const TUTOR_STEPS = [
   },
   {
     title: "4. Get booked and paid",
-    body: "Clients book directly into your available slots and pay upfront. Channel Tutoring retains a flat £15 platform fee per completed session — you keep the rest.",
+    body: "Clients book directly into your available slots and pay upfront. Channel Tutoring retains a platform fee per completed session — you keep the rest (see the Tutor Agreement for the exact amount).",
   },
   {
     title: "5. Withdraw your earnings",
@@ -51,7 +51,7 @@ export default function JoinAsATutorPage() {
           {[
             {
               title: "Fixed, fair rates",
-              body: "Session prices are set by level and the same for every tutor — we take a flat £15 platform fee per completed session, nothing more.",
+              body: "Session prices are set by level and the same for every tutor — we take a flat platform fee per completed session, nothing more.",
             },
             {
               title: "Flexible hours",

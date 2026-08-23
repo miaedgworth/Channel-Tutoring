@@ -90,9 +90,7 @@ export default function PricingPage() {
           </h2>
           <p className="mt-2 text-sm text-navy/70">
             A 60-minute GCSE session: the client pays{" "}
-            {formatCurrencyGBP(LEVEL_PRICE_PENCE.GCSE)} in total. Channel
-            Tutoring retains a flat £15 platform fee from this, and the
-            tutor receives the rest.
+            {formatCurrencyGBP(LEVEL_PRICE_PENCE.GCSE)} in total.
           </p>
         </div>
 
