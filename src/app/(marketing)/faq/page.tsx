@@ -25,7 +25,7 @@ const FAQS = [
   },
   {
     q: "How much does a tutor cost?",
-    a: "Each tutor sets their own hourly rate, shown on their profile before you book. There are no hidden fees for clients.",
+    a: "Pricing is fixed by level (KS3, GCSE, A-Level or university admissions) and the same for every tutor — see our Pricing page. There are no hidden fees for clients.",
   },
   {
     q: "Can I leave a review?",

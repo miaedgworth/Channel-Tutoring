@@ -46,8 +46,6 @@ export default async function BookTutorPage({
             tutorSlug={tutor.slug}
             tutorSubjects={tutor.subjects}
             tutorLevels={tutor.levels}
-            tutorExamBoards={tutor.examBoards}
-            hourlyRatePence={tutor.hourlyRatePence}
             slots={slots.map((s) => ({
               id: s.id,
               startsAt: s.startsAt.toISOString(),

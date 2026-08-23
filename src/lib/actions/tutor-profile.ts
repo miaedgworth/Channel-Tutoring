@@ -32,8 +32,6 @@ export async function updateTutorProfile(input: TutorProfileInput) {
       photoUrl: data.photoUrl || null,
       subjects: data.subjects,
       levels: data.levels,
-      examBoards: data.examBoards,
-      hourlyRatePence: data.hourlyRatePence,
       yearsExperience: data.yearsExperience,
       qualifications: data.qualifications,
       isPublished: data.isPublished,

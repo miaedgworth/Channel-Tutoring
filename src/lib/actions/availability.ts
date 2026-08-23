@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { createSlotSchema } from "@/lib/validations/availability";
-import { PLATFORM_FEE_PENCE } from "@/lib/constants";
+import { PLATFORM_FEE_PENCE, LEVEL_PRICE_PENCE } from "@/lib/constants";
 
 export async function createAvailabilitySlot(input: {
   startsAt: string;
@@ -22,10 +22,13 @@ export async function createAvailabilitySlot(input: {
   const { startsAt, durationMinutes } = parsed.data;
   const endsAt = new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
 
-  const sessionPrice = Math.round((profile.hourlyRatePence * durationMinutes) / 60);
-  if (sessionPrice <= PLATFORM_FEE_PENCE) {
+  const cheapestLevelPence = Math.min(
+    ...profile.levels.map((level) => LEVEL_PRICE_PENCE[level] ?? Infinity),
+  );
+  const cheapestSessionPrice = Math.round((cheapestLevelPence * durationMinutes) / 60);
+  if (cheapestSessionPrice <= PLATFORM_FEE_PENCE) {
     throw new Error(
-      `At your current rate, a ${durationMinutes}-minute session doesn't cover the platform fee. Increase your hourly rate or choose a longer duration.`,
+      `A ${durationMinutes}-minute session at your cheapest level doesn't cover the platform fee. Choose a longer duration.`,
     );
   }
 

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DBS_STATUS_LABELS } from "@/lib/constants";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, formatLevel } from "@/lib/utils";
 import { ApplicationReviewActions } from "@/components/admin/application-review-actions";
 
 export const metadata: Metadata = { title: "Review Application" };
@@ -57,7 +57,7 @@ export default async function TutorApplicationDetailPage({
             <div>
               <dt className="text-navy/50">Levels</dt>
               <dd className="font-medium text-navy">
-                {application.levels.join(", ")}
+                {application.levels.map(formatLevel).join(", ")}
               </dd>
             </div>
             <div>
@@ -70,12 +70,6 @@ export default async function TutorApplicationDetailPage({
               <dt className="text-navy/50">Subjects</dt>
               <dd className="font-medium text-navy">
                 {application.subjects.join(", ")}
-              </dd>
-            </div>
-            <div className="col-span-2">
-              <dt className="text-navy/50">Exam boards</dt>
-              <dd className="font-medium text-navy">
-                {application.examBoards.join(", ") || "—"}
               </dd>
             </div>
             <div>

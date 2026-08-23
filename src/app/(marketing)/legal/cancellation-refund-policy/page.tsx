@@ -14,9 +14,10 @@ export default function CancellationRefundPolicyPage() {
           original payment method.
         </li>
         <li>
-          <strong>Within 24 hours of the session:</strong> no refund is
-          given, in fairness to the tutor who has reserved that time for
-          you.
+          <strong>Within 24 hours of the session:</strong> 50% of the
+          lesson fee remains payable, in fairness to the tutor who has
+          reserved that time for you. The other 50% is refunded
+          automatically.
         </li>
       </ul>
       <p>

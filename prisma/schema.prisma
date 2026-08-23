@@ -21,8 +21,10 @@ enum UserStatus {
 }
 
 enum Level {
+  KS3
   GCSE
   A_LEVEL
+  UNIVERSITY_ADMISSIONS
 }
 
 enum DbsStatus {
@@ -93,6 +95,7 @@ model User {
   status          UserStatus @default(ACTIVE)
   image           String?
   newsletterOptIn Boolean    @default(false)
+  agreedToTermsAt DateTime?
   emailVerifiedAt DateTime?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
@@ -134,7 +137,6 @@ model TutorApplication {
   phone             String
   subjects          String[]
   levels            Level[]
-  examBoards        String[]
   yearsExperience   Int
   qualifications    String
   dbsStatus         DbsStatus              @default(NOT_PROVIDED)
@@ -165,8 +167,6 @@ model TutorProfile {
   photoUrl                 String?
   subjects                 String[]
   levels                   Level[]
-  examBoards               String[]
-  hourlyRatePence          Int
   yearsExperience          Int
   qualifications           String
   dbsStatus                DbsStatus @default(NOT_PROVIDED)
@@ -219,6 +219,7 @@ model Booking {
   startsAt                DateTime
   endsAt                  DateTime
   pricePence              Int
+  discountPence           Int           @default(0)
   platformFeePence        Int
   tutorPayoutPence        Int
   status                  BookingStatus @default(PENDING_PAYMENT)

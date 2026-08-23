@@ -9,7 +9,7 @@ import { TutorCard } from "@/components/tutors/tutor-card";
 export const metadata: Metadata = {
   title: "Find a Tutor",
   description:
-    "Search vetted GCSE and A-Level tutors in Guernsey by subject, level, exam board and price.",
+    "Search vetted tutors in Guernsey by subject and level, from KS3 through to university admissions.",
 };
 export const dynamic = "force-dynamic";
 
@@ -53,28 +53,18 @@ async function TutorResults({
   const params = await searchParams;
   const subject = typeof params.subject === "string" ? params.subject : undefined;
   const level = typeof params.level === "string" ? params.level : undefined;
-  const examBoard = typeof params.examBoard === "string" ? params.examBoard : undefined;
-  const maxPrice = typeof params.maxPrice === "string" ? Number(params.maxPrice) : undefined;
-  const sort = typeof params.sort === "string" ? params.sort : "rating";
 
   const where: Prisma.TutorProfileWhereInput = {
     isPublished: true,
     ...(subject ? { subjects: { has: subject } } : {}),
-    ...(level ? { levels: { has: level as "GCSE" | "A_LEVEL" } } : {}),
-    ...(examBoard ? { examBoards: { has: examBoard } } : {}),
-    ...(maxPrice && !Number.isNaN(maxPrice) ? { hourlyRatePence: { lte: maxPrice * 100 } } : {}),
+    ...(level
+      ? { levels: { has: level as "KS3" | "GCSE" | "A_LEVEL" | "UNIVERSITY_ADMISSIONS" } }
+      : {}),
   };
-
-  const orderBy: Prisma.TutorProfileOrderByWithRelationInput =
-    sort === "price-asc"
-      ? { hourlyRatePence: "asc" }
-      : sort === "price-desc"
-        ? { hourlyRatePence: "desc" }
-        : { ratingAverage: "desc" };
 
   const tutors = await prisma.tutorProfile.findMany({
     where,
-    orderBy,
+    orderBy: { ratingAverage: "desc" },
     include: { user: { select: { name: true } } },
   });
 

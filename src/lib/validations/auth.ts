@@ -8,6 +8,9 @@ export const registerSchema = z.object({
     .min(8, "Password must be at least 8 characters")
     .max(72),
   newsletterOptIn: z.boolean().default(false),
+  agreedToTerms: z.literal(true, {
+    message: "You must agree to the Registration Agreement to create an account.",
+  }),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

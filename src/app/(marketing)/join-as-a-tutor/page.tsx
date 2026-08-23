@@ -5,7 +5,7 @@ import { TutorApplicationForm } from "@/components/tutor-application/application
 export const metadata: Metadata = {
   title: "Join as a Tutor",
   description:
-    "Apply to become a Channel Tutoring tutor. Set your own rate, choose your own hours, and get paid securely through the platform.",
+    "Apply to become a Channel Tutoring tutor. Fixed, fair session rates, choose your own hours, and get paid securely through the platform.",
 };
 
 const TUTOR_STEPS = [
@@ -18,8 +18,8 @@ const TUTOR_STEPS = [
     body: "Our team reviews every application. Once approved, you'll receive an email to set up your account and complete your public profile.",
   },
   {
-    title: "3. Set your rate and availability",
-    body: "You choose your own hourly rate and publish availability slots whenever suits you.",
+    title: "3. Publish your availability",
+    body: "Session prices are fixed by Channel Tutoring based on level, the same for every tutor — see our Pricing page. Just publish availability slots whenever suits you.",
   },
   {
     title: "4. Get booked and paid",
@@ -40,18 +40,18 @@ export default function JoinAsATutorPage() {
             Tutor with Channel Tutoring
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-navy/70">
-            Join a trusted network of GCSE and A-Level tutors across
-            Guernsey. Set your own hourly rate, choose your own hours, and
-            we&apos;ll handle bookings, payments and admin — you focus on
-            teaching.
+            Join a trusted network of tutors across Guernsey, from KS3
+            through to university admissions. Fixed, fair session rates,
+            choose your own hours, and we&apos;ll handle bookings, payments
+            and admin — you focus on teaching.
           </p>
         </div>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-3">
           {[
             {
-              title: "Set your own rate",
-              body: "You decide your hourly rate — we take a flat £15 platform fee per completed session, nothing more.",
+              title: "Fixed, fair rates",
+              body: "Session prices are set by level and the same for every tutor — we take a flat £15 platform fee per completed session, nothing more.",
             },
             {
               title: "Flexible hours",

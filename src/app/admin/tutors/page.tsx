@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserStatusToggle } from "@/components/admin/user-status-toggle";
 import { TutorDbsSelect } from "@/components/admin/tutor-dbs-select";
-import { formatCurrencyGBP } from "@/lib/utils";
+import { formatLevel } from "@/lib/utils";
 import { DBS_STATUS_LABELS } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Tutors" };
@@ -24,7 +24,7 @@ export default async function AdminTutorsPage() {
           <thead>
             <tr className="border-b border-navy/10 text-left text-navy/50">
               <th className="pb-2 font-medium">Name</th>
-              <th className="pb-2 font-medium">Rate</th>
+              <th className="pb-2 font-medium">Levels</th>
               <th className="pb-2 font-medium">Published</th>
               <th className="pb-2 font-medium">DBS</th>
               <th className="pb-2 font-medium">Account</th>
@@ -40,7 +40,7 @@ export default async function AdminTutorsPage() {
                   </Link>
                   <p className="text-xs text-navy/40">{tutor.user.email}</p>
                 </td>
-                <td className="py-2.5 text-navy/70">{formatCurrencyGBP(tutor.hourlyRatePence)}/hr</td>
+                <td className="py-2.5 text-navy/70">{tutor.levels.map(formatLevel).join(", ")}</td>
                 <td className="py-2.5">
                   <Badge variant={tutor.isPublished ? "success" : "neutral"}>
                     {tutor.isPublished ? "Live" : "Unpublished"}

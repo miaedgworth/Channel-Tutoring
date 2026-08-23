@@ -1,12 +1,13 @@
 import { z } from "zod";
 
+const LEVEL_VALUES = ["KS3", "GCSE", "A_LEVEL", "UNIVERSITY_ADMISSIONS"] as const;
+
 export const tutorApplicationSchema = z.object({
   name: z.string().trim().min(2, "Please enter your full name").max(100),
   email: z.string().trim().toLowerCase().email("Enter a valid email address"),
   phone: z.string().trim().min(6, "Enter a valid phone number").max(30),
   subjects: z.array(z.string()).min(1, "Select at least one subject"),
-  levels: z.array(z.enum(["GCSE", "A_LEVEL"])).min(1, "Select at least one level"),
-  examBoards: z.array(z.string()).default([]),
+  levels: z.array(z.enum(LEVEL_VALUES)).min(1, "Select at least one level"),
   yearsExperience: z.coerce.number().int().min(0).max(60),
   qualifications: z.string().trim().min(5, "Tell us about your qualifications").max(1000),
   dbsStatus: z.enum(["NOT_PROVIDED", "PENDING", "VERIFIED"]).default("NOT_PROVIDED"),

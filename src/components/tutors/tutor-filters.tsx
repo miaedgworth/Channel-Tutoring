@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { SUBJECTS, EXAM_BOARDS, LEVELS } from "@/lib/constants";
+import { SUBJECTS, LEVELS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 
 const selectClass =
@@ -14,27 +14,18 @@ export function TutorFilters() {
 
   const [subject, setSubject] = useState(searchParams.get("subject") ?? "");
   const [level, setLevel] = useState(searchParams.get("level") ?? "");
-  const [examBoard, setExamBoard] = useState(searchParams.get("examBoard") ?? "");
-  const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") ?? "");
-  const [sort, setSort] = useState(searchParams.get("sort") ?? "rating");
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const params = new URLSearchParams();
     if (subject) params.set("subject", subject);
     if (level) params.set("level", level);
-    if (examBoard) params.set("examBoard", examBoard);
-    if (maxPrice) params.set("maxPrice", maxPrice);
-    if (sort && sort !== "rating") params.set("sort", sort);
     router.push(`/find-a-tutor${params.toString() ? `?${params}` : ""}`);
   }
 
   function handleReset() {
     setSubject("");
     setLevel("");
-    setExamBoard("");
-    setMaxPrice("");
-    setSort("rating");
     router.push("/find-a-tutor");
   }
 
@@ -43,7 +34,7 @@ export function TutorFilters() {
       onSubmit={handleSubmit}
       className="rounded-xl border border-navy/10 bg-white p-5 shadow-sm"
     >
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div>
           <label htmlFor="subject" className="block text-xs font-medium text-navy/70">
             Subject
@@ -79,56 +70,6 @@ export function TutorFilters() {
                 {l.label}
               </option>
             ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="examBoard" className="block text-xs font-medium text-navy/70">
-            Exam board
-          </label>
-          <select
-            id="examBoard"
-            value={examBoard}
-            onChange={(e) => setExamBoard(e.target.value)}
-            className={selectClass}
-          >
-            <option value="">Any exam board</option>
-            {EXAM_BOARDS.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="maxPrice" className="block text-xs font-medium text-navy/70">
-            Max price (£/hr)
-          </label>
-          <input
-            id="maxPrice"
-            type="number"
-            min={0}
-            value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value)}
-            className={selectClass}
-            placeholder="Any"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="sort" className="block text-xs font-medium text-navy/70">
-            Sort by
-          </label>
-          <select
-            id="sort"
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className={selectClass}
-          >
-            <option value="rating">Highest rated</option>
-            <option value="price-asc">Price: low to high</option>
-            <option value="price-desc">Price: high to low</option>
           </select>
         </div>
       </div>

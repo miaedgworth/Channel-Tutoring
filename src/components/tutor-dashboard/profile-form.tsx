@@ -2,7 +2,7 @@
 
 import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { SUBJECTS, EXAM_BOARDS, LEVELS, DBS_STATUS_LABELS } from "@/lib/constants";
+import { SUBJECTS, LEVELS, DBS_STATUS_LABELS } from "@/lib/constants";
 import { CheckboxGroup } from "@/components/ui/checkbox-group";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,8 +21,6 @@ export function TutorProfileForm({
     photoUrl: string | null;
     subjects: string[];
     levels: string[];
-    examBoards: string[];
-    hourlyRatePence: number;
     yearsExperience: number;
     qualifications: string;
     isPublished: boolean;
@@ -38,8 +36,6 @@ export function TutorProfileForm({
   const [photoUrl, setPhotoUrl] = useState(profile.photoUrl ?? "");
   const [subjects, setSubjects] = useState<string[]>(profile.subjects);
   const [levels, setLevels] = useState<string[]>(profile.levels);
-  const [examBoards, setExamBoards] = useState<string[]>(profile.examBoards);
-  const [hourlyRate, setHourlyRate] = useState((profile.hourlyRatePence / 100).toString());
   const [yearsExperience, setYearsExperience] = useState(profile.yearsExperience.toString());
   const [qualifications, setQualifications] = useState(profile.qualifications);
   const [isPublished, setIsPublished] = useState(profile.isPublished);
@@ -59,9 +55,7 @@ export function TutorProfileForm({
           bio,
           photoUrl,
           subjects,
-          levels: levels as ("GCSE" | "A_LEVEL")[],
-          examBoards,
-          hourlyRatePence: Math.round(Number(hourlyRate) * 100),
+          levels: levels as ("KS3" | "GCSE" | "A_LEVEL" | "UNIVERSITY_ADMISSIONS")[],
           yearsExperience: Number(yearsExperience),
           qualifications,
           isPublished,
@@ -161,38 +155,21 @@ export function TutorProfileForm({
             <CheckboxGroup options={SUBJECTS} values={subjects} onChange={setSubjects} columns={3} />
           </div>
         </div>
-        <div>
-          <p className="text-sm font-medium text-navy">Exam boards</p>
-          <div className="mt-2">
-            <CheckboxGroup options={EXAM_BOARDS} values={examBoards} onChange={setExamBoards} columns={3} />
-          </div>
-        </div>
       </section>
 
       <section className="space-y-5">
         <h2 className="font-heading text-lg font-semibold text-navy">
-          Experience &amp; rate
+          Experience
         </h2>
+        <div className="rounded-md border border-navy/10 bg-navy/[0.02] p-4 text-sm text-navy/70">
+          Session prices are fixed by Channel Tutoring based on level (see{" "}
+          <a href="/pricing" className="underline" target="_blank" rel="noreferrer">
+            Pricing
+          </a>
+          ) and the same for every tutor. Channel Tutoring retains a flat
+          £15 platform fee per completed session; you keep the rest.
+        </div>
         <div className="grid gap-5 sm:grid-cols-2">
-          <div>
-            <label htmlFor="rate" className="block text-sm font-medium text-navy">
-              Hourly rate (£)
-            </label>
-            <input
-              id="rate"
-              type="number"
-              min={5}
-              step={0.5}
-              required
-              value={hourlyRate}
-              onChange={(e) => setHourlyRate(e.target.value)}
-              className={inputClass}
-            />
-            <p className="mt-1 text-xs text-navy/50">
-              Channel Tutoring retains a flat £15 platform fee per completed
-              session; you keep the rest.
-            </p>
-          </div>
           <div>
             <label htmlFor="years" className="block text-sm font-medium text-navy">
               Years of experience

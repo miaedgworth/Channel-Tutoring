@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { formatCurrencyGBP } from "@/lib/utils";
+import { formatCurrencyGBP, formatLevel } from "@/lib/utils";
+import { LEVEL_PRICE_PENCE } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
 
 export function TutorCard({
@@ -12,12 +13,14 @@ export function TutorCard({
     photoUrl: string | null;
     subjects: string[];
     levels: string[];
-    hourlyRatePence: number;
     ratingAverage: number;
     ratingCount: number;
     user: { name: string };
   };
 }) {
+  const prices = tutor.levels.map((l) => LEVEL_PRICE_PENCE[l]).filter(Boolean);
+  const minPrice = prices.length ? Math.min(...prices) : undefined;
+  const maxPrice = prices.length ? Math.max(...prices) : undefined;
   return (
     <Link
       href={`/tutors/${tutor.slug}`}
@@ -44,7 +47,7 @@ export function TutorCard({
           <div className="mt-2 flex flex-wrap gap-1.5">
             {tutor.levels.map((level) => (
               <Badge key={level} variant="neutral">
-                {level === "A_LEVEL" ? "A-Level" : level}
+                {formatLevel(level)}
               </Badge>
             ))}
             {tutor.subjects.slice(0, 3).map((subject) => (
@@ -75,10 +78,14 @@ export function TutorCard({
             <span className="text-navy/40">No reviews yet</span>
           )}
         </div>
-        <p className="font-heading font-semibold text-navy">
-          {formatCurrencyGBP(tutor.hourlyRatePence)}
-          <span className="text-xs font-normal text-navy/50">/hr</span>
-        </p>
+        {minPrice !== undefined && (
+          <p className="font-heading font-semibold text-navy">
+            {minPrice === maxPrice
+              ? formatCurrencyGBP(minPrice)
+              : `${formatCurrencyGBP(minPrice)}–${formatCurrencyGBP(maxPrice!)}`}
+            <span className="text-xs font-normal text-navy/50">/hr</span>
+          </p>
+        )}
       </div>
     </Link>
   );

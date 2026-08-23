@@ -5,7 +5,7 @@ import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CancelBookingButton } from "@/components/cancel-booking-button";
-import { formatCurrencyGBP, formatDateTime } from "@/lib/utils";
+import { formatCurrencyGBP, formatDateTime, formatLevel } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Booking Details" };
 export const dynamic = "force-dynamic";
@@ -51,9 +51,7 @@ export default async function ClientBookingDetailPage({
             </div>
             <div>
               <dt className="text-navy/50">Level</dt>
-              <dd className="font-medium text-navy">
-                {booking.level === "A_LEVEL" ? "A-Level" : booking.level}
-              </dd>
+              <dd className="font-medium text-navy">{formatLevel(booking.level)}</dd>
             </div>
             {booking.examBoard && (
               <div>
@@ -65,6 +63,14 @@ export default async function ClientBookingDetailPage({
               <dt className="text-navy/50">Price paid</dt>
               <dd className="font-medium text-navy">{formatCurrencyGBP(booking.pricePence)}</dd>
             </div>
+            {booking.discountPence > 0 && (
+              <div>
+                <dt className="text-navy/50">Block-booking discount</dt>
+                <dd className="font-medium text-emerald-700">
+                  &minus;{formatCurrencyGBP(booking.discountPence)}
+                </dd>
+              </div>
+            )}
           </dl>
 
           {booking.notes && (

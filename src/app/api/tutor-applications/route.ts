@@ -35,7 +35,6 @@ export async function POST(request: Request) {
       phone: data.phone,
       subjects: data.subjects,
       levels: data.levels,
-      examBoards: data.examBoards,
       yearsExperience: data.yearsExperience,
       qualifications: data.qualifications,
       dbsStatus: data.dbsStatus,

@@ -30,7 +30,7 @@ export default function TermsPage() {
 
       <h2>3. Bookings and payments</h2>
       <ul>
-        <li>Tutors set their own hourly rates, shown on their profile.</li>
+        <li>Session prices are fixed by level and the same for every tutor &mdash; see our <a href="/pricing">Pricing</a> page.</li>
         <li>Payment is taken in full at the time of booking via our payment processor, Stripe.</li>
         <li>Channel Tutoring retains a flat platform fee (currently £15) from each completed session; the remainder is paid to the tutor.</li>
         <li>See our <a href="/legal/cancellation-refund-policy">Cancellation &amp; Refund Policy</a> for cancellation terms.</li>

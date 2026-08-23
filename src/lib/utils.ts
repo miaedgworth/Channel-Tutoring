@@ -1,8 +1,13 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { LEVEL_LABELS } from "@/lib/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+export function formatLevel(level: string) {
+  return LEVEL_LABELS[level] ?? level;
 }
 
 export function formatCurrencyGBP(amountInPence: number) {

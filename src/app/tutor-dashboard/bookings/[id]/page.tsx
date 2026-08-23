@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CancelBookingButton } from "@/components/cancel-booking-button";
 import { MarkCompletedButton } from "@/components/mark-completed-button";
-import { formatCurrencyGBP, formatDateTime } from "@/lib/utils";
+import { formatCurrencyGBP, formatDateTime, formatLevel } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Booking Details" };
 export const dynamic = "force-dynamic";
@@ -47,9 +47,7 @@ export default async function TutorBookingDetailPage({
             </div>
             <div>
               <dt className="text-navy/50">Level</dt>
-              <dd className="font-medium text-navy">
-                {booking.level === "A_LEVEL" ? "A-Level" : booking.level}
-              </dd>
+              <dd className="font-medium text-navy">{formatLevel(booking.level)}</dd>
             </div>
             <div>
               <dt className="text-navy/50">Your payout</dt>

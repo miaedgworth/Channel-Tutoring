@@ -31,11 +31,13 @@ export default function TutorAgreementPage() {
 
       <h2>3. Fees</h2>
       <p>
-        You set your own hourly rate. Channel Tutoring retains a flat
-        platform fee (currently <strong>£15</strong>) from each completed
-        session, deducted automatically via Stripe Connect at the time of
-        payment; the remainder is paid to you. This fee structure may be
-        updated from time to time, with reasonable notice.
+        Session prices are fixed by Channel Tutoring according to level
+        (see our <a href="/pricing">Pricing</a> page) and are the same for
+        every tutor. Channel Tutoring retains a flat platform fee
+        (currently <strong>£15</strong>) from each completed session,
+        deducted automatically via Stripe Connect at the time of payment;
+        the remainder is paid to you. This fee structure may be updated
+        from time to time, with reasonable notice.
       </p>
 
       <h2>4. Payments and payouts</h2>
@@ -68,8 +70,8 @@ export default function TutorAgreementPage() {
 
       <h2>7. Profile accuracy</h2>
       <p>
-        Your public profile (bio, qualifications, subjects, rate) must be
-        accurate and kept up to date. We may unpublish or edit a profile
+        Your public profile (bio, qualifications, subjects, levels taught)
+        must be accurate and kept up to date. We may unpublish or edit a profile
         that we believe to be inaccurate or misleading.
       </p>
 

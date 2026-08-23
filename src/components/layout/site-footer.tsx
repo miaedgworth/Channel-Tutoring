@@ -28,6 +28,7 @@ const columns = [
     links: [
       { href: "/legal/privacy-policy", label: "Privacy Policy" },
       { href: "/legal/terms", label: "Terms & Conditions" },
+      { href: "/legal/registration-agreement", label: "Registration Agreement" },
       { href: "/legal/cookie-policy", label: "Cookie Policy" },
       { href: "/legal/safeguarding-policy", label: "Safeguarding Policy" },
       { href: "/legal/cancellation-refund-policy", label: "Cancellation & Refunds" },

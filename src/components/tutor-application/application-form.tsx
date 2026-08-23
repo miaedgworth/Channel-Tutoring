@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { SUBJECTS, EXAM_BOARDS, LEVELS } from "@/lib/constants";
+import { SUBJECTS, LEVELS } from "@/lib/constants";
 import { CheckboxGroup } from "@/components/ui/checkbox-group";
 import { Button } from "@/components/ui/button";
 
@@ -14,7 +14,6 @@ export function TutorApplicationForm() {
   const [phone, setPhone] = useState("");
   const [subjects, setSubjects] = useState<string[]>([]);
   const [levels, setLevels] = useState<string[]>([]);
-  const [examBoards, setExamBoards] = useState<string[]>([]);
   const [yearsExperience, setYearsExperience] = useState("");
   const [qualifications, setQualifications] = useState("");
   const [dbsStatus, setDbsStatus] = useState("NOT_PROVIDED");
@@ -41,7 +40,6 @@ export function TutorApplicationForm() {
         phone,
         subjects,
         levels,
-        examBoards,
         yearsExperience,
         qualifications,
         dbsStatus,
@@ -162,17 +160,6 @@ export function TutorApplicationForm() {
               options={SUBJECTS}
               values={subjects}
               onChange={setSubjects}
-              columns={3}
-            />
-          </div>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-navy">Exam boards you know well</p>
-          <div className="mt-2">
-            <CheckboxGroup
-              options={EXAM_BOARDS}
-              values={examBoards}
-              onChange={setExamBoards}
               columns={3}
             />
           </div>

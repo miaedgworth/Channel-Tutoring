@@ -9,8 +9,6 @@ import { uniqueTutorSlug } from "@/lib/slug";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
 import { logAudit } from "@/lib/audit";
 
-const DEFAULT_HOURLY_RATE_PENCE = 3000;
-
 export async function approveTutorApplication(applicationId: string) {
   const admin = await requireUser("ADMIN");
 
@@ -60,8 +58,6 @@ export async function approveTutorApplication(applicationId: string) {
         bio: application.bio,
         subjects: application.subjects,
         levels: application.levels,
-        examBoards: application.examBoards,
-        hourlyRatePence: DEFAULT_HOURLY_RATE_PENCE,
         yearsExperience: application.yearsExperience,
         qualifications: application.qualifications,
         dbsStatus: application.dbsStatus,
@@ -99,8 +95,8 @@ export async function approveTutorApplication(applicationId: string) {
       <p>Hi ${application.name},</p>
       <p>Great news — your application to tutor with Channel Tutoring has
       been approved.</p>
-      <p>Set a password to access your tutor dashboard, complete your public
-      profile, and set your hourly rate:</p>
+      <p>Set a password to access your tutor dashboard and complete your
+      public profile:</p>
       <p><a href="${setPasswordUrl}" style="color:#C9A227;font-weight:bold;">Set your password</a></p>
       <p>This link expires in 7 days. Once you're in, don't forget to
       publish your profile so clients can find you.</p>

@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 export const createBookingSchema = z.object({
-  slotId: z.string().min(1),
+  slotIds: z.array(z.string().min(1)).min(1).max(20),
   subject: z.string().trim().min(1).max(60),
-  level: z.enum(["GCSE", "A_LEVEL"]),
+  level: z.enum(["KS3", "GCSE", "A_LEVEL", "UNIVERSITY_ADMISSIONS"]),
   examBoard: z.string().trim().max(60).optional().or(z.literal("")),
   notes: z.string().trim().max(1000).optional().or(z.literal("")),
 });

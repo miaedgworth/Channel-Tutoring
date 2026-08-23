@@ -41,8 +41,6 @@ async function main() {
       photoUrl: null,
       subjects: ["Maths", "Physics"],
       levels: ["GCSE", "A_LEVEL"],
-      examBoards: ["AQA", "Edexcel", "OCR"],
-      hourlyRatePence: 4000,
       yearsExperience: 8,
       qualifications: "MSc Physics (Bristol), PGCE, QTS",
       dbsStatus: "VERIFIED",

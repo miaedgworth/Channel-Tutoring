@@ -5,8 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
-import { formatCurrencyGBP, formatDate } from "@/lib/utils";
-import { DBS_STATUS_LABELS } from "@/lib/constants";
+import { formatCurrencyGBP, formatDate, formatLevel } from "@/lib/utils";
+import { DBS_STATUS_LABELS, LEVEL_PRICE_PENCE } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -83,7 +83,7 @@ export default async function TutorProfilePage({
 
             <div className="mt-4 flex flex-wrap gap-2">
               {tutor.levels.map((l) => (
-                <Badge key={l} variant="neutral">{l === "A_LEVEL" ? "A-Level" : l}</Badge>
+                <Badge key={l} variant="neutral">{formatLevel(l)}</Badge>
               ))}
               {tutor.subjects.map((s) => (
                 <Badge key={s} variant="gold">{s}</Badge>
@@ -92,10 +92,16 @@ export default async function TutorProfilePage({
           </div>
 
           <div className="shrink-0 rounded-xl border border-navy/10 bg-white p-5 text-center shadow-sm">
-            <p className="font-heading text-2xl font-bold text-navy">
-              {formatCurrencyGBP(tutor.hourlyRatePence)}
-              <span className="text-sm font-normal text-navy/50">/hr</span>
-            </p>
+            <ul className="space-y-1 text-left text-sm">
+              {tutor.levels.map((l) => (
+                <li key={l} className="flex items-center justify-between gap-4">
+                  <span className="text-navy/60">{formatLevel(l)}</span>
+                  <span className="font-semibold text-navy">
+                    {formatCurrencyGBP(LEVEL_PRICE_PENCE[l] ?? 0)}/hr
+                  </span>
+                </li>
+              ))}
+            </ul>
             <LinkButton
               href={`/tutors/${tutor.slug}/book`}
               variant="gold"
@@ -184,12 +190,6 @@ export default async function TutorProfilePage({
                   <dt className="text-navy/50">DBS status</dt>
                   <dd className="font-medium text-navy">
                     {DBS_STATUS_LABELS[tutor.dbsStatus]}
-                  </dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-navy/50">Exam boards</dt>
-                  <dd className="text-right font-medium text-navy">
-                    {tutor.examBoards.join(", ") || "—"}
                   </dd>
                 </div>
               </dl>

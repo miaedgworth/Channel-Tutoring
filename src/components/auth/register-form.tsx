@@ -12,18 +12,25 @@ export function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [newsletterOptIn, setNewsletterOptIn] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+
+    if (!agreedToTerms) {
+      setError("Please confirm you agree to the Registration Agreement to continue.");
+      return;
+    }
+
+    setLoading(true);
 
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, newsletterOptIn }),
+      body: JSON.stringify({ name, email, password, newsletterOptIn, agreedToTerms }),
     });
     const data = await res.json();
 
@@ -123,6 +130,25 @@ export function RegisterForm() {
         </label>
       </div>
 
+      <div className="flex items-start gap-3 rounded-md border border-navy/10 bg-navy/[0.03] p-3">
+        <input
+          id="agreedToTerms"
+          type="checkbox"
+          required
+          checked={agreedToTerms}
+          onChange={(e) => setAgreedToTerms(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-navy/30 text-gold-dark focus:ring-gold-dark"
+        />
+        <label htmlFor="agreedToTerms" className="text-sm text-navy/80">
+          I have read and agree to the{" "}
+          <Link href="/legal/registration-agreement" className="underline" target="_blank">
+            Registration and Agreement Form
+          </Link>
+          , including the pricing, cancellation policy and safeguarding
+          terms it sets out.
+        </label>
+      </div>
+
       <Button type="submit" variant="primary" className="w-full" disabled={loading}>
         {loading ? "Creating account..." : "Create Account"}
       </Button>
@@ -135,7 +161,7 @@ export function RegisterForm() {
       </p>
 
       <p className="text-center text-xs text-navy/50">
-        By signing up you agree to our{" "}
+        By signing up you also agree to our{" "}
         <Link href="/legal/terms" className="underline">
           Terms &amp; Conditions
         </Link>{" "}
