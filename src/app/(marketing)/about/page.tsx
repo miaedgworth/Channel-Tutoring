@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/button";
 
@@ -66,6 +67,28 @@ export default function AboutPage() {
               outside the classroom.
             </p>
           </div>
+        </div>
+
+        <div className="mt-8 rounded-xl border border-gold/30 bg-gold/5 p-6">
+          <h2 className="font-heading text-base font-semibold text-navy">
+            Cambridge Changemakers Award
+          </h2>
+          <p className="mt-2 text-sm text-navy/80">
+            In 2026, Mia won the Homerton College Changemakers Catalyst Fund
+            Award, an initiative from the University of Cambridge that
+            supports student-led ventures creating positive social impact.
+            The award recognised Channel Tutoring&apos;s work widening
+            access to education in Guernsey, and is supporting the launch
+            of our university admissions and interview coaching. Read more
+            on our{" "}
+            <Link
+              href="/news/channel-tutoring-wins-cambridge-changemakers-award"
+              className="underline"
+            >
+              News page
+            </Link>
+            .
+          </p>
         </div>
 
         <div className="mt-10 flex flex-wrap gap-4">
