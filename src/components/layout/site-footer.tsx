@@ -8,7 +8,6 @@ const columns = [
     heading: "For Clients",
     links: [
       { href: "/find-a-tutor", label: "Find a Tutor" },
-      { href: "/how-it-works", label: "How It Works" },
       { href: "/pricing", label: "Pricing" },
       { href: "/faq", label: "FAQ" },
     ],
