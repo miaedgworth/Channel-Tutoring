@@ -99,7 +99,7 @@ export default async function TutorProfilePage({
             </div>
           </div>
 
-          <div className="shrink-0 rounded-xl border border-navy/10 bg-white p-5 text-center shadow-sm">
+          <div className="w-full shrink-0 rounded-xl border border-navy/10 bg-white p-5 text-center shadow-sm sm:w-64">
             <LinkButton
               href={`/dashboard/messages?tutor=${tutor.slug}`}
               variant="gold"

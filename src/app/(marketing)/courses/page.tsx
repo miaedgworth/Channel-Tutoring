@@ -22,6 +22,11 @@ function dateRange(startDate: Date | null, endDate: Date | null) {
   return `${formatDate(startDate)} – ${formatDate(endDate)}`;
 }
 
+// Past courses with a blog recap link to that instead of the course page.
+const COURSE_RECAP_POST_SLUGS: Record<string, string> = {
+  "summer-school-2026": "gcse-summer-school-2026",
+};
+
 export default async function CoursesPage() {
   const [upcoming, past] = await Promise.all([
     prisma.course.findMany({
@@ -91,8 +96,11 @@ export default async function CoursesPage() {
             <p className="mt-3 text-sm text-navy/50">No past courses yet.</p>
           ) : (
             <div className="mt-4 space-y-4">
-              {past.map((course) => (
-                <Link key={course.id} href={`/courses/${course.slug}`}>
+              {past.map((course) => {
+                const recapSlug = COURSE_RECAP_POST_SLUGS[course.slug];
+                const href = recapSlug ? `/blog/${recapSlug}` : `/courses/${course.slug}`;
+                return (
+                <Link key={course.id} href={href}>
                   <Card className="transition-colors hover:border-navy/30">
                     <CardContent>
                       <div className="flex items-center gap-2">
@@ -108,7 +116,8 @@ export default async function CoursesPage() {
                     </CardContent>
                   </Card>
                 </Link>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>
