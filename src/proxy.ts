@@ -5,6 +5,7 @@ const roleForPrefix: { prefix: string; role: "CLIENT" | "TUTOR" | "ADMIN" }[] = 
   { prefix: "/dashboard", role: "CLIENT" },
   { prefix: "/tutor-dashboard", role: "TUTOR" },
   { prefix: "/admin", role: "ADMIN" },
+  { prefix: "/legal/tutor-agreement", role: "TUTOR" },
 ];
 
 export default auth((req) => {
@@ -33,5 +34,10 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/tutor-dashboard/:path*", "/admin/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/tutor-dashboard/:path*",
+    "/admin/:path*",
+    "/legal/tutor-agreement",
+  ],
 };

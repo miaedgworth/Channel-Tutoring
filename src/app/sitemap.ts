@@ -19,7 +19,6 @@ const STATIC_ROUTES = [
   "/legal/cookie-policy",
   "/legal/safeguarding-policy",
   "/legal/cancellation-refund-policy",
-  "/legal/tutor-agreement",
   "/legal/acceptable-use-policy",
 ];
 

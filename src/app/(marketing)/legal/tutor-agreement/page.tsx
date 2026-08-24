@@ -2,10 +2,14 @@ import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/legal-page";
 import { LEVELS, TUTOR_PAYOUT_PENCE } from "@/lib/constants";
 import { formatCurrencyGBP } from "@/lib/utils";
+import { requireUser } from "@/lib/current-user";
 
 export const metadata: Metadata = { title: "Tutor Agreement" };
+export const dynamic = "force-dynamic";
 
-export default function TutorAgreementPage() {
+export default async function TutorAgreementPage() {
+  await requireUser("TUTOR");
+
   return (
     <LegalPage title="Tutor Agreement" lastUpdated="23 August 2026">
       <p>

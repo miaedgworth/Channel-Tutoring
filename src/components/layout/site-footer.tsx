@@ -31,7 +31,6 @@ const columns = [
       { href: "/legal/cookie-policy", label: "Cookie Policy" },
       { href: "/legal/safeguarding-policy", label: "Safeguarding Policy" },
       { href: "/legal/cancellation-refund-policy", label: "Cancellation & Refunds" },
-      { href: "/legal/tutor-agreement", label: "Tutor Agreement" },
       { href: "/legal/acceptable-use-policy", label: "Acceptable Use Policy" },
     ],
   },
@@ -58,8 +57,8 @@ export function SiteFooter() {
               </span>
             </Link>
             <p className="mt-4 max-w-xs text-sm text-white/70">
-              Trusted, one-to-one GCSE and A-Level tuition for students across
-              Guernsey — delivered by vetted, experienced tutors.
+              Trusted, one-to-one tuition for students across Guernsey —
+              delivered by high-quality specialist tutors.
             </p>
             <div className="mt-6 max-w-xs">
               <p className="text-sm font-semibold text-white">

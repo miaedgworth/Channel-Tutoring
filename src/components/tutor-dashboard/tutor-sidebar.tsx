@@ -12,6 +12,7 @@ const NAV = [
   { href: "/tutor-dashboard/messages", label: "Messages" },
   { href: "/tutor-dashboard/earnings", label: "Earnings" },
   { href: "/tutor-dashboard/settings", label: "Settings" },
+  { href: "/legal/tutor-agreement", label: "Tutor Agreement" },
 ];
 
 export function TutorSidebar() {

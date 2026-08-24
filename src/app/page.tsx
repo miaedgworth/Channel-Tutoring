@@ -83,13 +83,12 @@ export default async function HomePage() {
             />
           </div>
           <p className="mx-auto mt-8 max-w-2xl text-lg text-navy/70">
-            Channel Tutoring connects students and parents with vetted,
-            experienced tutors — with simple online booking, secure payments
-            and safeguarding built in.
+            Channel Tutoring connects students and parents in Guernsey with
+            high-quality tutors. Build confidence through tailored support.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <LinkButton href="/find-a-tutor" variant="gold" size="lg">
-              Find a Tutor
+            <LinkButton href="/about" variant="gold" size="lg">
+              About Us
             </LinkButton>
           </div>
         </Container>
@@ -112,14 +111,9 @@ export default async function HomePage() {
 
       <section className="bg-navy/[0.02] py-16">
         <Container className="text-center">
-          <p className="mx-auto max-w-xl text-lg text-navy/70">
-            We offer tuition across a range of subjects and levels.
-          </p>
-          <div className="mt-6">
-            <LinkButton href="/find-a-tutor" variant="gold">
-              Find a Tutor
-            </LinkButton>
-          </div>
+          <LinkButton href="/find-a-tutor" variant="gold" size="lg">
+            Find a Tutor
+          </LinkButton>
         </Container>
       </section>
 
