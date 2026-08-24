@@ -28,7 +28,7 @@ export function baseEmailLayout(bodyHtml: string) {
         ${bodyHtml}
       </div>
       <div style="padding:16px 32px;background:#f5f6f8;color:#6b7280;font-size:12px;">
-        Channel Tutoring, Guernsey &middot; <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#1B2A4A;">channeltutoring.gg</a>
+        Channel Tutoring, Guernsey &middot; <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#1B2A4A;">channeltutoring.com</a>
       </div>
     </div>
   </div>`;

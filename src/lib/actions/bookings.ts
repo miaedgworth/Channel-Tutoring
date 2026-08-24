@@ -139,7 +139,7 @@ export async function logCompletedLesson(input: LogCompletedLessonInput) {
         ${formatDate(startsAt)} as complete, using 1 of your
         ${formatLevel(level)} tokens.</p>
         <p>If this doesn't look right, reply to your tutor or
-        <a href="mailto:hello@channeltutoring.gg">contact us</a>.</p>
+        <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
       `),
     }),
     sendEmail({

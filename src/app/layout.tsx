@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
   description:
     "Channel Tutoring connects Guernsey students and parents with vetted, experienced GCSE and A-Level tutors. Book trusted, one-to-one tuition online.",
-  metadataBase: new URL("https://www.channeltutoring.gg"),
+  metadataBase: new URL("https://www.channeltutoring.com"),
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
