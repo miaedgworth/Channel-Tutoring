@@ -43,7 +43,6 @@ async function main() {
       levels: ["GCSE", "A_LEVEL"],
       qualifications: "MSc Physics (Bristol), PGCE, QTS",
       sessionMode: "BOTH",
-      dbsStatus: "VERIFIED",
       isPublished: true,
     },
   });

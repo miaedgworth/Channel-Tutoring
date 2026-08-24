@@ -17,7 +17,7 @@ export default function AcceptableUsePolicyPage() {
         <li>Share personal contact details (phone number, personal email, social media handles) with another user, or ask another user for theirs.</li>
         <li>Attempt to arrange tutoring sessions, payment, or communication outside the Channel Tutoring platform.</li>
         <li>Use abusive, threatening, discriminatory or sexually inappropriate language or behaviour towards any other user.</li>
-        <li>Impersonate another person, or provide false information about your identity, qualifications or DBS status.</li>
+        <li>Impersonate another person, or provide false information about your identity or qualifications.</li>
         <li>Attempt to access another user&apos;s account, or any part of the platform you&apos;re not authorised to use.</li>
         <li>Use the platform for any unlawful purpose.</li>
         <li>Attempt to circumvent our safeguarding measures, including message monitoring.</li>

@@ -12,7 +12,6 @@ export const adminCreateTutorSchema = z.object({
   levels: z.array(z.enum(LEVEL_VALUES)).min(1, "Select at least one level"),
   qualifications: z.string().trim().min(3).max(1000),
   sessionMode: z.enum(["ONLINE", "IN_PERSON", "BOTH"]),
-  dbsStatus: z.enum(["NOT_PROVIDED", "PENDING", "VERIFIED"]).default("NOT_PROVIDED"),
 });
 
 export type AdminCreateTutorInput = z.infer<typeof adminCreateTutorSchema>;

@@ -27,12 +27,6 @@ enum Level {
   UNIVERSITY_ADMISSIONS
 }
 
-enum DbsStatus {
-  NOT_PROVIDED
-  PENDING
-  VERIFIED
-}
-
 enum AvailabilityPeriod {
   MORNING
   AFTERNOON
@@ -163,7 +157,6 @@ model TutorApplication {
   subjects          String[]
   levels            Level[]
   qualifications    String
-  dbsStatus         DbsStatus              @default(NOT_PROVIDED)
   cvUrl             String?
   referenceUrl      String?
   bio               String
@@ -193,7 +186,6 @@ model TutorProfile {
   levels                   Level[]
   qualifications           String
   sessionMode              SessionMode @default(BOTH)
-  dbsStatus                DbsStatus @default(NOT_PROVIDED)
   isPublished              Boolean   @default(false)
   stripeConnectAccountId   String?
   stripeOnboardingComplete Boolean   @default(false)

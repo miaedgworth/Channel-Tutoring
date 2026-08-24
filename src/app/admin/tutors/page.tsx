@@ -5,9 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { UserStatusToggle } from "@/components/admin/user-status-toggle";
-import { TutorDbsSelect } from "@/components/admin/tutor-dbs-select";
 import { formatLevel } from "@/lib/utils";
-import { DBS_STATUS_LABELS } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Tutors" };
 export const dynamic = "force-dynamic";
@@ -32,7 +30,6 @@ export default async function AdminTutorsPage() {
               <th className="pb-2 font-medium">Name</th>
               <th className="pb-2 font-medium">Levels</th>
               <th className="pb-2 font-medium">Published</th>
-              <th className="pb-2 font-medium">DBS</th>
               <th className="pb-2 font-medium">Account</th>
               <th className="pb-2 font-medium"></th>
             </tr>
@@ -51,12 +48,6 @@ export default async function AdminTutorsPage() {
                   <Badge variant={tutor.isPublished ? "success" : "neutral"}>
                     {tutor.isPublished ? "Live" : "Unpublished"}
                   </Badge>
-                </td>
-                <td className="py-2.5">
-                  <TutorDbsSelect tutorProfileId={tutor.id} dbsStatus={tutor.dbsStatus} />
-                  <p className="mt-0.5 text-[10px] text-navy/40">
-                    {DBS_STATUS_LABELS[tutor.dbsStatus]}
-                  </p>
                 </td>
                 <td className="py-2.5">
                   <Badge variant={tutor.user.status === "ACTIVE" ? "success" : "danger"}>

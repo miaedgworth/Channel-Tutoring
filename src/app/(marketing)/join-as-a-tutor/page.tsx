@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const TUTOR_STEPS = [
   {
     title: "1. Apply online",
-    body: "Tell us about your subjects, qualifications, experience and DBS status via the application form below.",
+    body: "Tell us about your subjects, qualifications and experience via the application form below.",
   },
   {
     title: "2. Get approved",

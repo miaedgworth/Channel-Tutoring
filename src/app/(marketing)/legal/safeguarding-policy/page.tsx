@@ -14,10 +14,9 @@ export default function SafeguardingPolicyPage() {
 
       <h2>Tutor vetting</h2>
       <ul>
-        <li>Every tutor completes an application detailing their qualifications, experience and DBS (criminal record) check status.</li>
+        <li>Every tutor completes an application detailing their qualifications and experience.</li>
         <li>Our team reviews every application before approving a tutor account.</li>
-        <li>A tutor&apos;s public profile cannot go live until their DBS check status is verified by our team.</li>
-        <li>We may request updated DBS information periodically, and can suspend a tutor&apos;s account at any time if concerns arise.</li>
+        <li>We can suspend a tutor&apos;s account at any time if concerns arise.</li>
       </ul>
 
       <h2>Monitored communication</h2>

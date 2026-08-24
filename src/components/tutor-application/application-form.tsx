@@ -15,7 +15,6 @@ export function TutorApplicationForm() {
   const [subjects, setSubjects] = useState<string[]>([]);
   const [levels, setLevels] = useState<string[]>([]);
   const [qualifications, setQualifications] = useState("");
-  const [dbsStatus, setDbsStatus] = useState("NOT_PROVIDED");
   const [cvUrl, setCvUrl] = useState("");
   const [referenceUrl, setReferenceUrl] = useState("");
   const [bio, setBio] = useState("");
@@ -40,7 +39,6 @@ export function TutorApplicationForm() {
         subjects,
         levels,
         qualifications,
-        dbsStatus,
         cvUrl,
         referenceUrl,
         bio,
@@ -66,8 +64,7 @@ export function TutorApplicationForm() {
         </h2>
         <p className="mt-2 text-sm text-navy/70">
           Thank you for applying to tutor with Channel Tutoring. We&apos;ll
-          review your details, including your DBS status and experience, and
-          be in touch by email soon.
+          review your details and be in touch by email soon.
         </p>
       </div>
     );
@@ -166,29 +163,6 @@ export function TutorApplicationForm() {
             className={inputClass}
             placeholder="e.g. BSc Mathematics (Bristol), PGCE, QTS"
           />
-        </div>
-        <div>
-          <label htmlFor="dbsStatus" className="block text-sm font-medium text-navy">
-            DBS check status
-          </label>
-          <select
-            id="dbsStatus"
-            value={dbsStatus}
-            onChange={(e) => setDbsStatus(e.target.value)}
-            className={inputClass}
-          >
-            <option value="NOT_PROVIDED">I don&apos;t have one yet</option>
-            <option value="PENDING">Application in progress</option>
-            <option value="VERIFIED">I have a current DBS certificate</option>
-          </select>
-          <p className="mt-1 text-xs text-navy/50">
-            All tutors working with under-18s must hold a valid DBS check
-            before their profile goes live — see our{" "}
-            <a href="/legal/safeguarding-policy" className="underline">
-              Safeguarding Policy
-            </a>
-            .
-          </p>
         </div>
         <div className="grid gap-5 sm:grid-cols-2">
           <div>

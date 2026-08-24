@@ -76,12 +76,6 @@ export const SESSION_MODE_LABELS: Record<string, string> = {
   BOTH: "Online or in person",
 };
 
-export const DBS_STATUS_LABELS: Record<string, string> = {
-  NOT_PROVIDED: "Not provided",
-  PENDING: "Pending check",
-  VERIFIED: "Verified",
-};
-
 export const PLATFORM_FEE_PENCE = Number(process.env.PLATFORM_FEE_PENCE ?? 1500);
 
 // What a tutor is paid per level, after the platform fee. Shown to tutors

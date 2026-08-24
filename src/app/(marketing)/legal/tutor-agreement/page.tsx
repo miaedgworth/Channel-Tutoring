@@ -30,9 +30,9 @@ export default async function TutorAgreementPage() {
 
       <h2>2. Vetting and DBS checks</h2>
       <ul>
-        <li>You must provide accurate information about your qualifications, experience and DBS (criminal record) check status.</li>
-        <li>Your public profile will not be published until your DBS status has been verified by our team.</li>
-        <li>You must notify us immediately of any change to your DBS status or any safeguarding-relevant matter.</li>
+        <li>You must provide accurate information about your qualifications and experience.</li>
+        <li>You are responsible for obtaining your own DBS (criminal record) check where appropriate.</li>
+        <li>You must notify us immediately of any safeguarding-relevant matter.</li>
       </ul>
 
       <h2>3. What you&apos;re paid</h2>

@@ -36,7 +36,6 @@ export async function POST(request: Request) {
       subjects: data.subjects,
       levels: data.levels,
       qualifications: data.qualifications,
-      dbsStatus: data.dbsStatus,
       cvUrl: data.cvUrl || null,
       referenceUrl: data.referenceUrl || null,
       bio: data.bio,
@@ -50,10 +49,9 @@ export async function POST(request: Request) {
     html: baseEmailLayout(`
       <p>Hi ${data.name},</p>
       <p>Thanks for applying to tutor with Channel Tutoring. Our team will review
-      your application, including your experience and DBS status, and get back
-      to you as soon as possible.</p>
-      <p>If you have a CV, references, or a DBS certificate to share, please
-      reply to this email and attach them.</p>
+      your application and get back to you as soon as possible.</p>
+      <p>If you have a CV or references to share, please reply to this email
+      and attach them.</p>
     `),
   }).catch(() => {});
 

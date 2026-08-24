@@ -60,7 +60,6 @@ export async function approveTutorApplication(applicationId: string) {
         subjects: application.subjects,
         levels: application.levels,
         qualifications: application.qualifications,
-        dbsStatus: application.dbsStatus,
         isPublished: false,
       },
     });
@@ -152,7 +151,6 @@ export async function adminCreateTutor(input: AdminCreateTutorInput) {
         levels: data.levels,
         qualifications: data.qualifications,
         sessionMode: data.sessionMode,
-        dbsStatus: data.dbsStatus,
         isPublished: false,
       },
     });

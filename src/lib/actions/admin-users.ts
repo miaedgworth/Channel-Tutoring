@@ -45,28 +45,3 @@ export async function setTutorPublished(tutorProfileId: string, isPublished: boo
 
   revalidatePath("/admin/tutors");
 }
-
-export async function setTutorDbsStatus(
-  tutorProfileId: string,
-  dbsStatus: "NOT_PROVIDED" | "PENDING" | "VERIFIED",
-) {
-  const admin = await requireUser("ADMIN");
-
-  const profile = await prisma.tutorProfile.findUnique({ where: { id: tutorProfileId } });
-  if (!profile) throw new Error("Tutor profile not found.");
-
-  await prisma.tutorProfile.update({
-    where: { id: tutorProfileId },
-    data: { dbsStatus },
-  });
-
-  await logAudit({
-    actorId: admin.id,
-    action: "TUTOR_DBS_STATUS_UPDATED",
-    targetType: "TutorProfile",
-    targetId: tutorProfileId,
-    metadata: { dbsStatus },
-  });
-
-  revalidatePath("/admin/tutors");
-}

@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 const TRUST_POINTS = [
   {
     title: "High-Quality Tutors Who Are Experts in Their Subjects",
-    body: "Every tutor is a subject specialist, vetted and DBS-checked before their profile goes live.",
+    body: "Every tutor is a subject specialist, reviewed by our team before their profile goes live.",
   },
   {
     title: "Tailored Learning Plans",
@@ -35,7 +35,7 @@ const TRUST_POINTS = [
 
 const STEPS = [
   { step: "1", title: "Find a tutor", body: "Search by subject, level, exam board and price." },
-  { step: "2", title: "Book a lesson", body: "Pick a time that works and pay securely online." },
+  { step: "2", title: "Message and schedule", body: "Agree a time with your tutor, then confirm the lesson using credit." },
   { step: "3", title: "Start learning", body: "Message your tutor and track every session in your dashboard." },
 ];
 

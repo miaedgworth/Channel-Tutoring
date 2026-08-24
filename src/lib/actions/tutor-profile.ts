@@ -18,12 +18,6 @@ export async function updateTutorProfile(input: TutorProfileInput) {
 
   const data = parsed.data;
 
-  if (data.isPublished && profile.dbsStatus !== "VERIFIED") {
-    throw new Error(
-      "Your profile can't go live until your DBS check has been verified by our team.",
-    );
-  }
-
   await prisma.tutorProfile.update({
     where: { id: profile.id },
     data: {

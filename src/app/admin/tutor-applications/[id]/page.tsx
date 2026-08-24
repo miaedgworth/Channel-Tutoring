@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { DBS_STATUS_LABELS } from "@/lib/constants";
 import { formatDateTime, formatLevel } from "@/lib/utils";
 import { ApplicationReviewActions } from "@/components/admin/application-review-actions";
 
@@ -64,12 +63,6 @@ export default async function TutorApplicationDetailPage({
               <dt className="text-navy/50">Subjects</dt>
               <dd className="font-medium text-navy">
                 {application.subjects.join(", ")}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-navy/50">DBS status</dt>
-              <dd className="font-medium text-navy">
-                {DBS_STATUS_LABELS[application.dbsStatus]}
               </dd>
             </div>
             {application.cvUrl && (

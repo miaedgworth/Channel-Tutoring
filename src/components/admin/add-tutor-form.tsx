@@ -23,7 +23,6 @@ export function AddTutorForm() {
   const [levels, setLevels] = useState<string[]>([]);
   const [qualifications, setQualifications] = useState("");
   const [sessionMode, setSessionMode] = useState("BOTH");
-  const [dbsStatus, setDbsStatus] = useState("NOT_PROVIDED");
   const [error, setError] = useState<string | null>(null);
 
   function handleSubmit(e: FormEvent) {
@@ -41,7 +40,6 @@ export function AddTutorForm() {
           levels: levels as ("KS3" | "GCSE" | "A_LEVEL" | "UNIVERSITY_ADMISSIONS")[],
           qualifications,
           sessionMode: sessionMode as "ONLINE" | "IN_PERSON" | "BOTH",
-          dbsStatus: dbsStatus as "NOT_PROVIDED" | "PENDING" | "VERIFIED",
         });
         router.push(`/tutors/${slug}`);
         router.refresh();
@@ -153,37 +151,20 @@ export function AddTutorForm() {
         />
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div>
-          <label htmlFor="sessionMode" className="block text-sm font-medium text-navy">
-            Session mode
-          </label>
-          <select
-            id="sessionMode"
-            value={sessionMode}
-            onChange={(e) => setSessionMode(e.target.value)}
-            className={inputClass}
-          >
-            <option value="BOTH">Online or in person</option>
-            <option value="ONLINE">Online only</option>
-            <option value="IN_PERSON">In person only</option>
-          </select>
-        </div>
-        <div>
-          <label htmlFor="dbsStatus" className="block text-sm font-medium text-navy">
-            DBS check status
-          </label>
-          <select
-            id="dbsStatus"
-            value={dbsStatus}
-            onChange={(e) => setDbsStatus(e.target.value)}
-            className={inputClass}
-          >
-            <option value="NOT_PROVIDED">Not provided</option>
-            <option value="PENDING">Pending check</option>
-            <option value="VERIFIED">Verified</option>
-          </select>
-        </div>
+      <div>
+        <label htmlFor="sessionMode" className="block text-sm font-medium text-navy">
+          Session mode
+        </label>
+        <select
+          id="sessionMode"
+          value={sessionMode}
+          onChange={(e) => setSessionMode(e.target.value)}
+          className={inputClass}
+        >
+          <option value="BOTH">Online or in person</option>
+          <option value="ONLINE">Online only</option>
+          <option value="IN_PERSON">In person only</option>
+        </select>
       </div>
 
       <Button type="submit" variant="primary" size="lg" disabled={isPending}>

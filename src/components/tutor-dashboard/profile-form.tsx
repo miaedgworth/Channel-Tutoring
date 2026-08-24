@@ -2,14 +2,12 @@
 
 import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { SUBJECTS, LEVELS, DBS_STATUS_LABELS, TUTOR_PAYOUT_PENCE } from "@/lib/constants";
+import { SUBJECTS, LEVELS, TUTOR_PAYOUT_PENCE } from "@/lib/constants";
 import { CheckboxGroup } from "@/components/ui/checkbox-group";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { PhotoUpload } from "@/components/ui/photo-upload";
 import { updateTutorProfile } from "@/lib/actions/tutor-profile";
 import { formatCurrencyGBP } from "@/lib/utils";
-import type { DbsStatus } from "@prisma/client";
 
 const inputClass =
   "mt-1.5 block w-full rounded-md border border-navy/20 px-3 py-2.5 text-sm focus:border-gold-dark focus:outline-none focus:ring-1 focus:ring-gold-dark";
@@ -26,7 +24,6 @@ export function TutorProfileForm({
     qualifications: string;
     sessionMode: string;
     isPublished: boolean;
-    dbsStatus: DbsStatus;
     slug: string;
   };
 }) {
@@ -82,18 +79,6 @@ export function TutorProfileForm({
           Profile saved.
         </p>
       )}
-
-      <div className="flex items-center gap-3 rounded-md border border-navy/10 bg-navy/[0.02] p-4">
-        <span className="text-sm text-navy/70">DBS check status:</span>
-        <Badge variant={profile.dbsStatus === "VERIFIED" ? "success" : "warning"}>
-          {DBS_STATUS_LABELS[profile.dbsStatus]}
-        </Badge>
-        {profile.dbsStatus !== "VERIFIED" && (
-          <span className="text-xs text-navy/50">
-            Your profile can&apos;t go live until this is verified — contact us at info@channeltutoring.com.
-          </span>
-        )}
-      </div>
 
       <section className="space-y-5">
         <h2 className="font-heading text-lg font-semibold text-navy">

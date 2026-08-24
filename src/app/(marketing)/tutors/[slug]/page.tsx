@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { formatCurrencyGBP, formatDate, formatLevel } from "@/lib/utils";
 import {
-  DBS_STATUS_LABELS,
   LEVEL_PRICE_PENCE,
   AVAILABILITY_PERIOD_LABELS,
   SESSION_MODE_LABELS,
@@ -90,9 +89,6 @@ export default async function TutorProfilePage({
                 </span>
               ) : (
                 <span className="text-sm text-navy/40">No reviews yet</span>
-              )}
-              {tutor.dbsStatus === "VERIFIED" && (
-                <Badge variant="success">DBS Verified</Badge>
               )}
               <Badge variant="neutral">{SESSION_MODE_LABELS[tutor.sessionMode]}</Badge>
             </div>
@@ -189,20 +185,6 @@ export default async function TutorProfilePage({
           </div>
 
           <aside className="space-y-4">
-            <div className="rounded-xl border border-navy/10 bg-navy/[0.02] p-5">
-              <h3 className="font-heading text-sm font-semibold text-navy">
-                At a glance
-              </h3>
-              <dl className="mt-3 space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <dt className="text-navy/50">DBS status</dt>
-                  <dd className="font-medium text-navy">
-                    {DBS_STATUS_LABELS[tutor.dbsStatus]}
-                  </dd>
-                </div>
-              </dl>
-            </div>
-
             <div className="rounded-xl border border-navy/10 bg-navy/[0.02] p-5">
               <h3 className="font-heading text-sm font-semibold text-navy">
                 General availability

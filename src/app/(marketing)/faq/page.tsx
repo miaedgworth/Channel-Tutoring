@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "How are tutors vetted?",
-    a: "Every tutor completes an application covering their qualifications, experience and DBS (criminal record) check status. Our team reviews each application, and a tutor's profile only goes live once we've verified their DBS check.",
+    a: "Every tutor completes an application covering their qualifications and experience, which our team reviews before their profile goes live.",
   },
   {
     q: "Is it safe for my child to message a tutor directly?",
