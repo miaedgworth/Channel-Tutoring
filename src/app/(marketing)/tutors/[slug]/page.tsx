@@ -137,16 +137,11 @@ export default async function TutorProfilePage({
               </p>
             </section>
 
-            <section>
-              <h2 className="font-heading text-lg font-semibold text-navy">
-                Reviews
-              </h2>
-              {tutor.reviews.length === 0 ? (
-                <p className="mt-2 text-sm text-navy/50">
-                  No reviews yet — be the first to book and review this
-                  tutor.
-                </p>
-              ) : (
+            {tutor.reviews.length > 0 && (
+              <section>
+                <h2 className="font-heading text-lg font-semibold text-navy">
+                  Reviews
+                </h2>
                 <ul className="mt-3 space-y-4">
                   {tutor.reviews.map((review) => (
                     <li
@@ -171,8 +166,8 @@ export default async function TutorProfilePage({
                     </li>
                   ))}
                 </ul>
-              )}
-            </section>
+              </section>
+            )}
           </div>
 
           <aside className="space-y-4">
