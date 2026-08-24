@@ -17,7 +17,7 @@ const FAQS = [
   },
   {
     q: "How do I pay for a session?",
-    a: "Payment is taken securely online via Stripe when you book. You'll receive an email confirmation and can view your full payment history and receipts in your dashboard.",
+    a: "Top up your Channel Tutoring credit balance securely online via Stripe, then use it to confirm any lesson your tutor schedules for you. Leftover credit carries over and can be used with any tutor. You'll receive an email confirmation and can view your full payment history and receipts in your dashboard.",
   },
   {
     q: "What if I need to cancel a session?",

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
+import { LinkButton } from "@/components/ui/button";
 import { formatCurrencyGBP, formatDateTime } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "My Bookings" };
@@ -33,9 +34,14 @@ export default async function TutorBookingsPage() {
       <Card>
         <CardContent>
           <p className="text-sm text-navy/60">
-            No bookings yet. Make sure your profile is published and you
-            have availability slots open.
+            No bookings yet. Once you&apos;ve agreed a time with a client over
+            messages, schedule the lesson below.
           </p>
+          <div className="mt-4">
+            <LinkButton href="/tutor-dashboard/bookings/new" variant="primary" size="sm">
+              Schedule a Lesson
+            </LinkButton>
+          </div>
         </CardContent>
       </Card>
     );
@@ -43,6 +49,11 @@ export default async function TutorBookingsPage() {
 
   return (
     <div className="space-y-3">
+      <div className="flex justify-end">
+        <LinkButton href="/tutor-dashboard/bookings/new" variant="primary" size="sm">
+          Schedule a Lesson
+        </LinkButton>
+      </div>
       {bookings.map((booking) => (
         <Link key={booking.id} href={`/tutor-dashboard/bookings/${booking.id}`}>
           <Card className="transition-colors hover:border-navy/30">

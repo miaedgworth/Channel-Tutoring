@@ -60,12 +60,6 @@ export default async function TutorApplicationDetailPage({
                 {application.levels.map(formatLevel).join(", ")}
               </dd>
             </div>
-            <div>
-              <dt className="text-navy/50">Years of experience</dt>
-              <dd className="font-medium text-navy">
-                {application.yearsExperience}
-              </dd>
-            </div>
             <div className="col-span-2">
               <dt className="text-navy/50">Subjects</dt>
               <dd className="font-medium text-navy">

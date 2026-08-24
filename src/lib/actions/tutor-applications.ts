@@ -8,6 +8,7 @@ import { requireUser } from "@/lib/current-user";
 import { uniqueTutorSlug } from "@/lib/slug";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
 import { logAudit } from "@/lib/audit";
+import { adminCreateTutorSchema, type AdminCreateTutorInput } from "@/lib/validations/admin-create-tutor";
 
 export async function approveTutorApplication(applicationId: string) {
   const admin = await requireUser("ADMIN");
@@ -58,7 +59,6 @@ export async function approveTutorApplication(applicationId: string) {
         bio: application.bio,
         subjects: application.subjects,
         levels: application.levels,
-        yearsExperience: application.yearsExperience,
         qualifications: application.qualifications,
         dbsStatus: application.dbsStatus,
         isPublished: false,
@@ -112,6 +112,88 @@ export async function approveTutorApplication(applicationId: string) {
   });
 
   revalidatePath("/admin/tutor-applications");
+}
+
+export async function adminCreateTutor(input: AdminCreateTutorInput) {
+  const admin = await requireUser("ADMIN");
+  const parsed = adminCreateTutorSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+  }
+  const data = parsed.data;
+
+  const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
+  if (existingUser) {
+    throw new Error("An account with that email already exists.");
+  }
+
+  const slug = await uniqueTutorSlug(data.name);
+  const randomPassword = randomBytes(24).toString("hex");
+  const passwordHash = await bcrypt.hash(randomPassword, 12);
+
+  const user = await prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        phone: data.phone || null,
+        passwordHash,
+        role: "TUTOR",
+      },
+    });
+
+    await tx.tutorProfile.create({
+      data: {
+        userId: user.id,
+        slug,
+        headline: data.headline,
+        bio: data.bio,
+        subjects: data.subjects,
+        levels: data.levels,
+        qualifications: data.qualifications,
+        sessionMode: data.sessionMode,
+        dbsStatus: data.dbsStatus,
+        isPublished: false,
+      },
+    });
+
+    return user;
+  });
+
+  const resetToken = randomBytes(32).toString("hex");
+  await prisma.passwordResetToken.create({
+    data: {
+      token: resetToken,
+      userId: user.id,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  const setPasswordUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
+  await sendEmail({
+    to: user.email,
+    subject: "You're set up to tutor with Channel Tutoring!",
+    html: baseEmailLayout(`
+      <p>Hi ${data.name},</p>
+      <p>An account has been created for you to tutor with Channel Tutoring.</p>
+      <p>Set a password to access your tutor dashboard and complete your
+      public profile:</p>
+      <p><a href="${setPasswordUrl}" style="color:#C9A227;font-weight:bold;">Set your password</a></p>
+      <p>This link expires in 7 days. Once you're in, don't forget to
+      publish your profile so clients can find you.</p>
+    `),
+  }).catch(() => {});
+
+  await logAudit({
+    actorId: admin.id,
+    action: "TUTOR_CREATED_BY_ADMIN",
+    targetType: "User",
+    targetId: user.id,
+  });
+
+  revalidatePath("/admin/tutors");
+
+  return slug;
 }
 
 export async function rejectTutorApplication(

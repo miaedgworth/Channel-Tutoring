@@ -4,12 +4,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { createSlotSchema } from "@/lib/validations/availability";
-import { PLATFORM_FEE_PENCE, LEVEL_PRICE_PENCE } from "@/lib/constants";
 
-export async function createAvailabilitySlot(input: {
-  startsAt: string;
-  durationMinutes: number;
-}) {
+export async function createAvailabilitySlot(input: { date: string; period: string }) {
   const user = await requireUser("TUTOR");
   const parsed = createSlotSchema.safeParse(input);
   if (!parsed.success) {
@@ -19,35 +15,21 @@ export async function createAvailabilitySlot(input: {
   const profile = await prisma.tutorProfile.findUnique({ where: { userId: user.id } });
   if (!profile) throw new Error("Tutor profile not found.");
 
-  const { startsAt, durationMinutes } = parsed.data;
-  const endsAt = new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
+  const { date, period } = parsed.data;
 
-  const cheapestLevelPence = Math.min(
-    ...profile.levels.map((level) => LEVEL_PRICE_PENCE[level] ?? Infinity),
-  );
-  const cheapestSessionPrice = Math.round((cheapestLevelPence * durationMinutes) / 60);
-  if (cheapestSessionPrice <= PLATFORM_FEE_PENCE) {
-    throw new Error(
-      `A ${durationMinutes}-minute session at your cheapest level doesn't cover the platform fee. Choose a longer duration.`,
-    );
-  }
-
-  const overlapping = await prisma.tutorAvailabilitySlot.findFirst({
-    where: {
-      tutorId: profile.id,
-      startsAt: { lt: endsAt },
-      endsAt: { gt: startsAt },
-    },
+  const existing = await prisma.tutorAvailabilitySlot.findUnique({
+    where: { tutorId_date_period: { tutorId: profile.id, date, period } },
   });
-  if (overlapping) {
-    throw new Error("This overlaps with an existing availability slot.");
+  if (existing) {
+    throw new Error("You've already marked yourself available for this day and period.");
   }
 
   await prisma.tutorAvailabilitySlot.create({
-    data: { tutorId: profile.id, startsAt, endsAt },
+    data: { tutorId: profile.id, date, period },
   });
 
   revalidatePath("/tutor-dashboard/availability");
+  revalidatePath(`/tutors/${profile.slug}`);
 }
 
 export async function deleteAvailabilitySlot(slotId: string) {
@@ -59,10 +41,8 @@ export async function deleteAvailabilitySlot(slotId: string) {
   if (!slot || slot.tutorId !== profile.id) {
     throw new Error("Slot not found.");
   }
-  if (slot.isBooked) {
-    throw new Error("This slot is already booked and can't be removed.");
-  }
 
   await prisma.tutorAvailabilitySlot.delete({ where: { id: slotId } });
   revalidatePath("/tutor-dashboard/availability");
+  revalidatePath(`/tutors/${profile.slug}`);
 }

@@ -8,7 +8,6 @@ export const tutorApplicationSchema = z.object({
   phone: z.string().trim().min(6, "Enter a valid phone number").max(30),
   subjects: z.array(z.string()).min(1, "Select at least one subject"),
   levels: z.array(z.enum(LEVEL_VALUES)).min(1, "Select at least one level"),
-  yearsExperience: z.coerce.number().int().min(0).max(60),
   qualifications: z.string().trim().min(5, "Tell us about your qualifications").max(1000),
   dbsStatus: z.enum(["NOT_PROVIDED", "PENDING", "VERIFIED"]).default("NOT_PROVIDED"),
   cvUrl: z.string().trim().url().optional().or(z.literal("")),

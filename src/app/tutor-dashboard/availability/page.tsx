@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,10 +22,15 @@ export default async function AvailabilityPage() {
     );
   }
 
-  const slots = await prisma.tutorAvailabilitySlot.findMany({
-    where: { tutorId: profile.id, startsAt: { gte: new Date() } },
-    orderBy: { startsAt: "asc" },
-  });
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const periodOrder: Record<string, number> = { MORNING: 0, AFTERNOON: 1, EVENING: 2 };
+  const slots = (
+    await prisma.tutorAvailabilitySlot.findMany({
+      where: { tutorId: profile.id, date: { gte: today } },
+      orderBy: { date: "asc" },
+    })
+  ).sort((a, b) => a.date.getTime() - b.date.getTime() || periodOrder[a.period] - periodOrder[b.period]);
 
   return (
     <div className="space-y-6">
@@ -34,8 +40,13 @@ export default async function AvailabilityPage() {
             Add availability
           </h2>
           <p className="mt-1 text-sm text-navy/60">
-            Add time slots when you&apos;re free to tutor. Clients book directly
-            into these slots.
+            Let clients know which days and times of day you&apos;re generally
+            free — morning, afternoon or evening. Clients will message you to
+            agree an exact time, and you then schedule the lesson from your{" "}
+            <Link href="/tutor-dashboard/bookings" className="underline">
+              Bookings
+            </Link>{" "}
+            page.
           </p>
           <div className="mt-4">
             <AvailabilityForm />

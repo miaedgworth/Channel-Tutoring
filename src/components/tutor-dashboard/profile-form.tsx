@@ -6,6 +6,7 @@ import { SUBJECTS, LEVELS, DBS_STATUS_LABELS, TUTOR_PAYOUT_PENCE } from "@/lib/c
 import { CheckboxGroup } from "@/components/ui/checkbox-group";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PhotoUpload } from "@/components/ui/photo-upload";
 import { updateTutorProfile } from "@/lib/actions/tutor-profile";
 import { formatCurrencyGBP } from "@/lib/utils";
 import type { DbsStatus } from "@prisma/client";
@@ -22,8 +23,8 @@ export function TutorProfileForm({
     photoUrl: string | null;
     subjects: string[];
     levels: string[];
-    yearsExperience: number;
     qualifications: string;
+    sessionMode: string;
     isPublished: boolean;
     dbsStatus: DbsStatus;
     slug: string;
@@ -37,8 +38,8 @@ export function TutorProfileForm({
   const [photoUrl, setPhotoUrl] = useState(profile.photoUrl ?? "");
   const [subjects, setSubjects] = useState<string[]>(profile.subjects);
   const [levels, setLevels] = useState<string[]>(profile.levels);
-  const [yearsExperience, setYearsExperience] = useState(profile.yearsExperience.toString());
   const [qualifications, setQualifications] = useState(profile.qualifications);
+  const [sessionMode, setSessionMode] = useState(profile.sessionMode);
   const [isPublished, setIsPublished] = useState(profile.isPublished);
 
   const [error, setError] = useState<string | null>(null);
@@ -57,8 +58,8 @@ export function TutorProfileForm({
           photoUrl,
           subjects,
           levels: levels as ("KS3" | "GCSE" | "A_LEVEL" | "UNIVERSITY_ADMISSIONS")[],
-          yearsExperience: Number(yearsExperience),
           qualifications,
+          sessionMode: sessionMode as "ONLINE" | "IN_PERSON" | "BOTH",
           isPublished,
         });
         setSuccess(true);
@@ -111,19 +112,7 @@ export function TutorProfileForm({
             placeholder="e.g. Experienced GCSE & A-Level Maths Tutor"
           />
         </div>
-        <div>
-          <label htmlFor="photoUrl" className="block text-sm font-medium text-navy">
-            Photo URL (optional)
-          </label>
-          <input
-            id="photoUrl"
-            type="url"
-            value={photoUrl}
-            onChange={(e) => setPhotoUrl(e.target.value)}
-            className={inputClass}
-            placeholder="https://..."
-          />
-        </div>
+        <PhotoUpload value={photoUrl} onChange={setPhotoUrl} label="Photo (optional)" />
         <div>
           <label htmlFor="bio" className="block text-sm font-medium text-navy">
             Bio
@@ -178,23 +167,6 @@ export function TutorProfileForm({
             ))}
           </ul>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2">
-          <div>
-            <label htmlFor="years" className="block text-sm font-medium text-navy">
-              Years of experience
-            </label>
-            <input
-              id="years"
-              type="number"
-              min={0}
-              max={60}
-              required
-              value={yearsExperience}
-              onChange={(e) => setYearsExperience(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-        </div>
         <div>
           <label htmlFor="qualifications" className="block text-sm font-medium text-navy">
             Qualifications
@@ -207,6 +179,21 @@ export function TutorProfileForm({
             onChange={(e) => setQualifications(e.target.value)}
             className={inputClass}
           />
+        </div>
+        <div>
+          <label htmlFor="sessionMode" className="block text-sm font-medium text-navy">
+            Do you offer sessions online, in person, or both?
+          </label>
+          <select
+            id="sessionMode"
+            value={sessionMode}
+            onChange={(e) => setSessionMode(e.target.value)}
+            className={inputClass}
+          >
+            <option value="BOTH">Online or in person</option>
+            <option value="ONLINE">Online only</option>
+            <option value="IN_PERSON">In person only</option>
+          </select>
         </div>
       </section>
 

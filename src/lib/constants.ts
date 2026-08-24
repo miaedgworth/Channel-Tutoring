@@ -58,6 +58,24 @@ export const LEVEL_PRICE_PENCE: Record<string, number> = {
   UNIVERSITY_ADMISSIONS: 5000,
 };
 
+export const AVAILABILITY_PERIODS = [
+  { value: "MORNING", label: "Morning" },
+  { value: "AFTERNOON", label: "Afternoon" },
+  { value: "EVENING", label: "Evening" },
+] as const;
+
+export const AVAILABILITY_PERIOD_LABELS: Record<string, string> = {
+  MORNING: "Morning",
+  AFTERNOON: "Afternoon",
+  EVENING: "Evening",
+};
+
+export const SESSION_MODE_LABELS: Record<string, string> = {
+  ONLINE: "Online",
+  IN_PERSON: "In person",
+  BOTH: "Online or in person",
+};
+
 export const DBS_STATUS_LABELS: Record<string, string> = {
   NOT_PROVIDED: "Not provided",
   PENDING: "Pending check",
@@ -71,11 +89,6 @@ export const PLATFORM_FEE_PENCE = Number(process.env.PLATFORM_FEE_PENCE ?? 1500)
 export const TUTOR_PAYOUT_PENCE: Record<string, number> = Object.fromEntries(
   Object.entries(LEVEL_PRICE_PENCE).map(([level, price]) => [level, price - PLATFORM_FEE_PENCE]),
 );
-
-// Book and pay for this many sessions with the same tutor/subject/level in
-// one go to receive the block-booking discount.
-export const BLOCK_BOOKING_MIN_SESSIONS = 5;
-export const BLOCK_BOOKING_DISCOUNT_RATE = 0.1;
 
 // Group lessons: extra per-hour charge for each additional student beyond
 // the first, on top of the one-to-one session price.

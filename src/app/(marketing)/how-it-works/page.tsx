@@ -10,19 +10,19 @@ export const metadata: Metadata = {
 const CLIENT_STEPS = [
   {
     title: "1. Search for a tutor",
-    body: "Use Find a Tutor to filter by subject and level (KS3, GCSE, A-Level or university admissions). Every tutor's profile shows their experience, qualifications and reviews. Pricing is fixed by level, so it's the same wherever you book.",
+    body: "Use Find a Tutor to filter by subject and level (KS3, GCSE, A-Level or university admissions). Every tutor's profile shows their qualifications, reviews and general availability — the days and times of day they're usually free. Pricing is fixed by level, so it's the same wherever you book.",
   },
   {
-    title: "2. Pick a time and book",
-    body: "Choose from your tutor's published availability and confirm your session details — subject, level, exam board and any notes for your tutor.",
+    title: "2. Message your tutor",
+    body: "Use in-app messaging to agree an exact day and time with your tutor, along with subject, level and exam board. All messages stay on the platform for everyone's safety.",
   },
   {
-    title: "3. Pay securely online",
-    body: "Payment is taken securely via Stripe at the time of booking. You'll get an email confirmation and receipt, and can view it any time in your dashboard.",
+    title: "3. Your tutor schedules the lesson",
+    body: "Once you've agreed a time, your tutor schedules it from their dashboard. It'll then appear in your dashboard, awaiting your confirmation.",
   },
   {
-    title: "4. Message your tutor",
-    body: "Use in-app messaging to arrange details or ask questions before your session. All messages stay on the platform for everyone's safety.",
+    title: "4. Confirm with credit",
+    body: "Top up your Channel Tutoring credit balance, then confirm the lesson using it. Once confirmed, your session is locked in — you can reuse leftover credit for future lessons with any tutor.",
   },
   {
     title: "5. Attend your session",

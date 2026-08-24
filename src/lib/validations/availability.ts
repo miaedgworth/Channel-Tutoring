@@ -1,12 +1,10 @@
 import { z } from "zod";
 
 export const createSlotSchema = z.object({
-  startsAt: z.coerce.date().refine((d) => d.getTime() > Date.now(), {
-    message: "Start time must be in the future",
+  date: z.coerce.date().refine((d) => d.getTime() >= new Date().setHours(0, 0, 0, 0), {
+    message: "Choose today or a future date",
   }),
-  durationMinutes: z.coerce.number().int().refine((v) => [30, 45, 60, 90, 120].includes(v), {
-    message: "Choose a valid duration",
-  }),
+  period: z.enum(["MORNING", "AFTERNOON", "EVENING"]),
 });
 
 export type CreateSlotInput = z.infer<typeof createSlotSchema>;

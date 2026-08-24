@@ -7,6 +7,7 @@ import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CancelBookingButton } from "@/components/cancel-booking-button";
 import { MarkCompletedButton } from "@/components/mark-completed-button";
 import { formatCurrencyGBP, formatDateTime, formatLevel } from "@/lib/utils";
+import { SESSION_MODE_LABELS } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Booking Details" };
 export const dynamic = "force-dynamic";
@@ -48,6 +49,10 @@ export default async function TutorBookingDetailPage({
             <div>
               <dt className="text-navy/50">Level</dt>
               <dd className="font-medium text-navy">{formatLevel(booking.level)}</dd>
+            </div>
+            <div>
+              <dt className="text-navy/50">Session mode</dt>
+              <dd className="font-medium text-navy">{SESSION_MODE_LABELS[booking.sessionMode]}</dd>
             </div>
             <div>
               <dt className="text-navy/50">Your payout</dt>

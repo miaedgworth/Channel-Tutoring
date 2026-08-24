@@ -33,6 +33,24 @@ enum DbsStatus {
   VERIFIED
 }
 
+enum AvailabilityPeriod {
+  MORNING
+  AFTERNOON
+  EVENING
+}
+
+enum SessionMode {
+  ONLINE
+  IN_PERSON
+  BOTH
+}
+
+enum CreditTransactionType {
+  TOPUP
+  SPEND
+  REFUND
+}
+
 enum TutorApplicationStatus {
   PENDING
   APPROVED
@@ -100,10 +118,11 @@ model User {
   status          UserStatus @default(ACTIVE)
   image           String?
   newsletterOptIn Boolean    @default(false)
-  agreedToTermsAt DateTime?
-  emailVerifiedAt DateTime?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  agreedToTermsAt   DateTime?
+  emailVerifiedAt   DateTime?
+  creditBalancePence Int      @default(0)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   tutorProfile          TutorProfile?
   tutorApplication      TutorApplication?
@@ -115,6 +134,7 @@ model User {
   passwordResetTokens   PasswordResetToken[]
   auditLogsAsActor      AuditLog[]           @relation("ActorAuditLogs")
   contactMessages       ContactMessage[]
+  creditTransactions    CreditTransaction[]
 
   @@index([role])
 }
@@ -142,7 +162,6 @@ model TutorApplication {
   phone             String
   subjects          String[]
   levels            Level[]
-  yearsExperience   Int
   qualifications    String
   dbsStatus         DbsStatus              @default(NOT_PROVIDED)
   cvUrl             String?
@@ -172,8 +191,8 @@ model TutorProfile {
   photoUrl                 String?
   subjects                 String[]
   levels                   Level[]
-  yearsExperience          Int
   qualifications           String
+  sessionMode              SessionMode @default(BOTH)
   dbsStatus                DbsStatus @default(NOT_PROVIDED)
   isPublished              Boolean   @default(false)
   stripeConnectAccountId   String?
@@ -198,17 +217,16 @@ model TutorProfile {
 }
 
 model TutorAvailabilitySlot {
-  id        String   @id @default(cuid())
+  id        String              @id @default(cuid())
   tutorId   String
-  startsAt  DateTime
-  endsAt    DateTime
-  isBooked  Boolean  @default(false)
-  createdAt DateTime @default(now())
+  date      DateTime            @db.Date
+  period    AvailabilityPeriod
+  createdAt DateTime            @default(now())
 
-  tutor   TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
-  booking Booking?
+  tutor TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
-  @@index([tutorId, startsAt])
+  @@unique([tutorId, date, period])
+  @@index([tutorId, date])
 }
 
 // ---------- Bookings ----------
@@ -217,10 +235,10 @@ model Booking {
   id                      String        @id @default(cuid())
   clientId                String
   tutorId                 String
-  slotId                  String?       @unique
   subject                 String
   level                   Level
   examBoard               String?
+  sessionMode             SessionMode
   startsAt                DateTime
   endsAt                  DateTime
   pricePence              Int
@@ -232,14 +250,11 @@ model Booking {
   cancellationReason      String?
   cancelledAt             DateTime?
   completedAt             DateTime?
-  stripeCheckoutSessionId String?       @unique
-  stripePaymentIntentId   String?       @unique
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
 
-  client        User                   @relation("ClientBookings", fields: [clientId], references: [id])
-  tutor         TutorProfile           @relation("TutorBookings", fields: [tutorId], references: [id])
-  slot          TutorAvailabilitySlot? @relation(fields: [slotId], references: [id])
+  client        User                @relation("ClientBookings", fields: [clientId], references: [id])
+  tutor         TutorProfile        @relation("TutorBookings", fields: [tutorId], references: [id])
   payment       Payment?
   review        Review?
   ledgerEntries TutorLedgerEntry[]
@@ -263,6 +278,21 @@ model Payment {
   updatedAt               DateTime      @updatedAt
 
   booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model CreditTransaction {
+  id                      String                @id @default(cuid())
+  userId                  String
+  type                    CreditTransactionType
+  amountPence             Int
+  bookingId               String?
+  stripeCheckoutSessionId String?
+  description             String
+  createdAt               DateTime              @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 model TutorLedgerEntry {

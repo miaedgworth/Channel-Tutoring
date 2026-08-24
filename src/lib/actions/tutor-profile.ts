@@ -32,8 +32,8 @@ export async function updateTutorProfile(input: TutorProfileInput) {
       photoUrl: data.photoUrl || null,
       subjects: data.subjects,
       levels: data.levels,
-      yearsExperience: data.yearsExperience,
       qualifications: data.qualifications,
+      sessionMode: data.sessionMode,
       isPublished: data.isPublished,
     },
   });

@@ -3,32 +3,27 @@
 import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { AVAILABILITY_PERIODS } from "@/lib/constants";
 import { createAvailabilitySlot } from "@/lib/actions/availability";
 
 export function AvailabilityForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [duration, setDuration] = useState("60");
+  const [period, setPeriod] = useState("MORNING");
   const [error, setError] = useState<string | null>(null);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!date || !time) {
-      setError("Choose a date and time.");
+    if (!date) {
+      setError("Choose a date.");
       return;
     }
-    const startsAt = new Date(`${date}T${time}`);
     startTransition(async () => {
       try {
-        await createAvailabilitySlot({
-          startsAt: startsAt.toISOString(),
-          durationMinutes: Number(duration),
-        });
+        await createAvailabilitySlot({ date, period });
         setDate("");
-        setTime("");
         router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong");
@@ -58,37 +53,24 @@ export function AvailabilityForm() {
         />
       </div>
       <div>
-        <label htmlFor="time" className="block text-xs font-medium text-navy/70">
-          Start time
-        </label>
-        <input
-          id="time"
-          type="time"
-          required
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          className="mt-1 rounded-md border border-navy/20 px-3 py-2 text-sm focus:border-gold-dark focus:outline-none"
-        />
-      </div>
-      <div>
-        <label htmlFor="duration" className="block text-xs font-medium text-navy/70">
-          Duration
+        <label htmlFor="period" className="block text-xs font-medium text-navy/70">
+          Period
         </label>
         <select
-          id="duration"
-          value={duration}
-          onChange={(e) => setDuration(e.target.value)}
+          id="period"
+          value={period}
+          onChange={(e) => setPeriod(e.target.value)}
           className="mt-1 rounded-md border border-navy/20 px-3 py-2 text-sm focus:border-gold-dark focus:outline-none"
         >
-          <option value="30">30 minutes</option>
-          <option value="45">45 minutes</option>
-          <option value="60">60 minutes</option>
-          <option value="90">90 minutes</option>
-          <option value="120">120 minutes</option>
+          {AVAILABILITY_PERIODS.map((p) => (
+            <option key={p.value} value={p.value}>
+              {p.label}
+            </option>
+          ))}
         </select>
       </div>
       <Button type="submit" variant="primary" size="sm" disabled={isPending}>
-        {isPending ? "Adding..." : "Add Slot"}
+        {isPending ? "Adding..." : "Add Availability"}
       </Button>
     </form>
   );

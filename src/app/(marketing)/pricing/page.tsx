@@ -3,13 +3,7 @@ import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrencyGBP } from "@/lib/utils";
-import {
-  LEVELS,
-  LEVEL_PRICE_PENCE,
-  ADDITIONAL_STUDENT_SURCHARGE_PENCE,
-  BLOCK_BOOKING_MIN_SESSIONS,
-  BLOCK_BOOKING_DISCOUNT_RATE,
-} from "@/lib/constants";
+import { LEVELS, LEVEL_PRICE_PENCE, ADDITIONAL_STUDENT_SURCHARGE_PENCE } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -51,7 +45,7 @@ export default function PricingPage() {
           </Card>
         </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+        <div className="mt-10">
           <div className="rounded-xl border border-navy/10 bg-navy/[0.02] p-6">
             <h2 className="font-heading text-lg font-semibold text-navy">
               Group lessons
@@ -59,19 +53,9 @@ export default function PricingPage() {
             <p className="mt-2 text-sm text-navy/70">
               For lessons with more than one student, add{" "}
               {formatCurrencyGBP(ADDITIONAL_STUDENT_SURCHARGE_PENCE)}/hour
-              per additional student. Let us know when booking and
-              we&apos;ll confirm the adjusted price.
-            </p>
-          </div>
-          <div className="rounded-xl border border-navy/10 bg-navy/[0.02] p-6">
-            <h2 className="font-heading text-lg font-semibold text-navy">
-              Block booking discount
-            </h2>
-            <p className="mt-2 text-sm text-navy/70">
-              Book and pay for {BLOCK_BOOKING_MIN_SESSIONS} or more sessions
-              with the same tutor in advance to receive{" "}
-              {Math.round(BLOCK_BOOKING_DISCOUNT_RATE * 100)}% off,
-              applied automatically at checkout.
+              per additional student. Message your tutor to arrange this and
+              they&apos;ll confirm the adjusted price when they schedule the
+              lesson.
             </p>
           </div>
         </div>

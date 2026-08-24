@@ -1,12 +1,16 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { formatCurrencyGBP, formatDate, formatLevel } from "@/lib/utils";
-import { DBS_STATUS_LABELS, LEVEL_PRICE_PENCE } from "@/lib/constants";
+import {
+  DBS_STATUS_LABELS,
+  LEVEL_PRICE_PENCE,
+  AVAILABILITY_PERIOD_LABELS,
+  SESSION_MODE_LABELS,
+} from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +46,17 @@ export default async function TutorProfilePage({
   });
 
   if (!tutor) notFound();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const periodOrder: Record<string, number> = { MORNING: 0, AFTERNOON: 1, EVENING: 2 };
+  const availability = (
+    await prisma.tutorAvailabilitySlot.findMany({
+      where: { tutorId: tutor.id, date: { gte: today } },
+      orderBy: { date: "asc" },
+      take: 20,
+    })
+  ).sort((a, b) => a.date.getTime() - b.date.getTime() || periodOrder[a.period] - periodOrder[b.period]);
 
   return (
     <div className="py-12">
@@ -79,6 +94,7 @@ export default async function TutorProfilePage({
               {tutor.dbsStatus === "VERIFIED" && (
                 <Badge variant="success">DBS Verified</Badge>
               )}
+              <Badge variant="neutral">{SESSION_MODE_LABELS[tutor.sessionMode]}</Badge>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
@@ -103,18 +119,16 @@ export default async function TutorProfilePage({
               ))}
             </ul>
             <LinkButton
-              href={`/tutors/${tutor.slug}/book`}
+              href={`/dashboard/messages?tutor=${tutor.slug}`}
               variant="gold"
               className="mt-3 w-full"
             >
-              Book a Lesson
-            </LinkButton>
-            <Link
-              href={`/dashboard/messages?tutor=${tutor.slug}`}
-              className="mt-2 block text-sm font-medium text-navy underline"
-            >
               Message this tutor
-            </Link>
+            </LinkButton>
+            <p className="mt-2 text-xs text-navy/50">
+              Message {tutor.user.name.split(" ")[0]} to agree a time, then
+              they&apos;ll schedule the lesson for you to confirm and pay.
+            </p>
           </div>
         </div>
 
@@ -181,18 +195,39 @@ export default async function TutorProfilePage({
               </h3>
               <dl className="mt-3 space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <dt className="text-navy/50">Experience</dt>
-                  <dd className="font-medium text-navy">
-                    {tutor.yearsExperience} years
-                  </dd>
-                </div>
-                <div className="flex justify-between">
                   <dt className="text-navy/50">DBS status</dt>
                   <dd className="font-medium text-navy">
                     {DBS_STATUS_LABELS[tutor.dbsStatus]}
                   </dd>
                 </div>
               </dl>
+            </div>
+
+            <div className="rounded-xl border border-navy/10 bg-navy/[0.02] p-5">
+              <h3 className="font-heading text-sm font-semibold text-navy">
+                General availability
+              </h3>
+              {availability.length === 0 ? (
+                <p className="mt-2 text-sm text-navy/50">
+                  No availability listed right now — message {tutor.user.name.split(" ")[0]} to
+                  ask about upcoming slots.
+                </p>
+              ) : (
+                <ul className="mt-3 space-y-1.5 text-sm">
+                  {availability.map((slot) => (
+                    <li key={slot.id} className="flex justify-between text-navy/80">
+                      <span>{formatDate(slot.date)}</span>
+                      <span className="font-medium text-navy">
+                        {AVAILABILITY_PERIOD_LABELS[slot.period]}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="mt-3 text-xs text-navy/40">
+                These are general windows, not exact times — message the
+                tutor to agree what works for you both.
+              </p>
             </div>
           </aside>
         </div>

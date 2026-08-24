@@ -5,18 +5,18 @@ import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CancelBookingButton } from "@/components/cancel-booking-button";
+import { ConfirmBookingButton } from "@/components/confirm-booking-button";
 import { formatCurrencyGBP, formatDateTime, formatLevel } from "@/lib/utils";
+import { SESSION_MODE_LABELS } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Booking Details" };
 export const dynamic = "force-dynamic";
 
 export default async function ClientBookingDetailPage({
   params,
-  searchParams,
 }: PageProps<"/dashboard/bookings/[id]">) {
   const user = await requireUser("CLIENT");
   const { id } = await params;
-  const search = await searchParams;
 
   const booking = await prisma.booking.findUnique({
     where: { id },
@@ -28,10 +28,16 @@ export default async function ClientBookingDetailPage({
 
   return (
     <div className="max-w-2xl space-y-6">
-      {search.checkout === "success" && booking.status === "PENDING_PAYMENT" && (
-        <div className="rounded-md bg-gold/10 px-4 py-3 text-sm text-navy">
-          Payment received — we&apos;re confirming your booking. This page
-          will update automatically once confirmed.
+      {booking.status === "PENDING_PAYMENT" && (
+        <div className="rounded-md border border-gold/30 bg-gold/5 px-4 py-3 text-sm text-navy">
+          <p className="font-medium">Your tutor has proposed this lesson.</p>
+          <p className="mt-1 text-navy/70">
+            Confirm it using {formatCurrencyGBP(booking.pricePence)} of credit
+            — until then this time isn&apos;t guaranteed.
+          </p>
+          <div className="mt-3">
+            <ConfirmBookingButton bookingId={booking.id} />
+          </div>
         </div>
       )}
 
@@ -52,6 +58,10 @@ export default async function ClientBookingDetailPage({
             <div>
               <dt className="text-navy/50">Level</dt>
               <dd className="font-medium text-navy">{formatLevel(booking.level)}</dd>
+            </div>
+            <div>
+              <dt className="text-navy/50">Session mode</dt>
+              <dd className="font-medium text-navy">{SESSION_MODE_LABELS[booking.sessionMode]}</dd>
             </div>
             {booking.examBoard && (
               <div>

@@ -14,7 +14,6 @@ export function TutorApplicationForm() {
   const [phone, setPhone] = useState("");
   const [subjects, setSubjects] = useState<string[]>([]);
   const [levels, setLevels] = useState<string[]>([]);
-  const [yearsExperience, setYearsExperience] = useState("");
   const [qualifications, setQualifications] = useState("");
   const [dbsStatus, setDbsStatus] = useState("NOT_PROVIDED");
   const [cvUrl, setCvUrl] = useState("");
@@ -40,7 +39,6 @@ export function TutorApplicationForm() {
         phone,
         subjects,
         levels,
-        yearsExperience,
         qualifications,
         dbsStatus,
         cvUrl,
@@ -122,21 +120,6 @@ export function TutorApplicationForm() {
               required
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label htmlFor="years" className="block text-sm font-medium text-navy">
-              Years of tutoring/teaching experience
-            </label>
-            <input
-              id="years"
-              type="number"
-              min={0}
-              max={60}
-              required
-              value={yearsExperience}
-              onChange={(e) => setYearsExperience(e.target.value)}
               className={inputClass}
             />
           </div>

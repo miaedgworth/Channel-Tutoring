@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { LinkButton } from "@/components/ui/button";
 import { UserStatusToggle } from "@/components/admin/user-status-toggle";
 import { TutorDbsSelect } from "@/components/admin/tutor-dbs-select";
 import { formatLevel } from "@/lib/utils";
@@ -20,6 +21,11 @@ export default async function AdminTutorsPage() {
   return (
     <Card>
       <CardContent className="overflow-x-auto">
+        <div className="mb-4 flex justify-end">
+          <LinkButton href="/admin/tutors/new" variant="primary" size="sm">
+            Add Tutor
+          </LinkButton>
+        </div>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-navy/10 text-left text-navy/50">

@@ -21,13 +21,6 @@ declare module "next-auth" {
   }
 }
 
-console.log(
-  "[auth-config] AUTH_SECRET present:",
-  Boolean(process.env.AUTH_SECRET),
-  "length:",
-  process.env.AUTH_SECRET?.length ?? 0,
-);
-
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET,
   trustHost: true,
