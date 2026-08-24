@@ -17,11 +17,11 @@ const FAQS = [
   },
   {
     q: "How do I pay for a session?",
-    a: "Top up your Channel Tutoring credit balance securely online via Stripe, then use it to confirm any lesson your tutor schedules for you. Leftover credit carries over and can be used with any tutor. You'll receive an email confirmation and can view your full payment history and receipts in your dashboard.",
+    a: "Buy lesson tokens for the level you need, securely online via Stripe — individually, or in a block of 5+ for 10% off. Tokens don't expire and can be used with any tutor teaching that level. Once your tutor logs a lesson as taught, one token is used automatically and they're paid — no separate confirmation step needed from you.",
   },
   {
-    q: "What if I need to cancel a session?",
-    a: "Cancellations made more than 24 hours before a session are free and fully refunded. Cancellations within 24 hours of the session are not refunded, in fairness to your tutor's reserved time. See our Cancellation & Refund Policy for full details.",
+    q: "What if a lesson gets logged by mistake?",
+    a: "Tutors can undo a lesson log within 24 hours, which refunds your token straight away. If it's outside that window, contact us and we'll sort it out.",
   },
   {
     q: "How much does a tutor cost?",

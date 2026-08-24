@@ -108,8 +108,8 @@ export default async function TutorProfilePage({
               Message this tutor
             </LinkButton>
             <p className="mt-2 text-xs text-navy/50">
-              Message {tutor.user.name.split(" ")[0]} to agree a time, then
-              they&apos;ll schedule the lesson for you to confirm and pay.
+              Buy lesson tokens for your level, then message{" "}
+              {tutor.user.name.split(" ")[0]} to arrange a time.
               Pricing is fixed by level — the same for every tutor. See our{" "}
               <a href="/pricing" className="underline">
                 Pricing page

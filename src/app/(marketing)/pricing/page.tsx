@@ -59,31 +59,25 @@ export default function PricingPage() {
             <p className="mt-2 text-sm text-navy/70">
               For lessons with more than one student, add{" "}
               {formatCurrencyGBP(ADDITIONAL_STUDENT_SURCHARGE_PENCE)}/hour
-              per additional student. Message your tutor to arrange this and
-              they&apos;ll confirm the adjusted price when they schedule the
-              lesson.
+              per additional student. Message your tutor to arrange this.
             </p>
           </div>
           <div className="rounded-xl border border-navy/10 bg-navy/[0.02] p-6">
             <h2 className="font-heading text-lg font-semibold text-navy">
-              Block booking discount
+              Block token discount
             </h2>
             <p className="mt-2 text-sm text-navy/70">
-              Buy lessons individually, or ask your tutor to schedule{" "}
-              {BLOCK_BOOKING_MIN_SESSIONS} or more sessions in one block to
-              get {Math.round(BLOCK_BOOKING_DISCOUNT_RATE * 100)}% off,
-              applied automatically.
+              Buy lesson tokens individually, or buy{" "}
+              {BLOCK_BOOKING_MIN_SESSIONS} or more at once to get{" "}
+              {Math.round(BLOCK_BOOKING_DISCOUNT_RATE * 100)}% off,
+              applied automatically. Tokens don&apos;t expire and work with
+              any tutor teaching that level.
             </p>
           </div>
         </div>
 
         <p className="mt-8 text-center text-sm text-navy/50">
-          Cancelling within 24 hours of a session is charged at 50% of the
-          fee. See our{" "}
-          <a href="/legal/cancellation-refund-policy" className="underline">
-            Cancellation &amp; Refund Policy
-          </a>{" "}
-          and{" "}
+          One token is redeemable against one lesson at that level. See our{" "}
           <a href="/legal/registration-agreement" className="underline">
             Registration Agreement
           </a>{" "}

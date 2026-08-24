@@ -5,7 +5,7 @@ import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { LinkButton } from "@/components/ui/button";
-import { formatCurrencyGBP, formatDateTime } from "@/lib/utils";
+import { formatCurrencyGBP, formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "My Bookings" };
 export const dynamic = "force-dynamic";
@@ -34,12 +34,12 @@ export default async function TutorBookingsPage() {
       <Card>
         <CardContent>
           <p className="text-sm text-navy/60">
-            No bookings yet. Once you&apos;ve agreed a time with a client over
-            messages, schedule the lesson below.
+            No lessons logged yet. Once you&apos;ve taught a session, log it
+            below to redeem the client&apos;s token and get paid.
           </p>
           <div className="mt-4">
             <LinkButton href="/tutor-dashboard/bookings/new" variant="primary" size="sm">
-              Schedule a Lesson
+              Log a Lesson
             </LinkButton>
           </div>
         </CardContent>
@@ -63,7 +63,7 @@ export default async function TutorBookingsPage() {
                   {booking.subject} with {booking.client.name}
                 </p>
                 <p className="text-sm text-navy/60">
-                  {formatDateTime(booking.startsAt)} &middot;{" "}
+                  {formatDate(booking.startsAt)} &middot;{" "}
                   {formatCurrencyGBP(booking.tutorPayoutPence)} payout
                 </p>
               </div>

@@ -5,7 +5,7 @@ import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScheduleLessonForm } from "@/components/tutor-dashboard/schedule-lesson-form";
 
-export const metadata: Metadata = { title: "Schedule a Lesson" };
+export const metadata: Metadata = { title: "Log a Lesson" };
 export const dynamic = "force-dynamic";
 
 export default async function ScheduleLessonPage({
@@ -38,8 +38,8 @@ export default async function ScheduleLessonPage({
         <CardContent>
           <p className="text-sm text-navy/60">
             You don&apos;t have any client conversations yet. Once a client
-            messages you and you&apos;ve agreed a time, come back here to
-            schedule the lesson.{" "}
+            messages you, you&apos;ve taught them a lesson, and they have a
+            token to spend, come back here to log it.{" "}
             <Link href="/tutor-dashboard/messages" className="underline">
               View messages
             </Link>
@@ -53,12 +53,11 @@ export default async function ScheduleLessonPage({
     <Card>
       <CardContent>
         <h2 className="font-heading text-lg font-semibold text-navy">
-          Schedule a Lesson
+          Log a Lesson
         </h2>
         <p className="mt-1 text-sm text-navy/60">
-          Once you and a client have agreed times, schedule them here — one
-          lesson, or a block of several. They&apos;ll be asked to use their
-          credit balance to confirm.
+          Once you&apos;ve taught a lesson, log it here to redeem one of the
+          client&apos;s tokens for that level and get paid straight away.
         </p>
         <div className="mt-6">
           <ScheduleLessonForm

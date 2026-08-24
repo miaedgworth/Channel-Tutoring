@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
+import type { Level } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
-import { formatCurrencyGBP } from "@/lib/utils";
+import { formatLevel } from "@/lib/utils";
 
 export async function POST(request: Request) {
   if (!isStripeConfigured()) {
@@ -29,14 +30,15 @@ export async function POST(request: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
-    if (session.metadata?.type === "credit_topup" && session.metadata.userId) {
+    if (session.metadata?.type === "token_purchase" && session.metadata.userId) {
       const userId = session.metadata.userId;
-      const amountPence = session.amount_total ?? 0;
-      if (amountPence <= 0) {
+      const level = session.metadata.level as Level | undefined;
+      const quantity = Number(session.metadata.quantity);
+      if (!level || !Number.isInteger(quantity) || quantity <= 0) {
         return NextResponse.json({ received: true });
       }
 
-      const existing = await prisma.creditTransaction.findFirst({
+      const existing = await prisma.tokenTransaction.findFirst({
         where: { stripeCheckoutSessionId: session.id },
       });
       if (existing) {
@@ -44,31 +46,32 @@ export async function POST(request: Request) {
       }
 
       const user = await prisma.$transaction(async (tx) => {
-        const updated = await tx.user.update({
-          where: { id: userId },
-          data: { creditBalancePence: { increment: amountPence } },
+        await tx.tokenBalance.upsert({
+          where: { userId_level: { userId, level } },
+          create: { userId, level, balance: quantity },
+          update: { balance: { increment: quantity } },
         });
-        await tx.creditTransaction.create({
+        await tx.tokenTransaction.create({
           data: {
             userId,
-            type: "TOPUP",
-            amountPence,
+            level,
+            type: "PURCHASE",
+            quantity,
             stripeCheckoutSessionId: session.id,
-            description: "Credit top-up",
+            description: `Bought ${quantity} ${formatLevel(level)} lesson token${quantity > 1 ? "s" : ""}`,
           },
         });
-        return updated;
+        return tx.user.findUniqueOrThrow({ where: { id: userId } });
       });
 
       await sendEmail({
         to: user.email,
-        subject: "Your Channel Tutoring credit top-up is complete",
+        subject: "Your Channel Tutoring tokens are ready",
         html: baseEmailLayout(`
           <p>Hi ${user.name},</p>
-          <p>You've added ${formatCurrencyGBP(amountPence)} of credit to your
-          Channel Tutoring account. Your new balance is
-          ${formatCurrencyGBP(user.creditBalancePence)}.</p>
-          <p>Use it to confirm lessons with any tutor from your dashboard.</p>
+          <p>You've added ${quantity} ${formatLevel(level)} lesson token${quantity > 1 ? "s" : ""}
+          to your account. Message a tutor to arrange a lesson — they'll log
+          it once it's taught and a token will be used automatically.</p>
         `),
       }).catch(() => {});
     }

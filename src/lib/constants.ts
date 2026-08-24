@@ -84,14 +84,21 @@ export const TUTOR_PAYOUT_PENCE: Record<string, number> = Object.fromEntries(
   Object.entries(LEVEL_PRICE_PENCE).map(([level, price]) => [level, price - PLATFORM_FEE_PENCE]),
 );
 
-// Schedule this many or more sessions with the same tutor in one block to
-// get a discount. Comes entirely out of the platform's fee — the tutor is
-// always paid as if there were no discount.
+// Buy this many or more lesson tokens for a level in one purchase to get a
+// discount on the whole purchase. Comes entirely out of the platform's fee —
+// tutors are always paid as if there were no discount when a token is
+// redeemed.
 export const BLOCK_BOOKING_MIN_SESSIONS = 5;
 export const BLOCK_BOOKING_DISCOUNT_RATE = 0.1;
+
+// A token is redeemable against one lesson of this length, at the token's
+// level. Matches the per-hour pricing shown on the Pricing page.
+export const TOKEN_LESSON_DURATION_MINUTES = 60;
 
 // Group lessons: extra per-hour charge for each additional student beyond
 // the first, on top of the one-to-one session price.
 export const ADDITIONAL_STUDENT_SURCHARGE_PENCE = 700;
 
-export const CANCELLATION_PARTIAL_REFUND_RATE = 0.5;
+// How long after a tutor logs a completed lesson they (or an admin) can
+// undo it, refunding the token.
+export const LESSON_LOG_UNDO_WINDOW_MS = 24 * 60 * 60 * 1000;

@@ -13,19 +13,19 @@ const CLIENT_STEPS = [
     body: "Use Find a Tutor to filter by subject and level (KS3, GCSE, A-Level or university admissions). Every tutor's profile shows their qualifications, reviews and general availability — the days and times of day they're usually free. Pricing is fixed by level, so it's the same wherever you book.",
   },
   {
-    title: "2. Message your tutor",
-    body: "Use in-app messaging to agree an exact day and time with your tutor, along with subject, level and exam board. All messages stay on the platform for everyone's safety.",
+    title: "2. Buy tokens for your level",
+    body: "Buy lesson tokens for the level you need, individually or in a block of 5+ for 10% off. One token is redeemable against one lesson at that level, with any tutor.",
   },
   {
-    title: "3. Your tutor schedules the lesson",
-    body: "Once you've agreed a time, your tutor schedules it from their dashboard. It'll then appear in your dashboard, awaiting your confirmation.",
+    title: "3. Message your tutor",
+    body: "Use in-app messaging to agree a day and time with your tutor, along with subject, level and exam board. All messages stay on the platform for everyone's safety.",
   },
   {
-    title: "4. Confirm with credit",
-    body: "Top up your Channel Tutoring credit balance, then confirm the lesson using it. Once confirmed, your session is locked in — you can reuse leftover credit for future lessons with any tutor.",
+    title: "4. Attend your session",
+    body: "After the lesson, your tutor logs it as complete, which uses one of your tokens for that level and pays them automatically — no extra step needed from you.",
   },
   {
-    title: "5. Attend your session",
+    title: "5. Leave a review",
     body: "After your session, you can leave a review to help other families choose the right tutor.",
   },
 ];

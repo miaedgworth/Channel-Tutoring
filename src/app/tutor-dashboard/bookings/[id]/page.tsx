@@ -5,9 +5,8 @@ import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CancelBookingButton } from "@/components/cancel-booking-button";
-import { MarkCompletedButton } from "@/components/mark-completed-button";
-import { formatCurrencyGBP, formatDateTime, formatLevel } from "@/lib/utils";
-import { SESSION_MODE_LABELS } from "@/lib/constants";
+import { formatCurrencyGBP, formatDate, formatLevel } from "@/lib/utils";
+import { SESSION_MODE_LABELS, LESSON_LOG_UNDO_WINDOW_MS } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Booking Details" };
 export const dynamic = "force-dynamic";
@@ -27,8 +26,10 @@ export default async function TutorBookingDetailPage({
   });
   if (!booking || booking.tutor.userId !== user.id) notFound();
 
-  const canCancel = ["PENDING_PAYMENT", "CONFIRMED"].includes(booking.status);
-  const canComplete = booking.status === "CONFIRMED" && booking.startsAt < new Date();
+  const canUndo =
+    booking.status === "COMPLETED" &&
+    !!booking.completedAt &&
+    new Date().getTime() - booking.completedAt.getTime() <= LESSON_LOG_UNDO_WINDOW_MS;
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -43,8 +44,8 @@ export default async function TutorBookingDetailPage({
 
           <dl className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <dt className="text-navy/50">Date &amp; time</dt>
-              <dd className="font-medium text-navy">{formatDateTime(booking.startsAt)}</dd>
+              <dt className="text-navy/50">Lesson date</dt>
+              <dd className="font-medium text-navy">{formatDate(booking.startsAt)}</dd>
             </div>
             <div>
               <dt className="text-navy/50">Level</dt>
@@ -64,30 +65,26 @@ export default async function TutorBookingDetailPage({
               <dt className="text-navy/50">Client email</dt>
               <dd className="font-medium text-navy">{booking.client.email}</dd>
             </div>
-            {booking.discountPence > 0 && (
-              <div>
-                <dt className="text-navy/50">Block-booking discount</dt>
-                <dd className="font-medium text-navy">
-                  {formatCurrencyGBP(booking.discountPence)} off the client&apos;s
-                  price — your payout is unaffected.
-                </dd>
-              </div>
-            )}
           </dl>
 
           {booking.notes && (
             <div>
-              <p className="text-sm text-navy/50">Client notes</p>
+              <p className="text-sm text-navy/50">Notes</p>
               <p className="mt-1 whitespace-pre-wrap text-sm text-navy">{booking.notes}</p>
             </div>
           )}
         </CardContent>
       </Card>
 
-      <div className="flex gap-3">
-        {canComplete && <MarkCompletedButton bookingId={booking.id} />}
-        {canCancel && <CancelBookingButton bookingId={booking.id} />}
-      </div>
+      {canUndo && (
+        <div>
+          <CancelBookingButton bookingId={booking.id} />
+          <p className="mt-2 text-xs text-navy/40">
+            You can undo a logged lesson within 24 hours — this refunds the
+            client&apos;s token and reverses your payout.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

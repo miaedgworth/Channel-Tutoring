@@ -27,7 +27,7 @@ export function CancelBookingButton({ bookingId }: { bookingId: string }) {
   if (!showConfirm) {
     return (
       <Button variant="danger" size="sm" onClick={() => setShowConfirm(true)}>
-        Cancel Booking
+        Undo Lesson Log
       </Button>
     );
   }
@@ -40,7 +40,8 @@ export function CancelBookingButton({ bookingId }: { bookingId: string }) {
         </p>
       )}
       <p className="text-sm text-navy">
-        Are you sure you want to cancel this booking?
+        Are you sure you want to undo this lesson log? The client&apos;s
+        token will be refunded and your payout reversed.
       </p>
       <textarea
         value={reason}

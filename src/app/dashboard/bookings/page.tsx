@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
-import { formatCurrencyGBP, formatDateTime } from "@/lib/utils";
+import { formatCurrencyGBP, formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "My Bookings" };
 export const dynamic = "force-dynamic";
@@ -45,7 +45,7 @@ export default async function ClientBookingsPage() {
                   {booking.subject} with {booking.tutor.user.name}
                 </p>
                 <p className="text-sm text-navy/60">
-                  {formatDateTime(booking.startsAt)} &middot;{" "}
+                  {formatDate(booking.startsAt)} &middot;{" "}
                   {formatCurrencyGBP(booking.pricePence)}
                 </p>
               </div>

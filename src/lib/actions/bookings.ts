@@ -3,350 +3,243 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
-import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
-import { formatDateTime, formatCurrencyGBP } from "@/lib/utils";
+import { formatDate, formatCurrencyGBP, formatLevel } from "@/lib/utils";
 import {
-  CANCELLATION_PARTIAL_REFUND_RATE,
   PLATFORM_FEE_PENCE,
   LEVEL_PRICE_PENCE,
-  BLOCK_BOOKING_MIN_SESSIONS,
-  BLOCK_BOOKING_DISCOUNT_RATE,
+  TOKEN_LESSON_DURATION_MINUTES,
+  LESSON_LOG_UNDO_WINDOW_MS,
 } from "@/lib/constants";
-import { scheduleLessonSchema, type ScheduleLessonInput } from "@/lib/validations/schedule-lesson";
+import {
+  logCompletedLessonSchema,
+  type LogCompletedLessonInput,
+} from "@/lib/validations/schedule-lesson";
 
-const FREE_CANCELLATION_WINDOW_MS = 24 * 60 * 60 * 1000;
-
-export async function scheduleLesson(input: ScheduleLessonInput) {
+export async function logCompletedLesson(input: LogCompletedLessonInput) {
   const user = await requireUser("TUTOR");
-  const parsed = scheduleLessonSchema.safeParse(input);
+  const parsed = logCompletedLessonSchema.safeParse(input);
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
-  const { clientId, subject, level, examBoard, sessionMode, dates, durationMinutes, notes } =
-    parsed.data;
+  const { clientId, subject, level, examBoard, sessionMode, date, notes } = parsed.data;
 
   const profile = await prisma.tutorProfile.findUnique({
     where: { userId: user.id },
-    include: { user: { select: { name: true } } },
+    include: { user: { select: { name: true, email: true } } },
   });
   if (!profile) throw new Error("Tutor profile not found.");
   if (profile.sessionMode !== "BOTH" && profile.sessionMode !== sessionMode) {
     throw new Error(`You only offer ${profile.sessionMode === "ONLINE" ? "online" : "in-person"} sessions.`);
   }
 
-  // Only allow scheduling for clients the tutor already has a conversation
-  // with, so this can't be used to create bookings for arbitrary users.
+  // Only allow logging lessons for clients the tutor already has a
+  // conversation with, so this can't be used against arbitrary users.
   const conversation = await prisma.conversation.findUnique({
     where: { clientId_tutorProfileId: { clientId, tutorProfileId: profile.id } },
     include: { client: true },
   });
   if (!conversation) {
-    throw new Error("You can only schedule lessons for clients you're already messaging.");
+    throw new Error("You can only log lessons for clients you're already messaging.");
   }
 
-  const levelPricePence = LEVEL_PRICE_PENCE[level];
-  const fullPricePence = Math.round((levelPricePence * durationMinutes) / 60);
-  const applyDiscount = dates.length >= BLOCK_BOOKING_MIN_SESSIONS;
-  const discountedPricePence = applyDiscount
-    ? Math.round(fullPricePence * (1 - BLOCK_BOOKING_DISCOUNT_RATE))
-    : fullPricePence;
-  const discountPence = fullPricePence - discountedPricePence;
-  // The tutor is always paid as if there were no discount; the block
-  // booking discount comes entirely out of the platform's fee.
-  const tutorPayoutPence = fullPricePence - PLATFORM_FEE_PENCE;
-  const platformFeePence = discountedPricePence - tutorPayoutPence;
+  const pricePence = LEVEL_PRICE_PENCE[level];
+  const tutorPayoutPence = pricePence - PLATFORM_FEE_PENCE;
+  const startsAt = date;
+  const endsAt = new Date(startsAt.getTime() + TOKEN_LESSON_DURATION_MINUTES * 60 * 1000);
 
-  if (tutorPayoutPence <= 0) {
-    throw new Error(
-      `A ${durationMinutes}-minute session at this level doesn't cover the platform fee. Choose a longer duration.`,
-    );
-  }
-  if (platformFeePence <= 0) {
-    throw new Error("This discount can't be applied to sessions this short. Choose a longer duration.");
-  }
-
-  const sortedDates = [...dates].sort((a, b) => a.getTime() - b.getTime());
-
-  const bookings = await prisma.$transaction(
-    sortedDates.map((startsAt) => {
-      const endsAt = new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
-      return prisma.booking.create({
-        data: {
-          clientId,
-          tutorId: profile.id,
-          subject,
-          level,
-          examBoard: examBoard || null,
-          sessionMode,
-          startsAt,
-          endsAt,
-          pricePence: discountedPricePence,
-          discountPence,
-          platformFeePence,
-          tutorPayoutPence,
-          notes: notes || null,
-          status: "PENDING_PAYMENT",
-        },
-      });
-    }),
-  );
-
-  await logAudit({
-    actorId: user.id,
-    action: "LESSON_SCHEDULED",
-    targetType: "Booking",
-    targetId: bookings[0].id,
-    metadata: { clientId, count: bookings.length, discounted: applyDiscount },
-  });
-
-  const totalPence = bookings.reduce((sum, b) => sum + b.pricePence, 0);
-  await sendEmail({
-    to: conversation.client.email,
-    subject:
-      bookings.length > 1
-        ? `${bookings.length} Channel Tutoring lessons are ready to confirm`
-        : "Your Channel Tutoring lesson is ready to confirm",
-    html: baseEmailLayout(`
-      <p>Hi ${conversation.client.name},</p>
-      <p>${profile.user.name} has scheduled ${bookings.length > 1 ? `${bookings.length} ${subject} sessions` : `a ${subject} session`} with you:</p>
-      <ul>
-        ${bookings.map((b) => `<li>${formatDateTime(b.startsAt)}</li>`).join("")}
-      </ul>
-      ${
-        applyDiscount
-          ? `<p>A ${Math.round(BLOCK_BOOKING_DISCOUNT_RATE * 100)}% block-booking discount has been applied.</p>`
-          : ""
-      }
-      <p>Log in to your dashboard to review the details and use your credit
-      balance to confirm ${bookings.length > 1 ? "each session" : "the booking"}
-      (${formatCurrencyGBP(totalPence)} total). If you don't have enough
-      credit, you can top up first.</p>
-    `),
-  }).catch(() => {});
-
-  revalidatePath("/tutor-dashboard/bookings");
-  revalidatePath("/dashboard/bookings");
-
-  return bookings[0].id;
-}
-
-export async function confirmBookingWithCredit(bookingId: string) {
-  const user = await requireUser("CLIENT");
-
-  const booking = await prisma.booking.findUnique({
-    where: { id: bookingId },
-    include: { tutor: { include: { user: true } } },
-  });
-  if (!booking || booking.clientId !== user.id) throw new Error("Booking not found.");
-  if (booking.status !== "PENDING_PAYMENT") {
-    throw new Error("This booking isn't awaiting payment.");
-  }
-
-  const client = await prisma.user.findUniqueOrThrow({ where: { id: user.id } });
-  if (client.creditBalancePence < booking.pricePence) {
-    throw new Error("You don't have enough credit to confirm this booking. Top up your balance first.");
-  }
-
-  await prisma.$transaction(async (tx) => {
-    await tx.user.update({
-      where: { id: user.id },
-      data: { creditBalancePence: { decrement: booking.pricePence } },
+  const booking = await prisma.$transaction(async (tx) => {
+    const tokenBalance = await tx.tokenBalance.findUnique({
+      where: { userId_level: { userId: clientId, level } },
     });
-    await tx.creditTransaction.create({
+    if (!tokenBalance || tokenBalance.balance < 1) {
+      throw new Error(
+        `${conversation.client.name} doesn't have any ${formatLevel(level)} tokens left. Ask them to buy more before you log this lesson.`,
+      );
+    }
+
+    await tx.tokenBalance.update({
+      where: { id: tokenBalance.id },
+      data: { balance: { decrement: 1 } },
+    });
+    await tx.tokenTransaction.create({
       data: {
-        userId: user.id,
-        type: "SPEND",
-        amountPence: -booking.pricePence,
-        bookingId: booking.id,
-        description: `${booking.subject} session with ${booking.tutor.user.name} on ${booking.startsAt.toLocaleDateString("en-GB")}`,
+        userId: clientId,
+        level,
+        type: "REDEEM",
+        quantity: -1,
+        description: `${subject} lesson with ${profile.user.name} on ${formatDate(startsAt)}`,
       },
     });
-    await tx.booking.update({ where: { id: booking.id }, data: { status: "CONFIRMED" } });
+
+    const created = await tx.booking.create({
+      data: {
+        clientId,
+        tutorId: profile.id,
+        subject,
+        level,
+        examBoard: examBoard || null,
+        sessionMode,
+        startsAt,
+        endsAt,
+        pricePence,
+        platformFeePence: PLATFORM_FEE_PENCE,
+        tutorPayoutPence,
+        notes: notes || null,
+        status: "COMPLETED",
+        completedAt: new Date(),
+      },
+    });
+
     await tx.payment.create({
       data: {
-        bookingId: booking.id,
-        amountPence: booking.pricePence,
-        platformFeePence: booking.platformFeePence,
-        tutorAmountPence: booking.tutorPayoutPence,
+        bookingId: created.id,
+        amountPence: pricePence,
+        platformFeePence: PLATFORM_FEE_PENCE,
+        tutorAmountPence: tutorPayoutPence,
         status: "SUCCEEDED",
       },
     });
     await tx.tutorProfile.update({
-      where: { id: booking.tutorId },
+      where: { id: profile.id },
       data: {
-        balancePence: { increment: booking.tutorPayoutPence },
-        totalEarnedPence: { increment: booking.tutorPayoutPence },
+        balancePence: { increment: tutorPayoutPence },
+        totalEarnedPence: { increment: tutorPayoutPence },
       },
     });
     await tx.tutorLedgerEntry.create({
       data: {
-        tutorId: booking.tutorId,
+        tutorId: profile.id,
         type: "EARNING",
-        amountPence: booking.tutorPayoutPence,
-        bookingId: booking.id,
-        description: `${booking.subject} session with ${client.name} on ${booking.startsAt.toLocaleDateString("en-GB")}`,
+        amountPence: tutorPayoutPence,
+        bookingId: created.id,
+        description: `${subject} lesson with ${conversation.client.name} on ${formatDate(startsAt)}`,
       },
     });
+
+    return created;
   });
 
   await logAudit({
     actorId: user.id,
-    action: "BOOKING_CONFIRMED_WITH_CREDIT",
+    action: "LESSON_LOGGED",
     targetType: "Booking",
     targetId: booking.id,
-    metadata: { amountPence: booking.pricePence },
+    metadata: { clientId, level },
   });
 
   await Promise.all([
     sendEmail({
-      to: client.email,
-      subject: "Your Channel Tutoring session is confirmed",
+      to: conversation.client.email,
+      subject: "A lesson has been logged on Channel Tutoring",
       html: baseEmailLayout(`
-        <p>Hi ${client.name},</p>
-        <p>Your ${booking.subject} session with ${booking.tutor.user.name} on
-        ${formatDateTime(booking.startsAt)} is confirmed.</p>
-        <p>${formatCurrencyGBP(booking.pricePence)} was deducted from your
-        credit balance.</p>
+        <p>Hi ${conversation.client.name},</p>
+        <p>${profile.user.name} logged your ${subject} lesson on
+        ${formatDate(startsAt)} as complete, using 1 of your
+        ${formatLevel(level)} tokens.</p>
+        <p>If this doesn't look right, reply to your tutor or
+        <a href="mailto:hello@channeltutoring.gg">contact us</a>.</p>
       `),
     }),
     sendEmail({
-      to: booking.tutor.user.email,
-      subject: "A lesson has been confirmed",
+      to: profile.user.email,
+      subject: "Lesson logged — you've been paid",
       html: baseEmailLayout(`
-        <p>Hi ${booking.tutor.user.name},</p>
-        <p>${client.name} has confirmed your ${booking.subject} session on
-        ${formatDateTime(booking.startsAt)} &mdash; payout
-        ${formatCurrencyGBP(booking.tutorPayoutPence)}.</p>
+        <p>Hi ${profile.user.name},</p>
+        <p>Your ${subject} lesson with ${conversation.client.name} on
+        ${formatDate(startsAt)} has been logged &mdash; payout
+        ${formatCurrencyGBP(tutorPayoutPence)}.</p>
       `),
     }),
   ]).catch(() => {});
 
-  revalidatePath("/dashboard/bookings");
   revalidatePath("/tutor-dashboard/bookings");
-  revalidatePath(`/dashboard/bookings/${booking.id}`);
+  revalidatePath("/dashboard/bookings");
+  revalidatePath("/tutor-dashboard/earnings");
+
+  return booking.id;
 }
 
 export async function cancelBooking(bookingId: string, reason?: string) {
-  const user = await requireUser();
+  const user = await requireUser("TUTOR");
 
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
-    include: {
-      tutor: { include: { user: true } },
-      client: true,
-      payment: true,
-    },
+    include: { tutor: true, client: true, payment: true },
   });
-  if (!booking) throw new Error("Booking not found.");
-
-  const isClient = booking.clientId === user.id;
-  const isTutor = booking.tutor.userId === user.id;
-  if (!isClient && !isTutor) throw new Error("You don't have access to this booking.");
-
-  if (!["PENDING_PAYMENT", "CONFIRMED"].includes(booking.status)) {
-    throw new Error("This booking can't be cancelled.");
-  }
-
-  const withinFreeWindow = booking.startsAt.getTime() - Date.now() > FREE_CANCELLATION_WINDOW_MS;
-  // Tutor-initiated cancellations, and client cancellations outside the
-  // 24-hour window, are refunded in full. A client cancelling within 24
-  // hours is refunded 50%, per our Cancellation Policy.
-  const refundFraction =
-    booking.status !== "CONFIRMED" ? 0 : isTutor || withinFreeWindow ? 1 : CANCELLATION_PARTIAL_REFUND_RATE;
-  const shouldRefund = refundFraction > 0;
-  const refundAmountPence = booking.payment
-    ? Math.round(booking.payment.amountPence * refundFraction)
-    : 0;
-  const tutorReversalPence = Math.round(booking.tutorPayoutPence * refundFraction);
-
-  const isCreditFunded = shouldRefund && booking.payment && !booking.payment.stripePaymentIntentId;
-
-  if (shouldRefund && booking.payment?.stripePaymentIntentId && isStripeConfigured()) {
-    const stripe = getStripe();
-    await stripe.refunds.create({
-      payment_intent: booking.payment.stripePaymentIntentId,
-      amount: refundAmountPence,
-      reason: "requested_by_customer",
-    });
+  if (!booking || booking.tutor.userId !== user.id) throw new Error("Booking not found.");
+  if (booking.status !== "COMPLETED") throw new Error("This lesson log can't be undone.");
+  if (!booking.completedAt || Date.now() - booking.completedAt.getTime() > LESSON_LOG_UNDO_WINDOW_MS) {
+    throw new Error("This lesson was logged more than 24 hours ago and can no longer be undone.");
   }
 
   await prisma.$transaction(async (tx) => {
-    if (isCreditFunded) {
-      await tx.user.update({
-        where: { id: booking.clientId },
-        data: { creditBalancePence: { increment: refundAmountPence } },
-      });
-      await tx.creditTransaction.create({
-        data: {
-          userId: booking.clientId,
-          type: "REFUND",
-          amountPence: refundAmountPence,
-          bookingId: booking.id,
-          description: `${refundFraction === 1 ? "Refund" : "Partial refund"} for cancelled ${booking.subject} session on ${booking.startsAt.toLocaleDateString("en-GB")}`,
-        },
-      });
-    }
+    await tx.tokenBalance.upsert({
+      where: { userId_level: { userId: booking.clientId, level: booking.level } },
+      create: { userId: booking.clientId, level: booking.level, balance: 1 },
+      update: { balance: { increment: 1 } },
+    });
+    await tx.tokenTransaction.create({
+      data: {
+        userId: booking.clientId,
+        level: booking.level,
+        type: "REFUND",
+        quantity: 1,
+        bookingId: booking.id,
+        description: `Token refunded — ${booking.subject} lesson on ${formatDate(booking.startsAt)} was undone by your tutor`,
+      },
+    });
 
     await tx.booking.update({
       where: { id: booking.id },
       data: {
-        status: isTutor ? "CANCELLED_BY_TUTOR" : "CANCELLED_BY_CLIENT",
+        status: "CANCELLED_BY_TUTOR",
         cancellationReason: reason || null,
         cancelledAt: new Date(),
       },
     });
 
-    if (shouldRefund && booking.payment) {
+    if (booking.payment) {
       await tx.payment.update({
         where: { id: booking.payment.id },
-        data: {
-          status: refundFraction === 1 ? "REFUNDED" : "PARTIALLY_REFUNDED",
-          refundedPence: refundAmountPence,
-        },
-      });
-      await tx.tutorProfile.update({
-        where: { id: booking.tutorId },
-        data: {
-          balancePence: { decrement: tutorReversalPence },
-          totalEarnedPence: { decrement: tutorReversalPence },
-        },
-      });
-      await tx.tutorLedgerEntry.create({
-        data: {
-          tutorId: booking.tutorId,
-          type: "REFUND",
-          amountPence: -tutorReversalPence,
-          bookingId: booking.id,
-          description: `${refundFraction === 1 ? "Refund" : "Partial refund"} for cancelled ${booking.subject} session on ${booking.startsAt.toLocaleDateString("en-GB")}`,
-        },
+        data: { status: "REFUNDED", refundedPence: booking.payment.amountPence },
       });
     }
+    await tx.tutorProfile.update({
+      where: { id: booking.tutorId },
+      data: {
+        balancePence: { decrement: booking.tutorPayoutPence },
+        totalEarnedPence: { decrement: booking.tutorPayoutPence },
+      },
+    });
+    await tx.tutorLedgerEntry.create({
+      data: {
+        tutorId: booking.tutorId,
+        type: "REFUND",
+        amountPence: -booking.tutorPayoutPence,
+        bookingId: booking.id,
+        description: `Lesson log undone — ${booking.subject} on ${formatDate(booking.startsAt)}`,
+      },
+    });
   });
 
   await logAudit({
     actorId: user.id,
-    action: isTutor ? "BOOKING_CANCELLED_BY_TUTOR" : "BOOKING_CANCELLED_BY_CLIENT",
+    action: "LESSON_LOG_UNDONE",
     targetType: "Booking",
     targetId: booking.id,
-    metadata: { reason: reason ?? null, refunded: shouldRefund, refundFraction },
+    metadata: { reason: reason ?? null },
   });
 
-  const otherPartyEmail = isTutor ? booking.client.email : booking.tutor.user.email;
-  const otherPartyName = isTutor ? booking.client.name : booking.tutor.user.name;
   await sendEmail({
-    to: otherPartyEmail,
-    subject: "A Channel Tutoring session was cancelled",
+    to: booking.client.email,
+    subject: "A logged lesson was undone",
     html: baseEmailLayout(`
-      <p>Hi ${otherPartyName},</p>
-      <p>Your ${booking.subject} session on ${formatDateTime(booking.startsAt)} has been
-      cancelled${isTutor ? " by the tutor" : ""}.</p>
-      ${
-        shouldRefund
-          ? `<p>${refundFraction === 1 ? "A full refund" : `A 50% refund (${formatCurrencyGBP(refundAmountPence)})`} has been issued.</p>`
-          : ""
-      }
+      <p>Hi ${booking.client.name},</p>
+      <p>${booking.tutor.userId === user.id ? "Your tutor" : "Channel Tutoring"}
+      undid the ${booking.subject} lesson logged for
+      ${formatDate(booking.startsAt)} &mdash; your token has been refunded.</p>
       ${reason ? `<p>Reason: ${reason}</p>` : ""}
     `),
   }).catch(() => {});
@@ -354,27 +247,5 @@ export async function cancelBooking(bookingId: string, reason?: string) {
   revalidatePath("/dashboard/bookings");
   revalidatePath("/tutor-dashboard/bookings");
   revalidatePath(`/dashboard/bookings/${booking.id}`);
-}
-
-export async function markBookingCompleted(bookingId: string) {
-  const user = await requireUser("TUTOR");
-
-  const booking = await prisma.booking.findUnique({
-    where: { id: bookingId },
-    include: { tutor: true },
-  });
-  if (!booking || booking.tutor.userId !== user.id) {
-    throw new Error("Booking not found.");
-  }
-  if (booking.status !== "CONFIRMED") {
-    throw new Error("Only confirmed bookings can be marked complete.");
-  }
-
-  await prisma.booking.update({
-    where: { id: booking.id },
-    data: { status: "COMPLETED", completedAt: new Date() },
-  });
-
-  revalidatePath("/tutor-dashboard/bookings");
-  revalidatePath("/dashboard/bookings");
+  revalidatePath(`/tutor-dashboard/bookings/${booking.id}`);
 }
