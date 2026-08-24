@@ -7,7 +7,13 @@ import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
 import { formatDateTime, formatCurrencyGBP } from "@/lib/utils";
-import { CANCELLATION_PARTIAL_REFUND_RATE, PLATFORM_FEE_PENCE, LEVEL_PRICE_PENCE } from "@/lib/constants";
+import {
+  CANCELLATION_PARTIAL_REFUND_RATE,
+  PLATFORM_FEE_PENCE,
+  LEVEL_PRICE_PENCE,
+  BLOCK_BOOKING_MIN_SESSIONS,
+  BLOCK_BOOKING_DISCOUNT_RATE,
+} from "@/lib/constants";
 import { scheduleLessonSchema, type ScheduleLessonInput } from "@/lib/validations/schedule-lesson";
 
 const FREE_CANCELLATION_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -18,7 +24,7 @@ export async function scheduleLesson(input: ScheduleLessonInput) {
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
-  const { clientId, subject, level, examBoard, sessionMode, startsAt, durationMinutes, notes } =
+  const { clientId, subject, level, examBoard, sessionMode, dates, durationMinutes, notes } =
     parsed.data;
 
   const profile = await prisma.tutorProfile.findUnique({
@@ -40,59 +46,90 @@ export async function scheduleLesson(input: ScheduleLessonInput) {
     throw new Error("You can only schedule lessons for clients you're already messaging.");
   }
 
-  const endsAt = new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
   const levelPricePence = LEVEL_PRICE_PENCE[level];
-  const pricePence = Math.round((levelPricePence * durationMinutes) / 60);
-  const tutorPayoutPence = pricePence - PLATFORM_FEE_PENCE;
+  const fullPricePence = Math.round((levelPricePence * durationMinutes) / 60);
+  const applyDiscount = dates.length >= BLOCK_BOOKING_MIN_SESSIONS;
+  const discountedPricePence = applyDiscount
+    ? Math.round(fullPricePence * (1 - BLOCK_BOOKING_DISCOUNT_RATE))
+    : fullPricePence;
+  const discountPence = fullPricePence - discountedPricePence;
+  // The tutor is always paid as if there were no discount; the block
+  // booking discount comes entirely out of the platform's fee.
+  const tutorPayoutPence = fullPricePence - PLATFORM_FEE_PENCE;
+  const platformFeePence = discountedPricePence - tutorPayoutPence;
+
   if (tutorPayoutPence <= 0) {
     throw new Error(
       `A ${durationMinutes}-minute session at this level doesn't cover the platform fee. Choose a longer duration.`,
     );
   }
+  if (platformFeePence <= 0) {
+    throw new Error("This discount can't be applied to sessions this short. Choose a longer duration.");
+  }
 
-  const booking = await prisma.booking.create({
-    data: {
-      clientId,
-      tutorId: profile.id,
-      subject,
-      level,
-      examBoard: examBoard || null,
-      sessionMode,
-      startsAt,
-      endsAt,
-      pricePence,
-      platformFeePence: PLATFORM_FEE_PENCE,
-      tutorPayoutPence,
-      notes: notes || null,
-      status: "PENDING_PAYMENT",
-    },
-  });
+  const sortedDates = [...dates].sort((a, b) => a.getTime() - b.getTime());
+
+  const bookings = await prisma.$transaction(
+    sortedDates.map((startsAt) => {
+      const endsAt = new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
+      return prisma.booking.create({
+        data: {
+          clientId,
+          tutorId: profile.id,
+          subject,
+          level,
+          examBoard: examBoard || null,
+          sessionMode,
+          startsAt,
+          endsAt,
+          pricePence: discountedPricePence,
+          discountPence,
+          platformFeePence,
+          tutorPayoutPence,
+          notes: notes || null,
+          status: "PENDING_PAYMENT",
+        },
+      });
+    }),
+  );
 
   await logAudit({
     actorId: user.id,
     action: "LESSON_SCHEDULED",
     targetType: "Booking",
-    targetId: booking.id,
-    metadata: { clientId, startsAt: startsAt.toISOString() },
+    targetId: bookings[0].id,
+    metadata: { clientId, count: bookings.length, discounted: applyDiscount },
   });
 
+  const totalPence = bookings.reduce((sum, b) => sum + b.pricePence, 0);
   await sendEmail({
     to: conversation.client.email,
-    subject: "Your Channel Tutoring lesson is ready to confirm",
+    subject:
+      bookings.length > 1
+        ? `${bookings.length} Channel Tutoring lessons are ready to confirm`
+        : "Your Channel Tutoring lesson is ready to confirm",
     html: baseEmailLayout(`
       <p>Hi ${conversation.client.name},</p>
-      <p>${profile.user.name} has scheduled a ${subject} session with you for
-      ${formatDateTime(startsAt)}.</p>
-      <p>Log in to your dashboard to review the details and use
-      ${formatCurrencyGBP(pricePence)} of credit to confirm the booking. If you
-      don't have enough credit, you can top up first.</p>
+      <p>${profile.user.name} has scheduled ${bookings.length > 1 ? `${bookings.length} ${subject} sessions` : `a ${subject} session`} with you:</p>
+      <ul>
+        ${bookings.map((b) => `<li>${formatDateTime(b.startsAt)}</li>`).join("")}
+      </ul>
+      ${
+        applyDiscount
+          ? `<p>A ${Math.round(BLOCK_BOOKING_DISCOUNT_RATE * 100)}% block-booking discount has been applied.</p>`
+          : ""
+      }
+      <p>Log in to your dashboard to review the details and use your credit
+      balance to confirm ${bookings.length > 1 ? "each session" : "the booking"}
+      (${formatCurrencyGBP(totalPence)} total). If you don't have enough
+      credit, you can top up first.</p>
     `),
   }).catch(() => {});
 
   revalidatePath("/tutor-dashboard/bookings");
   revalidatePath("/dashboard/bookings");
 
-  return booking.id;
+  return bookings[0].id;
 }
 
 export async function confirmBookingWithCredit(bookingId: string) {

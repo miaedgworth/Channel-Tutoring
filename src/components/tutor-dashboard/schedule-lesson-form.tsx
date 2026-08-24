@@ -3,8 +3,8 @@
 import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { EXAM_BOARDS } from "@/lib/constants";
-import { formatLevel } from "@/lib/utils";
+import { EXAM_BOARDS, BLOCK_BOOKING_MIN_SESSIONS, BLOCK_BOOKING_DISCOUNT_RATE } from "@/lib/constants";
+import { formatLevel, formatDateTime } from "@/lib/utils";
 import { scheduleLesson } from "@/lib/actions/bookings";
 
 const inputClass =
@@ -40,17 +40,41 @@ export function ScheduleLessonForm({
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [duration, setDuration] = useState("60");
+  const [sessionDates, setSessionDates] = useState<Date[]>([]);
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  const isBlock = sessionDates.length >= BLOCK_BOOKING_MIN_SESSIONS;
+
+  function addSessionDate() {
+    setError(null);
+    if (!date || !time) {
+      setError("Choose a date and time to add.");
+      return;
+    }
+    const startsAt = new Date(`${date}T${time}`);
+    if (startsAt.getTime() <= Date.now()) {
+      setError("Choose a future date and time.");
+      return;
+    }
+    setSessionDates((prev) =>
+      [...prev, startsAt].sort((a, b) => a.getTime() - b.getTime()),
+    );
+    setDate("");
+    setTime("");
+  }
+
+  function removeSessionDate(index: number) {
+    setSessionDates((prev) => prev.filter((_, i) => i !== index));
+  }
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!date || !time) {
-      setError("Choose a date and time.");
+    if (sessionDates.length === 0) {
+      setError("Add at least one session date.");
       return;
     }
-    const startsAt = new Date(`${date}T${time}`);
     startTransition(async () => {
       try {
         const bookingId = await scheduleLesson({
@@ -59,7 +83,7 @@ export function ScheduleLessonForm({
           level: level as "KS3" | "GCSE" | "A_LEVEL" | "UNIVERSITY_ADMISSIONS",
           examBoard,
           sessionMode: sessionMode as "ONLINE" | "IN_PERSON",
-          startsAt,
+          dates: sessionDates,
           durationMinutes: Number(duration),
           notes,
         });
@@ -169,51 +193,90 @@ export function ScheduleLessonForm({
         </select>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-3">
-        <div>
-          <label htmlFor="date" className="block text-sm font-medium text-navy">
-            Date
-          </label>
-          <input
-            id="date"
-            type="date"
-            required
-            min={new Date().toISOString().slice(0, 10)}
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className={inputClass}
-          />
+      <div>
+        <label className="block text-sm font-medium text-navy">Session dates</label>
+        <p className="mt-1 text-xs text-navy/50">
+          Add one session for a single lesson, or {BLOCK_BOOKING_MIN_SESSIONS}
+          + sessions for a block booking — the client gets{" "}
+          {Math.round(BLOCK_BOOKING_DISCOUNT_RATE * 100)}% off automatically.
+        </p>
+
+        {sessionDates.length > 0 && (
+          <ul className="mt-3 space-y-1.5">
+            {sessionDates.map((d, i) => (
+              <li
+                key={d.getTime()}
+                className="flex items-center justify-between rounded-md border border-navy/10 bg-navy/[0.02] px-3 py-2 text-sm"
+              >
+                <span className="text-navy">{formatDateTime(d)}</span>
+                <button
+                  type="button"
+                  onClick={() => removeSessionDate(i)}
+                  className="text-xs font-medium text-red underline"
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {isBlock && (
+          <p className="mt-2 text-xs font-medium text-emerald-700">
+            Block booking discount applied — {sessionDates.length} sessions.
+          </p>
+        )}
+
+        <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+          <div>
+            <label htmlFor="date" className="block text-xs font-medium text-navy/70">
+              Date
+            </label>
+            <input
+              id="date"
+              type="date"
+              min={new Date().toISOString().slice(0, 10)}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="time" className="block text-xs font-medium text-navy/70">
+              Start time
+            </label>
+            <input
+              id="time"
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+          <div className="flex items-end">
+            <Button type="button" variant="ghost" size="sm" onClick={addSessionDate}>
+              Add session
+            </Button>
+          </div>
         </div>
-        <div>
-          <label htmlFor="time" className="block text-sm font-medium text-navy">
-            Start time
-          </label>
-          <input
-            id="time"
-            type="time"
-            required
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label htmlFor="duration" className="block text-sm font-medium text-navy">
-            Duration
-          </label>
-          <select
-            id="duration"
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            className={inputClass}
-          >
-            <option value="30">30 minutes</option>
-            <option value="45">45 minutes</option>
-            <option value="60">60 minutes</option>
-            <option value="90">90 minutes</option>
-            <option value="120">120 minutes</option>
-          </select>
-        </div>
+      </div>
+
+      <div>
+        <label htmlFor="duration" className="block text-sm font-medium text-navy">
+          Duration (applies to every session above)
+        </label>
+        <select
+          id="duration"
+          value={duration}
+          onChange={(e) => setDuration(e.target.value)}
+          className={inputClass}
+        >
+          <option value="30">30 minutes</option>
+          <option value="45">45 minutes</option>
+          <option value="60">60 minutes</option>
+          <option value="90">90 minutes</option>
+          <option value="120">120 minutes</option>
+        </select>
       </div>
 
       <div>
@@ -230,11 +293,15 @@ export function ScheduleLessonForm({
       </div>
 
       <Button type="submit" variant="primary" size="lg" disabled={isPending}>
-        {isPending ? "Scheduling..." : "Schedule Lesson"}
+        {isPending
+          ? "Scheduling..."
+          : sessionDates.length > 1
+            ? `Schedule ${sessionDates.length} Lessons`
+            : "Schedule Lesson"}
       </Button>
       <p className="text-xs text-navy/40">
-        Your client will be asked to use their credit balance to confirm this
-        lesson. It won&apos;t be guaranteed until they do.
+        Your client will be asked to use their credit balance to confirm.
+        Sessions won&apos;t be guaranteed until they do.
       </p>
     </form>
   );

@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { formatCurrencyGBP, formatLevel } from "@/lib/utils";
-import { LEVEL_PRICE_PENCE } from "@/lib/constants";
+import { formatLevel } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 export function TutorCard({
@@ -18,9 +17,6 @@ export function TutorCard({
     user: { name: string };
   };
 }) {
-  const prices = tutor.levels.map((l) => LEVEL_PRICE_PENCE[l]).filter(Boolean);
-  const minPrice = prices.length ? Math.min(...prices) : undefined;
-  const maxPrice = prices.length ? Math.max(...prices) : undefined;
   return (
     <Link
       href={`/tutors/${tutor.slug}`}
@@ -64,27 +60,17 @@ export function TutorCard({
 
       <p className="mt-3 line-clamp-2 text-sm text-navy/60">{tutor.bio}</p>
 
-      <div className="mt-4 flex items-center justify-between border-t border-navy/10 pt-3">
-        <div className="flex items-center gap-1 text-sm text-navy/70">
-          {tutor.ratingCount > 0 ? (
-            <>
-              <span aria-hidden className="text-gold-dark">
-                ★
-              </span>
-              <span className="font-medium">{tutor.ratingAverage.toFixed(1)}</span>
-              <span className="text-navy/40">({tutor.ratingCount})</span>
-            </>
-          ) : (
-            <span className="text-navy/40">No reviews yet</span>
-          )}
-        </div>
-        {minPrice !== undefined && (
-          <p className="font-heading font-semibold text-navy">
-            {minPrice === maxPrice
-              ? formatCurrencyGBP(minPrice)
-              : `${formatCurrencyGBP(minPrice)}–${formatCurrencyGBP(maxPrice!)}`}
-            <span className="text-xs font-normal text-navy/50">/hr</span>
-          </p>
+      <div className="mt-4 flex items-center border-t border-navy/10 pt-3 text-sm text-navy/70">
+        {tutor.ratingCount > 0 ? (
+          <>
+            <span aria-hidden className="text-gold-dark">
+              ★
+            </span>
+            <span className="ml-1 font-medium">{tutor.ratingAverage.toFixed(1)}</span>
+            <span className="ml-1 text-navy/40">({tutor.ratingCount})</span>
+          </>
+        ) : (
+          <span className="text-navy/40">No reviews yet</span>
         )}
       </div>
     </Link>

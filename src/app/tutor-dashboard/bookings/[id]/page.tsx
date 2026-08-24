@@ -64,6 +64,15 @@ export default async function TutorBookingDetailPage({
               <dt className="text-navy/50">Client email</dt>
               <dd className="font-medium text-navy">{booking.client.email}</dd>
             </div>
+            {booking.discountPence > 0 && (
+              <div>
+                <dt className="text-navy/50">Block-booking discount</dt>
+                <dd className="font-medium text-navy">
+                  {formatCurrencyGBP(booking.discountPence)} off the client&apos;s
+                  price — your payout is unaffected.
+                </dd>
+              </div>
+            )}
           </dl>
 
           {booking.notes && (

@@ -4,12 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
-import { formatCurrencyGBP, formatDate, formatLevel } from "@/lib/utils";
-import {
-  LEVEL_PRICE_PENCE,
-  AVAILABILITY_PERIOD_LABELS,
-  SESSION_MODE_LABELS,
-} from "@/lib/constants";
+import { formatDate, formatLevel } from "@/lib/utils";
+import { AVAILABILITY_PERIOD_LABELS, SESSION_MODE_LABELS } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -104,26 +100,21 @@ export default async function TutorProfilePage({
           </div>
 
           <div className="shrink-0 rounded-xl border border-navy/10 bg-white p-5 text-center shadow-sm">
-            <ul className="space-y-1 text-left text-sm">
-              {tutor.levels.map((l) => (
-                <li key={l} className="flex items-center justify-between gap-4">
-                  <span className="text-navy/60">{formatLevel(l)}</span>
-                  <span className="font-semibold text-navy">
-                    {formatCurrencyGBP(LEVEL_PRICE_PENCE[l] ?? 0)}/hr
-                  </span>
-                </li>
-              ))}
-            </ul>
             <LinkButton
               href={`/dashboard/messages?tutor=${tutor.slug}`}
               variant="gold"
-              className="mt-3 w-full"
+              className="w-full"
             >
               Message this tutor
             </LinkButton>
             <p className="mt-2 text-xs text-navy/50">
               Message {tutor.user.name.split(" ")[0]} to agree a time, then
               they&apos;ll schedule the lesson for you to confirm and pay.
+              Pricing is fixed by level — the same for every tutor. See our{" "}
+              <a href="/pricing" className="underline">
+                Pricing page
+              </a>
+              .
             </p>
           </div>
         </div>

@@ -84,6 +84,12 @@ export const TUTOR_PAYOUT_PENCE: Record<string, number> = Object.fromEntries(
   Object.entries(LEVEL_PRICE_PENCE).map(([level, price]) => [level, price - PLATFORM_FEE_PENCE]),
 );
 
+// Schedule this many or more sessions with the same tutor in one block to
+// get a discount. Comes entirely out of the platform's fee — the tutor is
+// always paid as if there were no discount.
+export const BLOCK_BOOKING_MIN_SESSIONS = 5;
+export const BLOCK_BOOKING_DISCOUNT_RATE = 0.1;
+
 // Group lessons: extra per-hour charge for each additional student beyond
 // the first, on top of the one-to-one session price.
 export const ADDITIONAL_STUDENT_SURCHARGE_PENCE = 700;

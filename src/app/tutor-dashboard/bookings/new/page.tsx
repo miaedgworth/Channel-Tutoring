@@ -56,8 +56,9 @@ export default async function ScheduleLessonPage({
           Schedule a Lesson
         </h2>
         <p className="mt-1 text-sm text-navy/60">
-          Once you and a client have agreed a time, schedule it here.
-          They&apos;ll be asked to use their credit balance to confirm it.
+          Once you and a client have agreed times, schedule them here — one
+          lesson, or a block of several. They&apos;ll be asked to use their
+          credit balance to confirm.
         </p>
         <div className="mt-6">
           <ScheduleLessonForm
