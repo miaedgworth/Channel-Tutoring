@@ -7,10 +7,10 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { UserMenu } from "@/components/layout/user-menu";
 
 const NAV_LINKS = [
+  { href: "/about", label: "About" },
   { href: "/find-a-tutor", label: "Find a Tutor" },
   { href: "/pricing", label: "Pricing" },
   { href: "/courses", label: "Courses" },
-  { href: "/about", label: "About" },
   { href: "/blog", label: "Blog" },
   { href: "/contact", label: "Contact" },
 ];
