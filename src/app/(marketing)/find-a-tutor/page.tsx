@@ -25,6 +25,15 @@ export default function FindATutorPage({
           </h1>
         </div>
 
+        <div className="mx-auto mt-6 max-w-2xl rounded-xl border border-gold/30 bg-gold/5 px-5 py-4 text-center text-sm text-navy">
+          We&apos;re currently updating our roster of tutors. In the
+          meantime, email{" "}
+          <a href="mailto:info@channeltutoring.com" className="underline">
+            info@channeltutoring.com
+          </a>{" "}
+          to make an enquiry and we&apos;ll help you find the right tutor.
+        </div>
+
         <div className="mt-8">
           <Suspense fallback={null}>
             <TutorFilters />
