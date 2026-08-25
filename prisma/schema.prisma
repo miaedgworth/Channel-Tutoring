@@ -189,6 +189,7 @@ model TutorProfile {
   isPublished              Boolean   @default(false)
   stripeConnectAccountId   String?
   stripeOnboardingComplete Boolean   @default(false)
+  paypalEmail              String?
   ratingAverage            Float     @default(0)
   ratingCount              Int       @default(0)
   balancePence             Int       @default(0)
@@ -327,6 +328,8 @@ model Payout {
   amountPence      Int
   status           PayoutStatus @default(PENDING)
   stripeTransferId String?
+  paypalPayoutItemId String?
+  paypalBatchId    String?
   requestedAt      DateTime     @default(now())
   paidAt           DateTime?
   failureReason    String?
