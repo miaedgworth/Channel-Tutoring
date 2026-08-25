@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { UserStatusToggle } from "@/components/admin/user-status-toggle";
 import { PublishTutorToggle } from "@/components/admin/publish-tutor-toggle";
+import { ResendSetupEmailButton } from "@/components/admin/resend-setup-email-button";
 import { formatLevel } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Tutors" };
@@ -32,6 +33,7 @@ export default async function AdminTutorsPage() {
               <th className="pb-2 font-medium">Levels</th>
               <th className="pb-2 font-medium">Published</th>
               <th className="pb-2 font-medium">Account</th>
+              <th className="pb-2 font-medium"></th>
               <th className="pb-2 font-medium"></th>
               <th className="pb-2 font-medium"></th>
             </tr>
@@ -62,6 +64,9 @@ export default async function AdminTutorsPage() {
                 </td>
                 <td className="py-2.5 text-right">
                   <PublishTutorToggle tutorProfileId={tutor.id} isPublished={tutor.isPublished} />
+                </td>
+                <td className="py-2.5 text-right">
+                  <ResendSetupEmailButton userId={tutor.user.id} />
                 </td>
                 <td className="py-2.5 text-right">
                   <UserStatusToggle userId={tutor.user.id} status={tutor.user.status} />
