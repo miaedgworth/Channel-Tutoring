@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { UserStatusToggle } from "@/components/admin/user-status-toggle";
+import { PublishTutorToggle } from "@/components/admin/publish-tutor-toggle";
 import { formatLevel } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Tutors" };
@@ -32,15 +33,20 @@ export default async function AdminTutorsPage() {
               <th className="pb-2 font-medium">Published</th>
               <th className="pb-2 font-medium">Account</th>
               <th className="pb-2 font-medium"></th>
+              <th className="pb-2 font-medium"></th>
             </tr>
           </thead>
           <tbody>
             {tutors.map((tutor) => (
               <tr key={tutor.id} className="border-b border-navy/5">
                 <td className="py-2.5">
-                  <Link href={`/tutors/${tutor.slug}`} className="font-medium text-navy hover:underline">
-                    {tutor.user.name}
-                  </Link>
+                  {tutor.isPublished ? (
+                    <Link href={`/tutors/${tutor.slug}`} className="font-medium text-navy hover:underline">
+                      {tutor.user.name}
+                    </Link>
+                  ) : (
+                    <span className="font-medium text-navy">{tutor.user.name}</span>
+                  )}
                   <p className="text-xs text-navy/40">{tutor.user.email}</p>
                 </td>
                 <td className="py-2.5 text-navy/70">{tutor.levels.map(formatLevel).join(", ")}</td>
@@ -53,6 +59,9 @@ export default async function AdminTutorsPage() {
                   <Badge variant={tutor.user.status === "ACTIVE" ? "success" : "danger"}>
                     {tutor.user.status}
                   </Badge>
+                </td>
+                <td className="py-2.5 text-right">
+                  <PublishTutorToggle tutorProfileId={tutor.id} isPublished={tutor.isPublished} />
                 </td>
                 <td className="py-2.5 text-right">
                   <UserStatusToggle userId={tutor.user.id} status={tutor.user.status} />

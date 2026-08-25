@@ -44,7 +44,7 @@ export function AddTutorForm() {
         setError(result.error);
         return;
       }
-      router.push(`/tutors/${result.slug}`);
+      router.push("/admin/tutors");
       router.refresh();
     });
   }
