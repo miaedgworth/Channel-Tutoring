@@ -22,24 +22,24 @@ export function ApplicationReviewActions({
   function handleApprove() {
     setError(null);
     startTransition(async () => {
-      try {
-        await approveTutorApplication(applicationId);
-        router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const result = await approveTutorApplication(applicationId);
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      router.refresh();
     });
   }
 
   function handleReject() {
     setError(null);
     startTransition(async () => {
-      try {
-        await rejectTutorApplication(applicationId, reason);
-        router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const result = await rejectTutorApplication(applicationId, reason);
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      router.refresh();
     });
   }
 

@@ -14,12 +14,12 @@ export function RequestPayoutButton({ balancePence }: { balancePence: number }) 
   function handleClick() {
     setError(null);
     startTransition(async () => {
-      try {
-        await requestPayout();
-        router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const result = await requestPayout();
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      router.refresh();
     });
   }
 

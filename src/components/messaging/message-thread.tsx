@@ -52,13 +52,13 @@ export function MessageThread({
     if (!trimmed) return;
 
     startTransition(async () => {
-      try {
-        await sendMessage(conversationId, trimmed);
-        setBody("");
-        router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const result = await sendMessage(conversationId, trimmed);
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      setBody("");
+      router.refresh();
     });
   }
 

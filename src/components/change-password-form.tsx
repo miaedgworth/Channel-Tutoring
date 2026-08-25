@@ -19,14 +19,14 @@ export function ChangePasswordForm() {
     setError(null);
     setSuccess(false);
     startTransition(async () => {
-      try {
-        await changePassword({ currentPassword, newPassword });
-        setSuccess(true);
-        setCurrentPassword("");
-        setNewPassword("");
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const result = await changePassword({ currentPassword, newPassword });
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      setSuccess(true);
+      setCurrentPassword("");
+      setNewPassword("");
     });
   }
 

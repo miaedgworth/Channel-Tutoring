@@ -6,14 +6,16 @@ import { requireUser } from "@/lib/current-user";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { logAudit } from "@/lib/audit";
 
-export async function createConnectOnboardingLink(): Promise<string> {
+export async function createConnectOnboardingLink(): Promise<
+  { error: string; url?: undefined } | { error?: undefined; url: string }
+> {
   const user = await requireUser("TUTOR");
   if (!isStripeConfigured()) {
-    throw new Error("Payments are not configured in this environment yet.");
+    return { error: "Payments are not configured in this environment yet." };
   }
 
   const profile = await prisma.tutorProfile.findUnique({ where: { userId: user.id } });
-  if (!profile) throw new Error("Tutor profile not found.");
+  if (!profile) return { error: "Tutor profile not found." };
 
   const stripe = getStripe();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
@@ -47,7 +49,7 @@ export async function createConnectOnboardingLink(): Promise<string> {
     type: "account_onboarding",
   });
 
-  return accountLink.url;
+  return { url: accountLink.url };
 }
 
 export async function refreshConnectStatus() {
@@ -70,19 +72,19 @@ export async function refreshConnectStatus() {
   revalidatePath("/tutor-dashboard/earnings");
 }
 
-export async function requestPayout() {
+export async function requestPayout(): Promise<{ error: string } | { error?: undefined }> {
   const user = await requireUser("TUTOR");
   if (!isStripeConfigured()) {
-    throw new Error("Payments are not configured in this environment yet.");
+    return { error: "Payments are not configured in this environment yet." };
   }
 
   const profile = await prisma.tutorProfile.findUnique({ where: { userId: user.id } });
-  if (!profile) throw new Error("Tutor profile not found.");
+  if (!profile) return { error: "Tutor profile not found." };
   if (!profile.stripeConnectAccountId || !profile.stripeOnboardingComplete) {
-    throw new Error("Finish connecting your bank account before withdrawing.");
+    return { error: "Finish connecting your bank account before withdrawing." };
   }
   if (profile.balancePence <= 0) {
-    throw new Error("You don't have any balance to withdraw.");
+    return { error: "You don't have any balance to withdraw." };
   }
 
   const stripe = getStripe();
@@ -129,7 +131,7 @@ export async function requestPayout() {
         failureReason: err instanceof Error ? err.message : "Unknown error",
       },
     });
-    throw new Error("Withdrawal failed. Please try again or contact support.");
+    return { error: "Withdrawal failed. Please try again or contact support." };
   }
 
   await logAudit({
@@ -141,4 +143,6 @@ export async function requestPayout() {
   });
 
   revalidatePath("/tutor-dashboard/earnings");
+
+  return {};
 }

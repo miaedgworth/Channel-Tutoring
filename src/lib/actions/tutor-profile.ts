@@ -6,15 +6,17 @@ import { requireUser } from "@/lib/current-user";
 import { tutorProfileSchema, type TutorProfileInput } from "@/lib/validations/tutor-profile";
 import { logAudit } from "@/lib/audit";
 
-export async function updateTutorProfile(input: TutorProfileInput) {
+export async function updateTutorProfile(
+  input: TutorProfileInput,
+): Promise<{ error: string } | { error?: undefined }> {
   const user = await requireUser("TUTOR");
   const parsed = tutorProfileSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
 
   const profile = await prisma.tutorProfile.findUnique({ where: { userId: user.id } });
-  if (!profile) throw new Error("Tutor profile not found.");
+  if (!profile) return { error: "Tutor profile not found." };
 
   const data = parsed.data;
 
@@ -42,4 +44,6 @@ export async function updateTutorProfile(input: TutorProfileInput) {
 
   revalidatePath("/tutor-dashboard/profile");
   revalidatePath(`/tutors/${profile.slug}`);
+
+  return {};
 }

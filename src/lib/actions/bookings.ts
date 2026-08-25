@@ -17,11 +17,13 @@ import {
   type LogCompletedLessonInput,
 } from "@/lib/validations/schedule-lesson";
 
-export async function logCompletedLesson(input: LogCompletedLessonInput) {
+export async function logCompletedLesson(
+  input: LogCompletedLessonInput,
+): Promise<{ error: string; bookingId?: undefined } | { error?: undefined; bookingId: string }> {
   const user = await requireUser("TUTOR");
   const parsed = logCompletedLessonSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const { clientId, subject, level, examBoard, sessionMode, date, notes } = parsed.data;
 
@@ -29,9 +31,11 @@ export async function logCompletedLesson(input: LogCompletedLessonInput) {
     where: { userId: user.id },
     include: { user: { select: { name: true, email: true } } },
   });
-  if (!profile) throw new Error("Tutor profile not found.");
+  if (!profile) return { error: "Tutor profile not found." };
   if (profile.sessionMode !== "BOTH" && profile.sessionMode !== sessionMode) {
-    throw new Error(`You only offer ${profile.sessionMode === "ONLINE" ? "online" : "in-person"} sessions.`);
+    return {
+      error: `You only offer ${profile.sessionMode === "ONLINE" ? "online" : "in-person"} sessions.`,
+    };
   }
 
   // Only allow logging lessons for clients the tutor already has a
@@ -41,7 +45,7 @@ export async function logCompletedLesson(input: LogCompletedLessonInput) {
     include: { client: true },
   });
   if (!conversation) {
-    throw new Error("You can only log lessons for clients you're already messaging.");
+    return { error: "You can only log lessons for clients you're already messaging." };
   }
 
   const pricePence = LEVEL_PRICE_PENCE[level];
@@ -49,7 +53,9 @@ export async function logCompletedLesson(input: LogCompletedLessonInput) {
   const startsAt = date;
   const endsAt = new Date(startsAt.getTime() + TOKEN_LESSON_DURATION_MINUTES * 60 * 1000);
 
-  const booking = await prisma.$transaction(async (tx) => {
+  let booking;
+  try {
+    booking = await prisma.$transaction(async (tx) => {
     const tokenBalance = await tx.tokenBalance.findUnique({
       where: { userId_level: { userId: clientId, level } },
     });
@@ -119,7 +125,10 @@ export async function logCompletedLesson(input: LogCompletedLessonInput) {
     });
 
     return created;
-  });
+    });
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Something went wrong." };
+  }
 
   await logAudit({
     actorId: user.id,
@@ -158,20 +167,23 @@ export async function logCompletedLesson(input: LogCompletedLessonInput) {
   revalidatePath("/dashboard/bookings");
   revalidatePath("/tutor-dashboard/earnings");
 
-  return booking.id;
+  return { bookingId: booking.id };
 }
 
-export async function cancelBooking(bookingId: string, reason?: string) {
+export async function cancelBooking(
+  bookingId: string,
+  reason?: string,
+): Promise<{ error: string } | { error?: undefined }> {
   const user = await requireUser("TUTOR");
 
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
     include: { tutor: true, client: true, payment: true },
   });
-  if (!booking || booking.tutor.userId !== user.id) throw new Error("Booking not found.");
-  if (booking.status !== "COMPLETED") throw new Error("This lesson log can't be undone.");
+  if (!booking || booking.tutor.userId !== user.id) return { error: "Booking not found." };
+  if (booking.status !== "COMPLETED") return { error: "This lesson log can't be undone." };
   if (!booking.completedAt || Date.now() - booking.completedAt.getTime() > LESSON_LOG_UNDO_WINDOW_MS) {
-    throw new Error("This lesson was logged more than 24 hours ago and can no longer be undone.");
+    return { error: "This lesson was logged more than 24 hours ago and can no longer be undone." };
   }
 
   await prisma.$transaction(async (tx) => {
@@ -248,4 +260,6 @@ export async function cancelBooking(bookingId: string, reason?: string) {
   revalidatePath("/tutor-dashboard/bookings");
   revalidatePath(`/dashboard/bookings/${booking.id}`);
   revalidatePath(`/tutor-dashboard/bookings/${booking.id}`);
+
+  return {};
 }

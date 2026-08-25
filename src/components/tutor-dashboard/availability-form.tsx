@@ -21,13 +21,13 @@ export function AvailabilityForm() {
       return;
     }
     startTransition(async () => {
-      try {
-        await createAvailabilitySlot({ date, period });
-        setDate("");
-        router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const result = await createAvailabilitySlot({ date, period });
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      setDate("");
+      router.refresh();
     });
   }
 

@@ -40,17 +40,13 @@ export function PostForm({
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      try {
-        const input = { type, title, excerpt, content, coverImageUrl, authorName, status, featuredTutorId: "" };
-        if (post) {
-          await updatePost(post.id, input);
-          router.refresh();
-        } else {
-          await createPost(input);
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const input = { type, title, excerpt, content, coverImageUrl, authorName, status, featuredTutorId: "" };
+      const result = post ? await updatePost(post.id, input) : await createPost(input);
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      if (post) router.refresh();
     });
   }
 

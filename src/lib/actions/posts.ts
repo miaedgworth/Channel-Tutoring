@@ -7,11 +7,13 @@ import { requireUser } from "@/lib/current-user";
 import { postSchema, type PostInput } from "@/lib/validations/post";
 import { uniquePostSlug } from "@/lib/slug";
 
-export async function createPost(input: PostInput) {
+export async function createPost(
+  input: PostInput,
+): Promise<{ error: string } | { error?: undefined }> {
   await requireUser("ADMIN");
   const parsed = postSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const data = parsed.data;
   const slug = await uniquePostSlug(data.title);
@@ -37,16 +39,19 @@ export async function createPost(input: PostInput) {
   redirect(`/admin/content/${post.id}`);
 }
 
-export async function updatePost(postId: string, input: PostInput) {
+export async function updatePost(
+  postId: string,
+  input: PostInput,
+): Promise<{ error: string } | { error?: undefined }> {
   await requireUser("ADMIN");
   const parsed = postSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const data = parsed.data;
 
   const existing = await prisma.post.findUnique({ where: { id: postId } });
-  if (!existing) throw new Error("Post not found.");
+  if (!existing) return { error: "Post not found." };
 
   await prisma.post.update({
     where: { id: postId },
@@ -70,6 +75,8 @@ export async function updatePost(postId: string, input: PostInput) {
   revalidatePath("/news");
   revalidatePath(`/blog/${existing.slug}`);
   revalidatePath(`/news/${existing.slug}`);
+
+  return {};
 }
 
 export async function deletePost(postId: string) {

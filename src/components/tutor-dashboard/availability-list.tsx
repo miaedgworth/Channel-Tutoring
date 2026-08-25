@@ -21,7 +21,11 @@ export function AvailabilityList({
 
   function handleDelete(id: string) {
     startTransition(async () => {
-      await deleteAvailabilitySlot(id);
+      const result = await deleteAvailabilitySlot(id);
+      if (result.error) {
+        window.alert(result.error);
+        return;
+      }
       router.refresh();
     });
   }

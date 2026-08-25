@@ -6,13 +6,17 @@ import { requireUser } from "@/lib/current-user";
 import { containsContactInfo } from "@/lib/moderation";
 import { logAudit } from "@/lib/audit";
 
-export async function getOrCreateConversation(tutorSlug: string): Promise<string> {
+export async function getOrCreateConversation(
+  tutorSlug: string,
+): Promise<
+  { error: string; conversationId?: undefined } | { error?: undefined; conversationId: string }
+> {
   const user = await requireUser("CLIENT");
 
   const tutor = await prisma.tutorProfile.findUnique({
     where: { slug: tutorSlug, isPublished: true },
   });
-  if (!tutor) throw new Error("Tutor not found.");
+  if (!tutor) return { error: "Tutor not found." };
 
   const conversation = await prisma.conversation.upsert({
     where: { clientId_tutorProfileId: { clientId: user.id, tutorProfileId: tutor.id } },
@@ -24,27 +28,31 @@ export async function getOrCreateConversation(tutorSlug: string): Promise<string
     },
   });
 
-  return conversation.id;
+  return { conversationId: conversation.id };
 }
 
 async function assertParticipant(conversationId: string, userId: string) {
   const conversation = await prisma.conversation.findUnique({
     where: { id: conversationId },
   });
-  if (!conversation) throw new Error("Conversation not found.");
+  if (!conversation) return { error: "Conversation not found." };
   if (conversation.clientId !== userId && conversation.tutorUserId !== userId) {
-    throw new Error("You don't have access to this conversation.");
+    return { error: "You don't have access to this conversation." };
   }
-  return conversation;
+  return { conversation };
 }
 
-export async function sendMessage(conversationId: string, body: string) {
+export async function sendMessage(
+  conversationId: string,
+  body: string,
+): Promise<{ error: string } | { error?: undefined }> {
   const user = await requireUser();
   const trimmed = body.trim();
-  if (!trimmed) throw new Error("Message can't be empty.");
-  if (trimmed.length > 4000) throw new Error("Message is too long.");
+  if (!trimmed) return { error: "Message can't be empty." };
+  if (trimmed.length > 4000) return { error: "Message is too long." };
 
-  await assertParticipant(conversationId, user.id);
+  const participant = await assertParticipant(conversationId, user.id);
+  if (participant.error) return { error: participant.error };
 
   const flagged = containsContactInfo(trimmed);
 
@@ -70,14 +78,19 @@ export async function sendMessage(conversationId: string, body: string) {
 
   revalidatePath(`/dashboard/messages/${conversationId}`);
   revalidatePath(`/tutor-dashboard/messages/${conversationId}`);
+
+  return {};
 }
 
 export async function markConversationRead(conversationId: string) {
   const user = await requireUser();
-  await assertParticipant(conversationId, user.id);
+  const participant = await assertParticipant(conversationId, user.id);
+  if (participant.error) return { error: participant.error };
 
   await prisma.message.updateMany({
     where: { conversationId, senderId: { not: user.id }, readAt: null },
     data: { readAt: new Date() },
   });
+
+  return {};
 }

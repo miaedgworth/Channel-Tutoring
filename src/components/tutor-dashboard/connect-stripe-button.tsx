@@ -11,12 +11,12 @@ export function ConnectStripeButton({ label }: { label: string }) {
   function handleClick() {
     setError(null);
     startTransition(async () => {
-      try {
-        const url = await createConnectOnboardingLink();
-        window.location.href = url;
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const result = await createConnectOnboardingLink();
+      if (!("url" in result) || !result.url) {
+        setError(result.error ?? "Something went wrong");
+        return;
       }
+      window.location.href = result.url;
     });
   }
 

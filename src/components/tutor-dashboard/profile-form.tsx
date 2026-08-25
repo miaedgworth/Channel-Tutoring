@@ -48,22 +48,22 @@ export function TutorProfileForm({
     setSuccess(false);
 
     startTransition(async () => {
-      try {
-        await updateTutorProfile({
-          headline,
-          bio,
-          photoUrl,
-          subjects,
-          levels: levels as ("KS3" | "GCSE" | "A_LEVEL" | "UNIVERSITY_ADMISSIONS")[],
-          qualifications,
-          sessionMode: sessionMode as "ONLINE" | "IN_PERSON" | "BOTH",
-          isPublished,
-        });
-        setSuccess(true);
-        router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const result = await updateTutorProfile({
+        headline,
+        bio,
+        photoUrl,
+        subjects,
+        levels: levels as ("KS3" | "GCSE" | "A_LEVEL" | "UNIVERSITY_ADMISSIONS")[],
+        qualifications,
+        sessionMode: sessionMode as "ONLINE" | "IN_PERSON" | "BOTH",
+        isPublished,
+      });
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      setSuccess(true);
+      router.refresh();
     });
   }
 

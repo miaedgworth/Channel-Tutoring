@@ -32,13 +32,13 @@ export function AccountSettingsForm({
     setError(null);
     setSuccess(false);
     startTransition(async () => {
-      try {
-        await updateAccount({ name, phone, newsletterOptIn });
-        setSuccess(true);
-        router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const result = await updateAccount({ name, phone, newsletterOptIn });
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      setSuccess(true);
+      router.refresh();
     });
   }
 

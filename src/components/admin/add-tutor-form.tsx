@@ -29,23 +29,23 @@ export function AddTutorForm() {
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      try {
-        const slug = await adminCreateTutor({
-          name,
-          email,
-          phone,
-          headline,
-          bio,
-          subjects,
-          levels: levels as ("KS3" | "GCSE" | "A_LEVEL" | "UNIVERSITY_ADMISSIONS")[],
-          qualifications,
-          sessionMode: sessionMode as "ONLINE" | "IN_PERSON" | "BOTH",
-        });
-        router.push(`/tutors/${slug}`);
-        router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const result = await adminCreateTutor({
+        name,
+        email,
+        phone,
+        headline,
+        bio,
+        subjects,
+        levels: levels as ("KS3" | "GCSE" | "A_LEVEL" | "UNIVERSITY_ADMISSIONS")[],
+        qualifications,
+        sessionMode: sessionMode as "ONLINE" | "IN_PERSON" | "BOTH",
+      });
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      router.push(`/tutors/${result.slug}`);
+      router.refresh();
     });
   }
 

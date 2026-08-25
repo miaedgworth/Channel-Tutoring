@@ -5,12 +5,15 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { logAudit } from "@/lib/audit";
 
-export async function setUserStatus(userId: string, status: "ACTIVE" | "SUSPENDED") {
+export async function setUserStatus(
+  userId: string,
+  status: "ACTIVE" | "SUSPENDED",
+): Promise<{ error: string } | { error?: undefined }> {
   const admin = await requireUser("ADMIN");
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) throw new Error("User not found.");
-  if (user.role === "ADMIN") throw new Error("Admin accounts can't be suspended here.");
+  if (!user) return { error: "User not found." };
+  if (user.role === "ADMIN") return { error: "Admin accounts can't be suspended here." };
 
   await prisma.user.update({ where: { id: userId }, data: { status } });
 
@@ -23,13 +26,18 @@ export async function setUserStatus(userId: string, status: "ACTIVE" | "SUSPENDE
 
   revalidatePath("/admin/tutors");
   revalidatePath("/admin/clients");
+
+  return {};
 }
 
-export async function setTutorPublished(tutorProfileId: string, isPublished: boolean) {
+export async function setTutorPublished(
+  tutorProfileId: string,
+  isPublished: boolean,
+): Promise<{ error: string } | { error?: undefined }> {
   const admin = await requireUser("ADMIN");
 
   const profile = await prisma.tutorProfile.findUnique({ where: { id: tutorProfileId } });
-  if (!profile) throw new Error("Tutor profile not found.");
+  if (!profile) return { error: "Tutor profile not found." };
 
   await prisma.tutorProfile.update({
     where: { id: tutorProfileId },
@@ -44,4 +52,6 @@ export async function setTutorPublished(tutorProfileId: string, isPublished: boo
   });
 
   revalidatePath("/admin/tutors");
+
+  return {};
 }

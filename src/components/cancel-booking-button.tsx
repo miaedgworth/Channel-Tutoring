@@ -15,12 +15,12 @@ export function CancelBookingButton({ bookingId }: { bookingId: string }) {
   function handleCancel() {
     setError(null);
     startTransition(async () => {
-      try {
-        await cancelBooking(bookingId, reason);
-        router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const result = await cancelBooking(bookingId, reason);
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      router.refresh();
     });
   }
 

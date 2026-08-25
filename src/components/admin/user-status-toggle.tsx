@@ -18,7 +18,11 @@ export function UserStatusToggle({
 
   function handleClick() {
     startTransition(async () => {
-      await setUserStatus(userId, status === "ACTIVE" ? "SUSPENDED" : "ACTIVE");
+      const result = await setUserStatus(userId, status === "ACTIVE" ? "SUSPENDED" : "ACTIVE");
+      if (result.error) {
+        window.alert(result.error);
+        return;
+      }
       router.refresh();
     });
   }

@@ -53,20 +53,20 @@ export function ScheduleLessonForm({
       return;
     }
     startTransition(async () => {
-      try {
-        const bookingId = await logCompletedLesson({
-          clientId,
-          subject,
-          level: level as "KS3" | "GCSE" | "A_LEVEL" | "UNIVERSITY_ADMISSIONS",
-          examBoard,
-          sessionMode: sessionMode as "ONLINE" | "IN_PERSON",
-          date: new Date(`${date}T12:00:00`),
-          notes,
-        });
-        router.push(`/tutor-dashboard/bookings/${bookingId}`);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const result = await logCompletedLesson({
+        clientId,
+        subject,
+        level: level as "KS3" | "GCSE" | "A_LEVEL" | "UNIVERSITY_ADMISSIONS",
+        examBoard,
+        sessionMode: sessionMode as "ONLINE" | "IN_PERSON",
+        date: new Date(`${date}T12:00:00`),
+        notes,
+      });
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      router.push(`/tutor-dashboard/bookings/${result.bookingId}`);
     });
   }
 

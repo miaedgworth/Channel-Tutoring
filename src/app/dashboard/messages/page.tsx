@@ -11,8 +11,10 @@ export default async function ClientMessagesPage({
   const { tutor } = await searchParams;
 
   if (typeof tutor === "string" && tutor) {
-    const conversationId = await getOrCreateConversation(tutor);
-    redirect(`/dashboard/messages/${conversationId}`);
+    const result = await getOrCreateConversation(tutor);
+    if (!result.error) {
+      redirect(`/dashboard/messages/${result.conversationId}`);
+    }
   }
 
   return (

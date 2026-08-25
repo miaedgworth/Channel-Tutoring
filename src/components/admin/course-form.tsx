@@ -40,17 +40,13 @@ export function CourseForm({
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      try {
-        const input = { title, description, status, startDate, endDate };
-        if (course) {
-          await updateCourse(course.id, input);
-          router.refresh();
-        } else {
-          await createCourse(input);
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const input = { title, description, status, startDate, endDate };
+      const result = course ? await updateCourse(course.id, input) : await createCourse(input);
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      if (course) router.refresh();
     });
   }
 

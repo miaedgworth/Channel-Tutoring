@@ -10,14 +10,16 @@ import { sendEmail, baseEmailLayout } from "@/lib/email";
 import { logAudit } from "@/lib/audit";
 import { adminCreateTutorSchema, type AdminCreateTutorInput } from "@/lib/validations/admin-create-tutor";
 
-export async function approveTutorApplication(applicationId: string) {
+export async function approveTutorApplication(
+  applicationId: string,
+): Promise<{ error: string } | { error?: undefined }> {
   const admin = await requireUser("ADMIN");
 
   const application = await prisma.tutorApplication.findUnique({
     where: { id: applicationId },
   });
   if (!application || application.status !== "PENDING") {
-    throw new Error("This application has already been reviewed.");
+    return { error: "This application has already been reviewed." };
   }
 
   const existingUser = await prisma.user.findUnique({
@@ -25,10 +27,10 @@ export async function approveTutorApplication(applicationId: string) {
   });
 
   if (existingUser && existingUser.role === "TUTOR") {
-    throw new Error("A tutor account already exists for this email.");
+    return { error: "A tutor account already exists for this email." };
   }
   if (existingUser && existingUser.role === "ADMIN") {
-    throw new Error("This email belongs to an admin account.");
+    return { error: "This email belongs to an admin account." };
   }
 
   const slug = await uniqueTutorSlug(application.name);
@@ -111,19 +113,23 @@ export async function approveTutorApplication(applicationId: string) {
   });
 
   revalidatePath("/admin/tutor-applications");
+
+  return {};
 }
 
-export async function adminCreateTutor(input: AdminCreateTutorInput) {
+export async function adminCreateTutor(
+  input: AdminCreateTutorInput,
+): Promise<{ error: string; slug?: undefined } | { error?: undefined; slug: string }> {
   const admin = await requireUser("ADMIN");
   const parsed = adminCreateTutorSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const data = parsed.data;
 
   const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
   if (existingUser) {
-    throw new Error("An account with that email already exists.");
+    return { error: "An account with that email already exists." };
   }
 
   const slug = await uniqueTutorSlug(data.name);
@@ -191,20 +197,20 @@ export async function adminCreateTutor(input: AdminCreateTutorInput) {
 
   revalidatePath("/admin/tutors");
 
-  return slug;
+  return { slug };
 }
 
 export async function rejectTutorApplication(
   applicationId: string,
   reason: string,
-) {
+): Promise<{ error: string } | { error?: undefined }> {
   const admin = await requireUser("ADMIN");
 
   const application = await prisma.tutorApplication.findUnique({
     where: { id: applicationId },
   });
   if (!application || application.status !== "PENDING") {
-    throw new Error("This application has already been reviewed.");
+    return { error: "This application has already been reviewed." };
   }
 
   await prisma.tutorApplication.update({
@@ -240,4 +246,6 @@ export async function rejectTutorApplication(
   });
 
   revalidatePath("/admin/tutor-applications");
+
+  return {};
 }
