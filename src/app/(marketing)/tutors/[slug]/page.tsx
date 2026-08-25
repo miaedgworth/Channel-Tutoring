@@ -32,11 +32,6 @@ export default async function TutorProfilePage({
     where: { slug, isPublished: true },
     include: {
       user: { select: { name: true } },
-      reviews: {
-        orderBy: { createdAt: "desc" },
-        take: 10,
-        include: { client: { select: { name: true } } },
-      },
     },
   });
 
@@ -77,15 +72,6 @@ export default async function TutorProfilePage({
             <p className="mt-1 text-navy/70">{tutor.headline}</p>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              {tutor.ratingCount > 0 ? (
-                <span className="flex items-center gap-1 text-sm text-navy/70">
-                  <span aria-hidden className="text-gold-dark">★</span>
-                  <span className="font-semibold">{tutor.ratingAverage.toFixed(1)}</span>
-                  <span className="text-navy/40">({tutor.ratingCount} reviews)</span>
-                </span>
-              ) : (
-                <span className="text-sm text-navy/40">No reviews yet</span>
-              )}
               <Badge variant="neutral">{SESSION_MODE_LABELS[tutor.sessionMode]}</Badge>
             </div>
 
@@ -137,37 +123,6 @@ export default async function TutorProfilePage({
               </p>
             </section>
 
-            {tutor.reviews.length > 0 && (
-              <section>
-                <h2 className="font-heading text-lg font-semibold text-navy">
-                  Reviews
-                </h2>
-                <ul className="mt-3 space-y-4">
-                  {tutor.reviews.map((review) => (
-                    <li
-                      key={review.id}
-                      className="rounded-lg border border-navy/10 p-4"
-                    >
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-semibold text-navy">
-                          {review.client.name}
-                        </p>
-                        <span className="text-xs text-navy/40">
-                          {formatDate(review.createdAt)}
-                        </span>
-                      </div>
-                      <div className="mt-1 text-gold-dark" aria-label={`${review.rating} out of 5 stars`}>
-                        {"★".repeat(review.rating)}
-                        {"☆".repeat(5 - review.rating)}
-                      </div>
-                      {review.comment && (
-                        <p className="mt-2 text-sm text-navy/70">{review.comment}</p>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
           </div>
 
           <aside className="space-y-4">

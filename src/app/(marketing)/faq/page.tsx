@@ -28,10 +28,6 @@ const FAQS = [
     a: "Pricing is fixed by level (KS3, GCSE, A-Level or university admissions) and the same for every tutor — see our Pricing page. There are no hidden fees for clients.",
   },
   {
-    q: "Can I leave a review?",
-    a: "Yes — after a completed session, you can leave a rating and review for your tutor from your bookings dashboard.",
-  },
-  {
     q: "What subjects and levels do you cover?",
     a: "We cover core subjects from KS3 through GCSE, A-Level and university admissions, across the main UK exam boards used in Guernsey (AQA, Edexcel, OCR, WJEC/Eduqas and others). Use Find a Tutor to filter by subject and level, and let us know your exam board when you book a session.",
   },

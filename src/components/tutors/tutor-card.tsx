@@ -59,20 +59,6 @@ export function TutorCard({
       </div>
 
       <p className="mt-3 line-clamp-2 text-sm text-navy/60">{tutor.bio}</p>
-
-      <div className="mt-4 flex items-center border-t border-navy/10 pt-3 text-sm text-navy/70">
-        {tutor.ratingCount > 0 ? (
-          <>
-            <span aria-hidden className="text-gold-dark">
-              ★
-            </span>
-            <span className="ml-1 font-medium">{tutor.ratingAverage.toFixed(1)}</span>
-            <span className="ml-1 text-navy/40">({tutor.ratingCount})</span>
-          </>
-        ) : (
-          <span className="text-navy/40">No reviews yet</span>
-        )}
-      </div>
     </Link>
   );
 }

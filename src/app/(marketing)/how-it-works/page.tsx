@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const CLIENT_STEPS = [
   {
     title: "1. Search for a tutor",
-    body: "Use Find a Tutor to filter by subject and level (KS3, GCSE, A-Level or university admissions). Every tutor's profile shows their qualifications, reviews and general availability — the days and times of day they're usually free. Pricing is fixed by level, so it's the same wherever you book.",
+    body: "Use Find a Tutor to filter by subject and level (KS3, GCSE, A-Level or university admissions). Every tutor's profile shows their qualifications and general availability — the days and times of day they're usually free. Pricing is fixed by level, so it's the same wherever you book.",
   },
   {
     title: "2. Buy tokens for your level",
@@ -23,10 +23,6 @@ const CLIENT_STEPS = [
   {
     title: "4. Attend your session",
     body: "After the lesson, your tutor logs it as complete, which uses one of your tokens for that level and pays them automatically — no extra step needed from you.",
-  },
-  {
-    title: "5. Leave a review",
-    body: "After your session, you can leave a review to help other families choose the right tutor.",
   },
 ];
 

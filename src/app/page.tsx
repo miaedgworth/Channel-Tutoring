@@ -39,24 +39,6 @@ const STEPS = [
   { step: "3", title: "Start learning", body: "Message your tutor and track every session in your dashboard." },
 ];
 
-const TESTIMONIALS = [
-  {
-    quote:
-      "Our daughter's confidence in Maths has completely turned around this year. Booking and paying online was so simple.",
-    name: "Parent of a Year 11 student",
-  },
-  {
-    quote:
-      "I like that I can message my tutor directly and see all my past sessions in one place. Makes revising for exams much less stressful.",
-    name: "A-Level Chemistry student",
-  },
-  {
-    quote:
-      "As a tutor, having bookings, payments and messaging handled for me means I can just focus on teaching.",
-    name: "Channel Tutoring tutor",
-  },
-];
-
 export default async function HomePage() {
   const featuredTutors = await prisma.tutorProfile.findMany({
     where: { isPublished: true },
@@ -162,26 +144,6 @@ export default async function HomePage() {
           </Container>
         </section>
       )}
-
-      <section className="py-16">
-        <Container>
-          <h2 className="text-center font-heading text-2xl font-bold text-navy sm:text-3xl">
-            What families and tutors say
-          </h2>
-          <div className="mt-10 grid gap-6 sm:grid-cols-3">
-            {TESTIMONIALS.map((t) => (
-              <figure key={t.name} className="rounded-xl border border-navy/10 bg-white p-6">
-                <blockquote className="text-sm leading-relaxed text-navy/80">
-                  &ldquo;{t.quote}&rdquo;
-                </blockquote>
-                <figcaption className="mt-4 text-xs font-semibold text-navy/50">
-                  {t.name}
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </Container>
-      </section>
 
       <section className="bg-navy py-16">
         <Container className="text-center">
