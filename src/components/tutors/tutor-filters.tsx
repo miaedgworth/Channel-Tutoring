@@ -14,18 +14,21 @@ export function TutorFilters() {
 
   const [subject, setSubject] = useState(searchParams.get("subject") ?? "");
   const [level, setLevel] = useState(searchParams.get("level") ?? "");
+  const [sessionMode, setSessionMode] = useState(searchParams.get("sessionMode") ?? "");
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const params = new URLSearchParams();
     if (subject) params.set("subject", subject);
     if (level) params.set("level", level);
+    if (sessionMode) params.set("sessionMode", sessionMode);
     router.push(`/find-a-tutor${params.toString() ? `?${params}` : ""}`);
   }
 
   function handleReset() {
     setSubject("");
     setLevel("");
+    setSessionMode("");
     router.push("/find-a-tutor");
   }
 
@@ -70,6 +73,22 @@ export function TutorFilters() {
                 {l.label}
               </option>
             ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="sessionMode" className="block text-xs font-medium text-navy/70">
+            Online or in person
+          </label>
+          <select
+            id="sessionMode"
+            value={sessionMode}
+            onChange={(e) => setSessionMode(e.target.value)}
+            className={selectClass}
+          >
+            <option value="">Either</option>
+            <option value="ONLINE">Online</option>
+            <option value="IN_PERSON">In person</option>
           </select>
         </div>
       </div>

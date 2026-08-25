@@ -58,6 +58,7 @@ async function TutorResults({
   const params = await searchParams;
   const subject = typeof params.subject === "string" ? params.subject : undefined;
   const level = typeof params.level === "string" ? params.level : undefined;
+  const sessionMode = typeof params.sessionMode === "string" ? params.sessionMode : undefined;
 
   const where: Prisma.TutorProfileWhereInput = {
     isPublished: true,
@@ -65,6 +66,11 @@ async function TutorResults({
     ...(level
       ? { levels: { has: level as "KS3" | "GCSE" | "A_LEVEL" | "UNIVERSITY_ADMISSIONS" } }
       : {}),
+    ...(sessionMode === "ONLINE"
+      ? { sessionMode: { in: ["ONLINE", "BOTH"] } }
+      : sessionMode === "IN_PERSON"
+        ? { sessionMode: { in: ["IN_PERSON", "BOTH"] } }
+        : {}),
   };
 
   const tutors = await prisma.tutorProfile.findMany({

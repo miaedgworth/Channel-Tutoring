@@ -65,8 +65,9 @@ export default async function HomePage() {
             />
           </div>
           <p className="mx-auto mt-8 max-w-2xl text-lg text-navy/70">
-            Channel Tutoring connects students and parents in Guernsey with
-            high-quality tutors. Build confidence through tailored support.
+            Channel Tutoring connects students and parents online or in
+            person in Guernsey with high-quality tutors. Build confidence
+            through tailored support.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <LinkButton href="/about" variant="gold" size="lg">
