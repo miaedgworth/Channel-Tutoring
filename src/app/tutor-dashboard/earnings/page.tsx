@@ -1,26 +1,18 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
-import { refreshConnectStatus } from "@/lib/actions/stripe-connect";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ConnectStripeButton } from "@/components/tutor-dashboard/connect-stripe-button";
-import { RequestPayoutButton } from "@/components/tutor-dashboard/request-payout-button";
+import { PayPalEmailForm } from "@/components/tutor-dashboard/paypal-email-form";
+import { RequestPayPalPayoutButton } from "@/components/tutor-dashboard/request-paypal-payout-button";
 import { formatCurrencyGBP, formatDateTime } from "@/lib/utils";
-import { isStripeConfigured } from "@/lib/stripe";
+import { isPayPalConfigured } from "@/lib/paypal";
 
 export const metadata: Metadata = { title: "Earnings" };
 export const dynamic = "force-dynamic";
 
-export default async function EarningsPage({
-  searchParams,
-}: PageProps<"/tutor-dashboard/earnings">) {
+export default async function EarningsPage() {
   const user = await requireUser("TUTOR");
-  const search = await searchParams;
-
-  if (search.onboarding === "return") {
-    await refreshConnectStatus();
-  }
 
   const profile = await prisma.tutorProfile.findUnique({ where: { userId: user.id } });
   if (!profile) {
@@ -41,30 +33,25 @@ export default async function EarningsPage({
 
   return (
     <div className="space-y-6">
-      {!isStripeConfigured() && (
+      {!isPayPalConfigured() && (
         <div className="rounded-md border border-navy/10 bg-navy/[0.02] px-4 py-3 text-sm text-navy/60">
           Payments aren&apos;t configured in this environment yet.
         </div>
       )}
 
-      {!profile.stripeOnboardingComplete ? (
+      {!profile.paypalEmail ? (
         <Card>
           <CardContent>
             <h2 className="font-heading text-lg font-semibold text-navy">
-              Connect your bank account
+              Add your PayPal email
             </h2>
             <p className="mt-1 text-sm text-navy/60">
-              To receive payouts from bookings, connect a bank account
-              through Stripe. This only takes a couple of minutes.
+              To receive payouts from bookings, tell us the email address
+              on your PayPal account. Don&apos;t have one? You can create a
+              free personal PayPal account in a couple of minutes.
             </p>
             <div className="mt-4">
-              <ConnectStripeButton
-                label={
-                  profile.stripeConnectAccountId
-                    ? "Continue Setup"
-                    : "Connect with Stripe"
-                }
-              />
+              <PayPalEmailForm currentEmail={profile.paypalEmail} />
             </div>
           </CardContent>
         </Card>
@@ -77,7 +64,7 @@ export default async function EarningsPage({
                 {formatCurrencyGBP(profile.balancePence)}
               </p>
               <div className="mt-4">
-                <RequestPayoutButton balancePence={profile.balancePence} />
+                <RequestPayPalPayoutButton balancePence={profile.balancePence} />
               </div>
             </CardContent>
           </Card>
@@ -88,8 +75,21 @@ export default async function EarningsPage({
                 {formatCurrencyGBP(profile.totalEarnedPence)}
               </p>
               <Badge variant="success" className="mt-3">
-                Bank account connected
+                PayPal connected
               </Badge>
+              <div className="mt-4">
+                <p className="text-xs text-navy/40">
+                  Paying out to {profile.paypalEmail}
+                </p>
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-xs text-navy/50 underline">
+                    Change PayPal email
+                  </summary>
+                  <div className="mt-3">
+                    <PayPalEmailForm currentEmail={profile.paypalEmail} />
+                  </div>
+                </details>
+              </div>
             </CardContent>
           </Card>
         </div>

@@ -3,10 +3,10 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { requestPayout } from "@/lib/actions/stripe-connect";
+import { requestPayPalPayout } from "@/lib/actions/paypal-payouts";
 import { formatCurrencyGBP } from "@/lib/utils";
 
-export function RequestPayoutButton({ balancePence }: { balancePence: number }) {
+export function RequestPayPalPayoutButton({ balancePence }: { balancePence: number }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -14,7 +14,7 @@ export function RequestPayoutButton({ balancePence }: { balancePence: number }) 
   function handleClick() {
     setError(null);
     startTransition(async () => {
-      const result = await requestPayout();
+      const result = await requestPayPalPayout();
       if (result.error) {
         setError(result.error);
         return;
