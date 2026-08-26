@@ -18,16 +18,16 @@ const TUTOR_STEPS = [
     body: "Our team reviews every application. Once approved, you'll receive an email to set up your account and complete your public profile.",
   },
   {
-    title: "3. Publish your availability",
-    body: "Session prices are fixed by Channel Tutoring based on level, the same for every tutor — see our Pricing page. Just publish availability slots whenever suits you.",
+    title: "3. Set your weekly availability",
+    body: "Session prices are fixed by Channel Tutoring based on level, the same for every tutor — see our Pricing page. Just tick the days and times of day you're generally free each week, so clients know before they message you.",
   },
   {
     title: "4. Get booked and paid",
-    body: "Clients book directly into your available slots and pay upfront. Channel Tutoring retains a platform fee per completed session — you keep the rest (see the Tutor Agreement for the exact amount).",
+    body: "Clients message you through the platform to arrange a subject, level and session length. Once you've taught the lesson, log it as complete — the right number of tokens is used based on the session length, and you're paid straight away.",
   },
   {
     title: "5. Withdraw your earnings",
-    body: "Track everything in your earnings dashboard and withdraw your available balance to your bank account whenever you like.",
+    body: "Track everything in your earnings dashboard. Add your bank details and request a withdrawal whenever you have a balance — payouts are sent by bank transfer every Monday.",
   },
 ];
 
@@ -51,7 +51,7 @@ export default function JoinAsATutorPage() {
           {[
             {
               title: "Fixed, fair rates",
-              body: "Session prices are set by level and the same for every tutor — we take a flat platform fee per completed session, nothing more.",
+              body: "Session prices are set by level and the same for every tutor, per hour taught — session length is flexible, and pay scales with it.",
             },
             {
               title: "Flexible hours",
@@ -59,7 +59,7 @@ export default function JoinAsATutorPage() {
             },
             {
               title: "Secure payments",
-              body: "Get paid directly to your bank account via Stripe, with a clear earnings ledger.",
+              body: "Add your bank details and withdraw your balance whenever you like — payouts are sent by bank transfer every Monday, with a clear earnings ledger.",
             },
           ].map((item) => (
             <div
