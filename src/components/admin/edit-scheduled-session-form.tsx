@@ -4,18 +4,11 @@ import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { EXAM_BOARDS, SESSION_DURATION_OPTIONS_MINUTES, formatSessionDuration } from "@/lib/constants";
-import { formatLevel, formatTokenQuantity } from "@/lib/utils";
+import { formatLevel, formatTokenQuantity, toLocalDateInputValue, toLocalTimeInputValue } from "@/lib/utils";
 import { adminUpdateScheduledSession } from "@/lib/actions/admin-bookings";
 
 const inputClass =
   "mt-1.5 block w-full rounded-md border border-navy/20 px-3 py-2.5 text-sm focus:border-gold-dark focus:outline-none focus:ring-1 focus:ring-gold-dark";
-
-function toDateValue(d: Date) {
-  return d.toISOString().slice(0, 10);
-}
-function toTimeValue(d: Date) {
-  return d.toISOString().slice(11, 16);
-}
 
 export function EditScheduledSessionForm({
   bookingId,
@@ -46,8 +39,8 @@ export function EditScheduledSessionForm({
   const [examBoard, setExamBoard] = useState(initial.examBoard);
   const [sessionMode, setSessionMode] = useState(initial.sessionMode);
   const initialDate = new Date(initial.startsAt);
-  const [date, setDate] = useState(toDateValue(initialDate));
-  const [time, setTime] = useState(toTimeValue(initialDate));
+  const [date, setDate] = useState(toLocalDateInputValue(initialDate));
+  const [time, setTime] = useState(toLocalTimeInputValue(initialDate));
   const [durationMinutes, setDurationMinutes] = useState(initial.durationMinutes);
   const [notes, setNotes] = useState(initial.notes);
   const [error, setError] = useState<string | null>(null);
