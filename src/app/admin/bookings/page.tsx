@@ -63,9 +63,14 @@ export default async function AdminBookingsPage({
             </Link>
           ))}
         </div>
-        <LinkButton href="/api/admin/export/bookings" variant="outline" size="sm">
-          Export CSV
-        </LinkButton>
+        <div className="flex gap-2">
+          <LinkButton href="/admin/bookings/new" variant="gold" size="sm">
+            Schedule a Session
+          </LinkButton>
+          <LinkButton href="/api/admin/export/bookings" variant="outline" size="sm">
+            Export CSV
+          </LinkButton>
+        </div>
       </div>
 
       <Card>
