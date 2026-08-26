@@ -88,16 +88,36 @@ export default async function AdminBookingsPage({
             </thead>
             <tbody>
               {bookings.map((booking) => (
-                <tr key={booking.id} className="border-b border-navy/5">
-                  <td className="py-2.5 text-navy/60">{formatDateTime(booking.startsAt)}</td>
-                  <td className="py-2.5 text-navy">{booking.client.name}</td>
-                  <td className="py-2.5 text-navy">{booking.tutor.user.name}</td>
-                  <td className="py-2.5 text-navy/70">{booking.subject}</td>
-                  <td className="py-2.5">
-                    <BookingStatusBadge status={booking.status} />
+                <tr key={booking.id} className="border-b border-navy/5 hover:bg-navy/[0.02]">
+                  <td className="p-0">
+                    <Link href={`/admin/bookings/${booking.id}`} className="block px-0 py-2.5 text-navy/60">
+                      {formatDateTime(booking.startsAt)}
+                    </Link>
                   </td>
-                  <td className="py-2.5 text-right font-medium text-navy">
-                    {formatCurrencyGBP(booking.pricePence)}
+                  <td className="p-0">
+                    <Link href={`/admin/bookings/${booking.id}`} className="block px-0 py-2.5 text-navy">
+                      {booking.client.name}
+                    </Link>
+                  </td>
+                  <td className="p-0">
+                    <Link href={`/admin/bookings/${booking.id}`} className="block px-0 py-2.5 text-navy">
+                      {booking.tutor.user.name}
+                    </Link>
+                  </td>
+                  <td className="p-0">
+                    <Link href={`/admin/bookings/${booking.id}`} className="block px-0 py-2.5 text-navy/70">
+                      {booking.subject}
+                    </Link>
+                  </td>
+                  <td className="p-0">
+                    <Link href={`/admin/bookings/${booking.id}`} className="block px-0 py-2.5">
+                      <BookingStatusBadge status={booking.status} />
+                    </Link>
+                  </td>
+                  <td className="p-0 text-right">
+                    <Link href={`/admin/bookings/${booking.id}`} className="block px-0 py-2.5 text-right font-medium text-navy">
+                      {formatCurrencyGBP(booking.pricePence)}
+                    </Link>
                   </td>
                 </tr>
               ))}

@@ -9,7 +9,9 @@ import { formatDate, formatLevel, formatTokenQuantity } from "@/lib/utils";
 import { PLATFORM_FEE_PENCE, LEVEL_PRICE_PENCE, formatSessionDuration } from "@/lib/constants";
 import {
   adminScheduleSessionSchema,
+  adminUpdateSessionSchema,
   type AdminScheduleSessionInput,
+  type AdminUpdateSessionInput,
 } from "@/lib/validations/schedule-lesson";
 
 export async function adminScheduleSession(
@@ -148,4 +150,163 @@ export async function adminScheduleSession(
   revalidatePath("/tutor-dashboard");
 
   return { bookingId: booking.id };
+}
+
+export async function adminUpdateScheduledSession(
+  bookingId: string,
+  input: AdminUpdateSessionInput,
+): Promise<{ error: string } | { error?: undefined }> {
+  const admin = await requireUser("ADMIN");
+  const parsed = adminUpdateSessionSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+  const { subject, level, examBoard, sessionMode, date, notes, durationMinutes } = parsed.data;
+
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: {
+      client: true,
+      tutor: { include: { user: { select: { name: true, email: true } } } },
+      payment: true,
+    },
+  });
+  if (!booking) return { error: "Session not found." };
+  if (booking.status !== "CONFIRMED") {
+    return { error: "Only sessions that haven't happened yet can be edited." };
+  }
+  const profile = booking.tutor;
+  if (profile.sessionMode !== "BOTH" && profile.sessionMode !== sessionMode) {
+    return {
+      error: `${profile.user.name} only offers ${profile.sessionMode === "ONLINE" ? "online" : "in-person"} sessions.`,
+    };
+  }
+
+  const oldLevel = booking.level;
+  const oldTokensUsed = Number(booking.tokensUsed);
+  const newTokensUsed = durationMinutes / 60;
+  const pricePence = Math.round(LEVEL_PRICE_PENCE[level] * newTokensUsed);
+  const platformFeePence = Math.round(PLATFORM_FEE_PENCE * newTokensUsed);
+  const tutorPayoutPence = pricePence - platformFeePence;
+  const startsAt = date;
+  const endsAt = new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
+  const tokensChanged = level !== oldLevel || newTokensUsed !== oldTokensUsed;
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      if (tokensChanged) {
+        // Release the old reservation, then make a fresh one for the new
+        // level/length — handles a level change, a length change, or both,
+        // the same way a cancel-and-reschedule would.
+        await tx.tokenBalance.upsert({
+          where: { userId_level: { userId: booking.clientId, level: oldLevel } },
+          create: { userId: booking.clientId, level: oldLevel, balance: oldTokensUsed },
+          update: { balance: { increment: oldTokensUsed } },
+        });
+        await tx.tokenTransaction.create({
+          data: {
+            userId: booking.clientId,
+            level: oldLevel,
+            type: "REFUND",
+            quantity: oldTokensUsed,
+            bookingId: booking.id,
+            description: `${formatTokenQuantity(oldTokensUsed)} token(s) released — ${booking.subject} session on ${formatDate(booking.startsAt)} was edited by Channel Tutoring`,
+          },
+        });
+
+        const newBalance = await tx.tokenBalance.findUnique({
+          where: { userId_level: { userId: booking.clientId, level } },
+        });
+        if (!newBalance || Number(newBalance.balance) < newTokensUsed) {
+          throw new Error(
+            `${booking.client.name} doesn't have enough ${formatLevel(level)} tokens for a ${formatSessionDuration(durationMinutes)} session. Grant them tokens first, or choose a shorter length.`,
+          );
+        }
+        await tx.tokenBalance.update({
+          where: { id: newBalance.id },
+          data: { balance: { decrement: newTokensUsed } },
+        });
+        await tx.tokenTransaction.create({
+          data: {
+            userId: booking.clientId,
+            level,
+            type: "REDEEM",
+            quantity: -newTokensUsed,
+            bookingId: booking.id,
+            description: `${subject} session (${formatSessionDuration(durationMinutes)}) rescheduled for ${formatDate(startsAt)} by Channel Tutoring`,
+          },
+        });
+      }
+
+      await tx.booking.update({
+        where: { id: booking.id },
+        data: {
+          subject,
+          level,
+          examBoard: examBoard || null,
+          sessionMode,
+          startsAt,
+          endsAt,
+          tokensUsed: newTokensUsed,
+          pricePence,
+          platformFeePence,
+          tutorPayoutPence,
+          notes: notes || null,
+        },
+      });
+
+      if (booking.payment) {
+        await tx.payment.update({
+          where: { id: booking.payment.id },
+          data: { amountPence: pricePence, platformFeePence, tutorAmountPence: tutorPayoutPence },
+        });
+      }
+    });
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Something went wrong." };
+  }
+
+  await logAudit({
+    actorId: admin.id,
+    action: "ADMIN_SESSION_EDITED",
+    targetType: "Booking",
+    targetId: booking.id,
+    metadata: { level, durationMinutes, tokensChanged },
+  });
+
+  await Promise.all([
+    sendEmail({
+      to: booking.client.email,
+      subject: "Your scheduled session was updated",
+      html: baseEmailLayout(`
+        <p>Hi ${booking.client.name},</p>
+        <p>Channel Tutoring updated your ${subject} session with
+        ${profile.user.name} — it's now ${formatSessionDuration(durationMinutes)}
+        on ${formatDate(startsAt)}.</p>
+        <p>If this doesn't look right, reply to this email or
+        <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
+      `),
+    }),
+    sendEmail({
+      to: profile.user.email,
+      subject: "A scheduled session was updated",
+      html: baseEmailLayout(`
+        <p>Hi ${profile.user.name},</p>
+        <p>Channel Tutoring updated your ${subject} session with
+        ${booking.client.name} — it's now ${formatSessionDuration(durationMinutes)}
+        on ${formatDate(startsAt)}.</p>
+      `),
+    }),
+  ]).catch(() => {});
+
+  revalidatePath("/admin/bookings");
+  revalidatePath(`/admin/bookings/${booking.id}`);
+  revalidatePath("/tutor-dashboard/bookings");
+  revalidatePath(`/tutor-dashboard/bookings/${booking.id}`);
+  revalidatePath("/dashboard/bookings");
+  revalidatePath(`/dashboard/bookings/${booking.id}`);
+  revalidatePath("/dashboard");
+  revalidatePath("/tutor-dashboard");
+
+  return {};
 }
