@@ -104,6 +104,21 @@ export default async function TutorApplicationDetailPage({
             </p>
           </div>
 
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <p className="text-navy/50 text-sm">GCSE grades</p>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-navy">
+                {application.gcseGrades}
+              </p>
+            </div>
+            <div>
+              <p className="text-navy/50 text-sm">A-Level grades</p>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-navy">
+                {application.aLevelGrades}
+              </p>
+            </div>
+          </div>
+
           <div>
             <p className="text-navy/50 text-sm">Bio</p>
             <p className="mt-1 whitespace-pre-wrap text-sm text-navy">

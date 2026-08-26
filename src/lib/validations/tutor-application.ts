@@ -9,6 +9,8 @@ export const tutorApplicationSchema = z.object({
   subjects: z.array(z.string()).min(1, "Select at least one subject"),
   levels: z.array(z.enum(LEVEL_VALUES)).min(1, "Select at least one level"),
   qualifications: z.string().trim().min(5, "Tell us about your qualifications").max(1000),
+  gcseGrades: z.string().trim().min(2, "Tell us your GCSE grades").max(300),
+  aLevelGrades: z.string().trim().min(2, "Tell us your A-Level grades").max(300),
   cvUrl: z.string().trim().url().optional().or(z.literal("")),
   referenceUrl: z.string().trim().url().optional().or(z.literal("")),
   bio: z.string().trim().min(50, "Please write at least a short paragraph (50+ characters)").max(2000),

@@ -11,7 +11,7 @@ export default async function TutorAgreementPage() {
   await requireUser("TUTOR");
 
   return (
-    <LegalPage title="Tutor Agreement" lastUpdated="23 August 2026">
+    <LegalPage title="Tutor Agreement" lastUpdated="26 August 2026">
       <p>
         This agreement applies to anyone approved as a tutor on the Channel
         Tutoring platform. By completing your tutor application and
@@ -73,11 +73,12 @@ export default async function TutorAgreementPage() {
         <li>You can view a full ledger of your sessions, fees and payouts in your tutor dashboard.</li>
       </ul>
 
-      <h2>5. Cancellations</h2>
+      <h2>5. Cancellations and lessons logged in error</h2>
       <p>
-        If you cancel a confirmed session, the client is entitled to a full
-        refund. Repeated cancellations may affect your standing on the
-        platform. See our{" "}
+        If you log a session as complete by mistake, you can undo it
+        within 24 hours, which refunds the client&apos;s tokens and
+        reverses your payout. Repeated errors or cancellations may affect
+        your standing on the platform. See our{" "}
         <a href="/legal/cancellation-refund-policy">
           Cancellation &amp; Refund Policy
         </a>{" "}

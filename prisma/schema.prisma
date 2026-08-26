@@ -167,6 +167,8 @@ model TutorApplication {
   subjects          String[]
   levels            Level[]
   qualifications    String
+  gcseGrades        String
+  aLevelGrades      String
   cvUrl             String?
   referenceUrl      String?
   bio               String

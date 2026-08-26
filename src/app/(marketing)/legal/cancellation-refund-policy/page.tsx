@@ -5,51 +5,52 @@ export const metadata: Metadata = { title: "Cancellation & Refund Policy" };
 
 export default function CancellationRefundPolicyPage() {
   return (
-    <LegalPage title="Cancellation &amp; Refund Policy" lastUpdated="21 August 2026">
-      <h2>Client cancellations</h2>
-      <ul>
-        <li>
-          <strong>More than 24 hours before the session:</strong> free
-          cancellation, with a full refund issued automatically to your
-          original payment method.
-        </li>
-        <li>
-          <strong>Within 24 hours of the session:</strong> 50% of the
-          lesson fee remains payable, in fairness to the tutor who has
-          reserved that time for you. The other 50% is refunded
-          automatically.
-        </li>
-      </ul>
+    <LegalPage title="Cancellation &amp; Refund Policy" lastUpdated="26 August 2026">
+      <h2>How charging works</h2>
       <p>
-        You can cancel a booking at any time from your dashboard. Refunds
-        (where applicable) are processed automatically via Stripe and
-        typically appear within 5&ndash;10 business days, depending on your
-        bank.
+        Buying lesson tokens and arranging a session are two separate
+        steps. Tokens are only ever used once a session has actually taken
+        place: your tutor logs it as complete afterwards, which is the
+        point a token is deducted from your balance and your tutor is
+        paid. Nothing is charged in advance for a specific date or time,
+        so there&apos;s nothing to refund for a session that never
+        happened.
       </p>
 
-      <h2>Tutor-initiated cancellations</h2>
+      <h2>Changing or cancelling a planned session</h2>
       <p>
-        If a tutor needs to cancel a confirmed session, the client
-        receives a full refund regardless of how close to the session it
-        is. We expect tutors to only cancel when genuinely necessary, and
-        repeated cancellations may affect a tutor&apos;s account standing.
+        If you need to change or cancel a session you&apos;ve arranged
+        with a tutor, just message them through Channel Tutoring as soon
+        as you can. Since no token is used until the tutor logs the
+        session as complete, cancelling or rescheduling in advance doesn&apos;t
+        cost you anything.
       </p>
 
-      <h2>Failed or disputed payments</h2>
+      <h2>Lessons logged in error</h2>
       <p>
-        If a payment fails, the booking is not confirmed and the time slot
-        remains available for others to book. If you believe a payment was
-        taken in error, contact us at{" "}
+        If a tutor logs a session as complete by mistake, they can undo it
+        within 24 hours of logging it. This refunds the exact number of
+        tokens used and reverses their payout. If it&apos;s outside that
+        24-hour window, contact us at{" "}
         <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>{" "}
-        and we&apos;ll investigate.
+        and we&apos;ll sort it out.
       </p>
 
       <h2>No-shows</h2>
       <p>
-        If a client doesn&apos;t attend a confirmed session without
-        cancelling in advance, no refund is given. If a tutor doesn&apos;t
-        attend a confirmed session, the client is entitled to a full
-        refund — please contact us so we can arrange this.
+        Tutors only log — and get paid for — sessions that actually took
+        place, so a client no-show shouldn&apos;t result in any tokens
+        being used. If a tutor doesn&apos;t attend a session you&apos;d
+        arranged, please contact us so we can look into it.
+      </p>
+
+      <h2>Failed or disputed token purchases</h2>
+      <p>
+        If a card payment for tokens fails, no tokens are added to your
+        account. If you believe you were charged in error, or want to
+        request a refund for tokens you haven&apos;t used, contact us at{" "}
+        <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>{" "}
+        and we&apos;ll review it. Unused tokens don&apos;t expire.
       </p>
 
       <h2>Contact</h2>

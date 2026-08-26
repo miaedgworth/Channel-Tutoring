@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function RegistrationAgreementPage() {
   return (
-    <LegalPage title="Registration and Agreement Form" lastUpdated="23 August 2026">
+    <LegalPage title="Registration and Agreement Form" lastUpdated="26 August 2026">
       <p>
         This is the agreement you accept when you create a client account
         with Channel Tutoring, on behalf of yourself and/or the student(s)
@@ -47,51 +47,44 @@ export default function RegistrationAgreementPage() {
         </tbody>
       </table>
       <p>
-        These prices are based on one-to-one lessons. For lessons with more
-        than one student, the price increases by £7/hour per additional
-        student &mdash; please mention this to us when booking a group
-        session so we can arrange it.
+        These prices are per hour. 1 lesson token is equivalent to a
+        1-hour session; session length is customisable, and the tokens
+        used scale with it &mdash; for example, a 1.5-hour session uses
+        1.5 tokens. For lessons with more than one student, the price
+        increases by £7/hour per additional student &mdash; please mention
+        this to your tutor when arranging a group session.
       </p>
       <p>
-        <strong>Block booking discount:</strong> book and pay for 5 or more
-        sessions with the same tutor in advance and receive 10% off. This
-        is applied automatically at checkout when you select 5 or more
-        available times for the same subject and level.
+        <strong>Block token discount:</strong> buy 5 or more tokens for
+        the same level in a single purchase and receive 10% off, applied
+        automatically at checkout. Tokens don&apos;t expire and work with
+        any tutor teaching that level.
       </p>
       <p>
-        Payment is taken securely online by card at the time of booking. We
-        don&apos;t take payment by bank transfer or in person.
+        Payment for tokens is taken securely online by card at the time of
+        purchase. We don&apos;t take payment by bank transfer or in
+        person. No token is deducted until a tutor logs a session as
+        complete, so nothing is charged in advance for a specific date or
+        time.
       </p>
 
       <h2>Cancellation policy</h2>
       <p>
-        If you need to cancel a session, please give as much notice as
-        possible.
-      </p>
-      <ul>
-        <li>
-          <strong>24 hours&apos; notice or more:</strong> free cancellation,
-          with a full refund.
-        </li>
-        <li>
-          <strong>Less than 24 hours&apos; notice:</strong> 50% of the
-          lesson fee remains payable; the other 50% is refunded.
-        </li>
-      </ul>
-      <p>
-        See our full{" "}
+        Since tokens are only used once a tutor logs a session as
+        complete, changing or cancelling a planned session in advance
+        doesn&apos;t cost you anything &mdash; just message your tutor as
+        soon as you can. See our full{" "}
         <a href="/legal/cancellation-refund-policy">
           Cancellation &amp; Refund Policy
         </a>{" "}
-        for how tutor-initiated cancellations and no-shows are handled.
+        for how lessons logged in error and no-shows are handled.
       </p>
 
       <h2>Booking policy</h2>
       <p>
-        Lessons must be arranged through Channel Tutoring &mdash; via the
-        booking system and in-platform messaging &mdash; and not directly
-        with the tutor. This helps us keep sessions properly scheduled,
-        paid and insured.
+        Lessons must be arranged through Channel Tutoring &mdash; via
+        in-platform messaging &mdash; and not directly with the tutor.
+        This helps us keep sessions properly logged, paid and insured.
       </p>
 
       <h2>Complaints policy</h2>

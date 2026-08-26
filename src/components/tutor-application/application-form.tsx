@@ -15,6 +15,8 @@ export function TutorApplicationForm() {
   const [subjects, setSubjects] = useState<string[]>([]);
   const [levels, setLevels] = useState<string[]>([]);
   const [qualifications, setQualifications] = useState("");
+  const [gcseGrades, setGcseGrades] = useState("");
+  const [aLevelGrades, setALevelGrades] = useState("");
   const [cvUrl, setCvUrl] = useState("");
   const [referenceUrl, setReferenceUrl] = useState("");
   const [bio, setBio] = useState("");
@@ -39,6 +41,8 @@ export function TutorApplicationForm() {
         subjects,
         levels,
         qualifications,
+        gcseGrades,
+        aLevelGrades,
         cvUrl,
         referenceUrl,
         bio,
@@ -163,6 +167,34 @@ export function TutorApplicationForm() {
             className={inputClass}
             placeholder="e.g. BSc Mathematics (Bristol), PGCE, QTS"
           />
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label htmlFor="gcseGrades" className="block text-sm font-medium text-navy">
+              GCSE grades
+            </label>
+            <input
+              id="gcseGrades"
+              required
+              value={gcseGrades}
+              onChange={(e) => setGcseGrades(e.target.value)}
+              className={inputClass}
+              placeholder="e.g. 9, 9, 8, 8, 7, 7, 6"
+            />
+          </div>
+          <div>
+            <label htmlFor="aLevelGrades" className="block text-sm font-medium text-navy">
+              A-Level grades
+            </label>
+            <input
+              id="aLevelGrades"
+              required
+              value={aLevelGrades}
+              onChange={(e) => setALevelGrades(e.target.value)}
+              className={inputClass}
+              placeholder="e.g. A*, A*, A (or equivalent)"
+            />
+          </div>
         </div>
         <div className="grid gap-5 sm:grid-cols-2">
           <div>

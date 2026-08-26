@@ -36,6 +36,8 @@ export async function POST(request: Request) {
       subjects: data.subjects,
       levels: data.levels,
       qualifications: data.qualifications,
+      gcseGrades: data.gcseGrades,
+      aLevelGrades: data.aLevelGrades,
       cvUrl: data.cvUrl || null,
       referenceUrl: data.referenceUrl || null,
       bio: data.bio,
