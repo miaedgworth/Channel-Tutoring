@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { courseSchema, type CourseInput } from "@/lib/validations/course";
@@ -18,16 +19,27 @@ export async function createCourse(
   const data = parsed.data;
   const slug = await uniqueCourseSlug(data.title);
 
-  const course = await prisma.course.create({
-    data: {
-      title: data.title,
-      slug,
-      description: data.description,
-      status: data.status,
-      startDate: data.startDate ? new Date(data.startDate) : null,
-      endDate: data.endDate ? new Date(data.endDate) : null,
-    },
-  });
+  let course;
+  try {
+    course = await prisma.course.create({
+      data: {
+        title: data.title,
+        slug,
+        description: data.description,
+        status: data.status,
+        startDate: data.startDate ? new Date(data.startDate) : null,
+        endDate: data.endDate ? new Date(data.endDate) : null,
+      },
+    });
+  } catch (err) {
+    // uniqueCourseSlug()'s own check is check-then-act — two admins
+    // creating a course with the same title at nearly the same time could
+    // both pass it before either commits.
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      return { error: "A course with a very similar title was just created — please try again." };
+    }
+    throw err;
+  }
 
   revalidatePath("/admin/courses");
   revalidatePath("/courses");
@@ -48,16 +60,25 @@ export async function updateCourse(
   const existing = await prisma.course.findUnique({ where: { id: courseId } });
   if (!existing) return { error: "Course not found." };
 
-  await prisma.course.update({
-    where: { id: courseId },
-    data: {
-      title: data.title,
-      description: data.description,
-      status: data.status,
-      startDate: data.startDate ? new Date(data.startDate) : null,
-      endDate: data.endDate ? new Date(data.endDate) : null,
-    },
-  });
+  try {
+    await prisma.course.update({
+      where: { id: courseId },
+      data: {
+        title: data.title,
+        description: data.description,
+        status: data.status,
+        startDate: data.startDate ? new Date(data.startDate) : null,
+        endDate: data.endDate ? new Date(data.endDate) : null,
+      },
+    });
+  } catch (err) {
+    // Another admin could have deleted this course between the findUnique
+    // above and this update.
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+      return { error: "Course not found." };
+    }
+    throw err;
+  }
 
   revalidatePath("/admin/courses");
   revalidatePath(`/admin/courses/${courseId}`);
@@ -69,7 +90,15 @@ export async function updateCourse(
 
 export async function deleteCourse(courseId: string) {
   await requireUser("ADMIN");
-  await prisma.course.delete({ where: { id: courseId } });
+  try {
+    await prisma.course.delete({ where: { id: courseId } });
+  } catch (err) {
+    // Already deleted (e.g. a double-click, or another admin got there
+    // first) — nothing left to do.
+    if (!(err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025")) {
+      throw err;
+    }
+  }
   revalidatePath("/admin/courses");
   revalidatePath("/courses");
 }
