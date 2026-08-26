@@ -3,10 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { PayPalEmailForm } from "@/components/tutor-dashboard/paypal-email-form";
-import { RequestPayPalPayoutButton } from "@/components/tutor-dashboard/request-paypal-payout-button";
+import { BankDetailsForm } from "@/components/tutor-dashboard/bank-details-form";
+import { RequestBankPayoutButton } from "@/components/tutor-dashboard/request-bank-payout-button";
 import { formatCurrencyGBP, formatDateTime } from "@/lib/utils";
-import { isPayPalConfigured } from "@/lib/paypal";
 
 export const metadata: Metadata = { title: "Earnings" };
 export const dynamic = "force-dynamic";
@@ -25,33 +24,45 @@ export default async function EarningsPage() {
     );
   }
 
-  const ledgerEntries = await prisma.tutorLedgerEntry.findMany({
-    where: { tutorId: profile.id },
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
+  const [ledgerEntries, pendingPayout] = await Promise.all([
+    prisma.tutorLedgerEntry.findMany({
+      where: { tutorId: profile.id },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    }),
+    prisma.payout.findFirst({
+      where: { tutorId: profile.id, status: "PENDING" },
+    }),
+  ]);
+
+  const hasBankDetails = Boolean(
+    profile.bankAccountName && profile.bankSortCode && profile.bankAccountNumber,
+  );
 
   return (
     <div className="space-y-6">
-      {!isPayPalConfigured() && (
-        <div className="rounded-md border border-navy/10 bg-navy/[0.02] px-4 py-3 text-sm text-navy/60">
-          Payments aren&apos;t configured in this environment yet.
-        </div>
-      )}
+      <div className="rounded-md border border-navy/10 bg-navy/[0.02] px-4 py-3 text-sm text-navy/60">
+        Withdrawals are paid out by bank transfer every Monday.
+      </div>
 
-      {!profile.paypalEmail ? (
+      {!hasBankDetails ? (
         <Card>
           <CardContent>
             <h2 className="font-heading text-lg font-semibold text-navy">
-              Add your PayPal email
+              Add your bank details
             </h2>
             <p className="mt-1 text-sm text-navy/60">
-              To receive payouts from bookings, tell us the email address
-              on your PayPal account. Don&apos;t have one? You can create a
-              free personal PayPal account in a couple of minutes.
+              To receive payouts from bookings, add the UK bank account
+              you&apos;d like to be paid into.
             </p>
             <div className="mt-4">
-              <PayPalEmailForm currentEmail={profile.paypalEmail} />
+              <BankDetailsForm
+                current={{
+                  bankAccountName: profile.bankAccountName,
+                  bankSortCode: profile.bankSortCode,
+                  bankAccountNumber: profile.bankAccountNumber,
+                }}
+              />
             </div>
           </CardContent>
         </Card>
@@ -64,7 +75,10 @@ export default async function EarningsPage() {
                 {formatCurrencyGBP(profile.balancePence)}
               </p>
               <div className="mt-4">
-                <RequestPayPalPayoutButton balancePence={profile.balancePence} />
+                <RequestBankPayoutButton
+                  balancePence={profile.balancePence}
+                  hasPendingPayout={Boolean(pendingPayout)}
+                />
               </div>
             </CardContent>
           </Card>
@@ -75,18 +89,24 @@ export default async function EarningsPage() {
                 {formatCurrencyGBP(profile.totalEarnedPence)}
               </p>
               <Badge variant="success" className="mt-3">
-                PayPal connected
+                Bank details added
               </Badge>
               <div className="mt-4">
                 <p className="text-xs text-navy/40">
-                  Paying out to {profile.paypalEmail}
+                  Paying out to account ending {profile.bankAccountNumber?.slice(-4)}
                 </p>
                 <details className="mt-2">
                   <summary className="cursor-pointer text-xs text-navy/50 underline">
-                    Change PayPal email
+                    Change bank details
                   </summary>
                   <div className="mt-3">
-                    <PayPalEmailForm currentEmail={profile.paypalEmail} />
+                    <BankDetailsForm
+                      current={{
+                        bankAccountName: profile.bankAccountName,
+                        bankSortCode: profile.bankSortCode,
+                        bankAccountNumber: profile.bankAccountNumber,
+                      }}
+                    />
                   </div>
                 </details>
               </div>

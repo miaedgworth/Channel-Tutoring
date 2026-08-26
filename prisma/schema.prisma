@@ -197,9 +197,9 @@ model TutorProfile {
   qualifications           String
   sessionMode              SessionMode @default(BOTH)
   isPublished              Boolean   @default(false)
-  stripeConnectAccountId   String?
-  stripeOnboardingComplete Boolean   @default(false)
-  paypalEmail              String?
+  bankAccountName          String?
+  bankSortCode             String?
+  bankAccountNumber        String?
   ratingAverage            Float     @default(0)
   ratingCount              Int       @default(0)
   balancePence             Int       @default(0)
@@ -333,16 +333,13 @@ model TutorLedgerEntry {
 }
 
 model Payout {
-  id               String       @id @default(cuid())
-  tutorId          String
-  amountPence      Int
-  status           PayoutStatus @default(PENDING)
-  stripeTransferId String?
-  paypalPayoutItemId String?
-  paypalBatchId    String?
-  requestedAt      DateTime     @default(now())
-  paidAt           DateTime?
-  failureReason    String?
+  id            String       @id @default(cuid())
+  tutorId       String
+  amountPence   Int
+  status        PayoutStatus @default(PENDING)
+  requestedAt   DateTime     @default(now())
+  paidAt        DateTime?
+  failureReason String?
 
   tutor         TutorProfile       @relation(fields: [tutorId], references: [id], onDelete: Cascade)
   ledgerEntries TutorLedgerEntry[]
