@@ -7,6 +7,7 @@ import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CancelBookingButton } from "@/components/cancel-booking-button";
 import { MarkSessionCompleteButton } from "@/components/tutor-dashboard/mark-session-complete-button";
 import { CancelUpcomingSessionButton } from "@/components/tutor-dashboard/cancel-upcoming-session-button";
+import { EditScheduledSessionForm } from "@/components/tutor-dashboard/edit-scheduled-session-form";
 import { formatCurrencyGBP, formatDate, formatDateTime, formatLevel, formatTokenQuantity } from "@/lib/utils";
 import { SESSION_MODE_LABELS, LESSON_LOG_UNDO_WINDOW_MS, formatSessionDuration } from "@/lib/constants";
 
@@ -108,6 +109,35 @@ export default async function TutorBookingDetailPage({
             <div className="flex flex-wrap gap-3">
               <MarkSessionCompleteButton bookingId={booking.id} />
               <CancelUpcomingSessionButton bookingId={booking.id} />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {booking.status === "CONFIRMED" && (
+        <Card>
+          <CardContent>
+            <h2 className="font-heading text-lg font-semibold text-navy">Edit Session</h2>
+            <p className="mt-1 text-sm text-navy/60">
+              Change the date, time, length or other details of this
+              upcoming session.
+            </p>
+            <div className="mt-6">
+              <EditScheduledSessionForm
+                bookingId={booking.id}
+                tutorSubjects={booking.tutor.subjects}
+                tutorLevels={booking.tutor.levels}
+                tutorSessionMode={booking.tutor.sessionMode}
+                initial={{
+                  subject: booking.subject,
+                  level: booking.level,
+                  examBoard: booking.examBoard ?? "",
+                  sessionMode: booking.sessionMode,
+                  startsAt: booking.startsAt.toISOString(),
+                  durationMinutes: (booking.endsAt.getTime() - booking.startsAt.getTime()) / 60000,
+                  notes: booking.notes ?? "",
+                }}
+              />
             </div>
           </CardContent>
         </Card>

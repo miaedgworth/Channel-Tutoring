@@ -9,9 +9,9 @@ import { formatDate, formatLevel, formatTokenQuantity } from "@/lib/utils";
 import { PLATFORM_FEE_PENCE, LEVEL_PRICE_PENCE, formatSessionDuration } from "@/lib/constants";
 import {
   adminScheduleSessionSchema,
-  adminUpdateSessionSchema,
+  updateSessionSchema,
   type AdminScheduleSessionInput,
-  type AdminUpdateSessionInput,
+  type UpdateSessionInput,
 } from "@/lib/validations/schedule-lesson";
 
 export async function adminScheduleSession(
@@ -154,10 +154,10 @@ export async function adminScheduleSession(
 
 export async function adminUpdateScheduledSession(
   bookingId: string,
-  input: AdminUpdateSessionInput,
+  input: UpdateSessionInput,
 ): Promise<{ error: string } | { error?: undefined }> {
   const admin = await requireUser("ADMIN");
-  const parsed = adminUpdateSessionSchema.safeParse(input);
+  const parsed = updateSessionSchema.safeParse(input);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
