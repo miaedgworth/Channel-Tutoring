@@ -56,6 +56,37 @@ export default async function TutorOverviewPage() {
         </Card>
       )}
 
+      <Card>
+        <CardContent>
+          <h2 className="font-heading text-sm font-semibold text-navy">
+            How it works
+          </h2>
+          <ol className="mt-2 space-y-1.5 text-sm text-navy/60">
+            <li>
+              1. A client messages you through Channel Tutoring to arrange
+              a session — subject, level, session length and date.
+            </li>
+            <li>
+              2. You teach the session, in person or online (see below for
+              online sessions).
+            </li>
+            <li>
+              3. Afterwards, go to{" "}
+              <Link href="/tutor-dashboard/bookings/new" className="underline">
+                Log a lesson
+              </Link>{" "}
+              and mark it as complete. The right number of tokens is used
+              based on the session length, and you&apos;re paid
+              immediately — no extra step needed from the client.
+            </li>
+            <li>
+              4. Logged a lesson by mistake? You can undo it within 24
+              hours from the booking&apos;s page.
+            </li>
+          </ol>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardContent>
