@@ -1,12 +1,24 @@
 import { z } from "zod";
 
-export const courseSchema = z.object({
-  title: z.string().trim().min(3, "Add a title").max(150),
-  description: z.string().trim().min(10, "Add a short description").max(3000),
-  status: z.enum(["UPCOMING", "PAST"]),
-  startDate: z.string().trim().optional().or(z.literal("")),
-  endDate: z.string().trim().optional().or(z.literal("")),
-});
+const optionalDateString = z
+  .string()
+  .trim()
+  .optional()
+  .or(z.literal(""))
+  .refine((val) => !val || !Number.isNaN(Date.parse(val)), "Enter a valid date");
+
+export const courseSchema = z
+  .object({
+    title: z.string().trim().min(3, "Add a title").max(150),
+    description: z.string().trim().min(10, "Add a short description").max(3000),
+    status: z.enum(["UPCOMING", "PAST"]),
+    startDate: optionalDateString,
+    endDate: optionalDateString,
+  })
+  .refine(
+    (data) => !data.startDate || !data.endDate || Date.parse(data.endDate) >= Date.parse(data.startDate),
+    { message: "End date can't be before the start date", path: ["endDate"] },
+  );
 
 export type CourseInput = z.infer<typeof courseSchema>;
 
