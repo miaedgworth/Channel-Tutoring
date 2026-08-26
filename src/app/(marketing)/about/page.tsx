@@ -43,6 +43,14 @@ export default function AboutPage() {
             <p className="mt-2 text-sm font-medium text-navy/70">
               Mia &mdash; Founder
             </p>
+            <a
+              href="https://www.linkedin.com/in/mia-edgworth-491486423"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 inline-block text-sm text-navy/60 underline hover:text-navy"
+            >
+              LinkedIn
+            </a>
           </div>
 
           <div className="prose-navy space-y-6 text-navy/80">
