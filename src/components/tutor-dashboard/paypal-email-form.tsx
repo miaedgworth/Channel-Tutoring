@@ -44,6 +44,18 @@ export function PayPalEmailForm({ currentEmail }: { currentEmail: string | null 
           placeholder="you@example.com"
           className="mt-1.5 block w-full rounded-md border border-navy/20 px-3 py-2.5 text-sm focus:border-gold-dark focus:outline-none focus:ring-1 focus:ring-gold-dark"
         />
+        <p className="mt-1.5 text-xs text-navy/50">
+          Don&apos;t have a PayPal account?{" "}
+          <a
+            href="https://www.paypal.com/gb/webapps/mpp/account-selection"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            Create a free one
+          </a>{" "}
+          — it only takes a couple of minutes.
+        </p>
       </div>
       <Button type="submit" variant="gold" disabled={isPending}>
         {isPending ? "Saving..." : currentEmail ? "Update PayPal email" : "Save PayPal email"}

@@ -70,6 +70,26 @@ export const AVAILABILITY_PERIOD_LABELS: Record<string, string> = {
   EVENING: "Evening",
 };
 
+export const DAYS_OF_WEEK = [
+  { value: "MONDAY", label: "Monday" },
+  { value: "TUESDAY", label: "Tuesday" },
+  { value: "WEDNESDAY", label: "Wednesday" },
+  { value: "THURSDAY", label: "Thursday" },
+  { value: "FRIDAY", label: "Friday" },
+  { value: "SATURDAY", label: "Saturday" },
+  { value: "SUNDAY", label: "Sunday" },
+] as const;
+
+export const DAY_OF_WEEK_LABELS: Record<string, string> = {
+  MONDAY: "Monday",
+  TUESDAY: "Tuesday",
+  WEDNESDAY: "Wednesday",
+  THURSDAY: "Thursday",
+  FRIDAY: "Friday",
+  SATURDAY: "Saturday",
+  SUNDAY: "Sunday",
+};
+
 export const SESSION_MODE_LABELS: Record<string, string> = {
   ONLINE: "Online",
   IN_PERSON: "In person",

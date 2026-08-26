@@ -4,8 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
-import { formatDate, formatLevel } from "@/lib/utils";
-import { AVAILABILITY_PERIOD_LABELS, SESSION_MODE_LABELS } from "@/lib/constants";
+import { formatLevel } from "@/lib/utils";
+import {
+  AVAILABILITY_PERIOD_LABELS,
+  DAY_OF_WEEK_LABELS,
+  SESSION_MODE_LABELS,
+} from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -37,16 +41,25 @@ export default async function TutorProfilePage({
 
   if (!tutor) notFound();
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const dayOrder: Record<string, number> = {
+    MONDAY: 0,
+    TUESDAY: 1,
+    WEDNESDAY: 2,
+    THURSDAY: 3,
+    FRIDAY: 4,
+    SATURDAY: 5,
+    SUNDAY: 6,
+  };
   const periodOrder: Record<string, number> = { MORNING: 0, AFTERNOON: 1, EVENING: 2 };
   const availability = (
     await prisma.tutorAvailabilitySlot.findMany({
-      where: { tutorId: tutor.id, date: { gte: today } },
-      orderBy: { date: "asc" },
-      take: 20,
+      where: { tutorId: tutor.id },
     })
-  ).sort((a, b) => a.date.getTime() - b.date.getTime() || periodOrder[a.period] - periodOrder[b.period]);
+  ).sort(
+    (a, b) =>
+      dayOrder[a.dayOfWeek] - dayOrder[b.dayOfWeek] ||
+      periodOrder[a.period] - periodOrder[b.period],
+  );
 
   return (
     <div className="py-12">
@@ -128,7 +141,7 @@ export default async function TutorProfilePage({
           <aside className="space-y-4">
             <div className="rounded-xl border border-navy/10 bg-navy/[0.02] p-5">
               <h3 className="font-heading text-sm font-semibold text-navy">
-                General availability
+                Weekly availability
               </h3>
               {availability.length === 0 ? (
                 <p className="mt-2 text-sm text-navy/50">
@@ -139,7 +152,7 @@ export default async function TutorProfilePage({
                 <ul className="mt-3 space-y-1.5 text-sm">
                   {availability.map((slot) => (
                     <li key={slot.id} className="flex justify-between text-navy/80">
-                      <span>{formatDate(slot.date)}</span>
+                      <span>{DAY_OF_WEEK_LABELS[slot.dayOfWeek]}</span>
                       <span className="font-medium text-navy">
                         {AVAILABILITY_PERIOD_LABELS[slot.period]}
                       </span>
@@ -148,8 +161,8 @@ export default async function TutorProfilePage({
                 </ul>
               )}
               <p className="mt-3 text-xs text-navy/40">
-                These are general windows, not exact times — message the
-                tutor to agree what works for you both.
+                These are general weekly windows, not exact times — message
+                the tutor to agree what works for you both.
               </p>
             </div>
           </aside>

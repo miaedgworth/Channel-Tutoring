@@ -33,6 +33,16 @@ enum AvailabilityPeriod {
   EVENING
 }
 
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
 enum SessionMode {
   ONLINE
   IN_PERSON
@@ -212,14 +222,14 @@ model TutorProfile {
 model TutorAvailabilitySlot {
   id        String              @id @default(cuid())
   tutorId   String
-  date      DateTime            @db.Date
+  dayOfWeek DayOfWeek
   period    AvailabilityPeriod
   createdAt DateTime            @default(now())
 
   tutor TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
-  @@unique([tutorId, date, period])
-  @@index([tutorId, date])
+  @@unique([tutorId, dayOfWeek, period])
+  @@index([tutorId])
 }
 
 // ---------- Bookings ----------
