@@ -4,7 +4,7 @@ import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { EXAM_BOARDS, SESSION_DURATION_OPTIONS_MINUTES, formatSessionDuration } from "@/lib/constants";
-import { formatLevel, formatTokenQuantity, toLocalDateInputValue } from "@/lib/utils";
+import { formatLevel, formatTokenQuantity, toLocalDateInputValue, londonWallTimeToUtc } from "@/lib/utils";
 import { logCompletedLesson } from "@/lib/actions/bookings";
 
 const inputClass =
@@ -60,7 +60,7 @@ export function ScheduleLessonForm({
         level: level as "KS3" | "GCSE" | "A_LEVEL" | "UNIVERSITY_ADMISSIONS",
         examBoard,
         sessionMode: sessionMode as "ONLINE" | "IN_PERSON",
-        date: new Date(`${date}T12:00:00`),
+        date: londonWallTimeToUtc(date, "12:00"),
         durationMinutes,
         notes,
       });

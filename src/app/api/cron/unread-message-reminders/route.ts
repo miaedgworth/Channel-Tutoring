@@ -98,7 +98,7 @@ export async function GET(request: Request) {
         subject: "You have an unread message on Channel Tutoring",
         html: baseEmailLayout(`
           <p>Hi ${group.recipient.name},</p>
-          <p>${group.senderName} sent you ${group.messageIds.length > 1 ? `${group.messageIds.length} messages` : "a message"}
+          <p>${group.senderName} sent you ${claimed.count > 1 ? `${claimed.count} messages` : "a message"}
           on Channel Tutoring over 10 hours ago that you haven't opened yet.</p>
           <p><a href="${link}">View your messages</a></p>
         `),
