@@ -10,6 +10,7 @@ const NAV = [
   { href: "/dashboard/tokens", label: "Lesson Tokens" },
   { href: "/dashboard/payments", label: "Payments & Receipts" },
   { href: "/dashboard/messages", label: "Messages" },
+  { href: "/dashboard/resources", label: "Resources" },
   { href: "/dashboard/settings", label: "Settings" },
 ];
 
