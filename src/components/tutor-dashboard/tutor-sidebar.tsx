@@ -11,6 +11,7 @@ const NAV = [
   { href: "/tutor-dashboard/bookings", label: "Bookings" },
   { href: "/tutor-dashboard/messages", label: "Messages" },
   { href: "/tutor-dashboard/earnings", label: "Earnings" },
+  { href: "/tutor-dashboard/resources", label: "Resources" },
   { href: "/tutor-dashboard/settings", label: "Settings" },
   { href: "/legal/tutor-agreement", label: "Tutor Agreement" },
 ];
