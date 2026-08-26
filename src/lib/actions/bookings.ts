@@ -63,19 +63,19 @@ export async function scheduleSession(
   let booking;
   try {
     booking = await prisma.$transaction(async (tx) => {
-      const tokenBalance = await tx.tokenBalance.findUnique({
-        where: { userId_level: { userId: clientId, level } },
+      // Atomic conditional decrement — the WHERE clause is re-checked
+      // against the row's committed value even under a concurrent
+      // transaction, so two simultaneous schedules against the same
+      // almost-exhausted balance can't both succeed and drive it negative.
+      const claimed = await tx.tokenBalance.updateMany({
+        where: { userId: clientId, level, balance: { gte: tokensUsed } },
+        data: { balance: { decrement: tokensUsed } },
       });
-      if (!tokenBalance || Number(tokenBalance.balance) < tokensUsed) {
+      if (claimed.count === 0) {
         throw new Error(
           `${conversation.client.name} doesn't have enough ${formatLevel(level)} tokens for a ${formatSessionDuration(durationMinutes)} session. Ask them to buy more before you schedule this.`,
         );
       }
-
-      await tx.tokenBalance.update({
-        where: { id: tokenBalance.id },
-        data: { balance: { decrement: tokensUsed } },
-      });
       await tx.tokenTransaction.create({
         data: {
           userId: clientId,
@@ -360,12 +360,22 @@ export async function updateScheduledSession(
   const oldLevel = booking.level;
   const oldTokensUsed = Number(booking.tokensUsed);
   const newTokensUsed = durationMinutes / 60;
-  const pricePence = Math.round(LEVEL_PRICE_PENCE[level] * newTokensUsed);
-  const platformFeePence = Math.round(PLATFORM_FEE_PENCE * newTokensUsed);
-  const tutorPayoutPence = pricePence - platformFeePence;
   const startsAt = date;
   const endsAt = new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
   const tokensChanged = level !== oldLevel || newTokensUsed !== oldTokensUsed;
+
+  // Only recompute price/payout when the level or length actually changed
+  // (and therefore the tokens were released and re-reserved below) — an
+  // edit that only touches e.g. notes or the exam board must not silently
+  // reprice a booking against today's rates if pricing has changed since
+  // it was scheduled.
+  const pricePence = tokensChanged
+    ? Math.round(LEVEL_PRICE_PENCE[level] * newTokensUsed)
+    : booking.pricePence;
+  const platformFeePence = tokensChanged
+    ? Math.round(PLATFORM_FEE_PENCE * newTokensUsed)
+    : booking.platformFeePence;
+  const tutorPayoutPence = tokensChanged ? pricePence - platformFeePence : booking.tutorPayoutPence;
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -389,18 +399,15 @@ export async function updateScheduledSession(
           },
         });
 
-        const newBalance = await tx.tokenBalance.findUnique({
-          where: { userId_level: { userId: booking.clientId, level } },
+        const claimed = await tx.tokenBalance.updateMany({
+          where: { userId: booking.clientId, level, balance: { gte: newTokensUsed } },
+          data: { balance: { decrement: newTokensUsed } },
         });
-        if (!newBalance || Number(newBalance.balance) < newTokensUsed) {
+        if (claimed.count === 0) {
           throw new Error(
             `${booking.client.name} doesn't have enough ${formatLevel(level)} tokens for a ${formatSessionDuration(durationMinutes)} session. Ask them to buy more, or choose a shorter length.`,
           );
         }
-        await tx.tokenBalance.update({
-          where: { id: newBalance.id },
-          data: { balance: { decrement: newTokensUsed } },
-        });
         await tx.tokenTransaction.create({
           data: {
             userId: booking.clientId,
@@ -430,7 +437,7 @@ export async function updateScheduledSession(
         },
       });
 
-      if (booking.payment) {
+      if (tokensChanged && booking.payment) {
         await tx.payment.update({
           where: { id: booking.payment.id },
           data: { amountPence: pricePence, platformFeePence, tutorAmountPence: tutorPayoutPence },
@@ -514,19 +521,15 @@ export async function logCompletedLesson(
   let booking;
   try {
     booking = await prisma.$transaction(async (tx) => {
-    const tokenBalance = await tx.tokenBalance.findUnique({
-      where: { userId_level: { userId: clientId, level } },
+    const claimed = await tx.tokenBalance.updateMany({
+      where: { userId: clientId, level, balance: { gte: tokensUsed } },
+      data: { balance: { decrement: tokensUsed } },
     });
-    if (!tokenBalance || Number(tokenBalance.balance) < tokensUsed) {
+    if (claimed.count === 0) {
       throw new Error(
         `${conversation.client.name} doesn't have enough ${formatLevel(level)} tokens for a ${formatSessionDuration(durationMinutes)} session. Ask them to buy more before you log this lesson.`,
       );
     }
-
-    await tx.tokenBalance.update({
-      where: { id: tokenBalance.id },
-      data: { balance: { decrement: tokensUsed } },
-    });
     await tx.tokenTransaction.create({
       data: {
         userId: clientId,
