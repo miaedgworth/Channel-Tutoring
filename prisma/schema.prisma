@@ -125,6 +125,11 @@ model User {
   newsletterOptIn Boolean    @default(false)
   agreedToTermsAt   DateTime?
   emailVerifiedAt   DateTime?
+  // Set on every password change/reset. Compared against the value stashed
+  // in a session's JWT at sign-in time (see auth.ts) so that changing a
+  // password invalidates any other session issued before that change,
+  // instead of leaving them valid for up to the JWT's full lifetime.
+  passwordChangedAt DateTime?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 

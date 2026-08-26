@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
+import { logAudit } from "@/lib/audit";
 import { updateAccountSchema, changePasswordSchema } from "@/lib/validations/account";
 import { subscribeEmail, unsubscribeEmailForUser } from "@/lib/newsletter";
 
@@ -55,7 +56,20 @@ export async function changePassword(input: {
   if (!valid) return { error: "Current password is incorrect." };
 
   const passwordHash = await bcrypt.hash(parsed.data.newPassword, 12);
-  await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+  await prisma.user.update({
+    where: { id: user.id },
+    // passwordChangedAt invalidates any other session issued before this
+    // change on that user's next request — see the session callback in
+    // auth.ts.
+    data: { passwordHash, passwordChangedAt: new Date() },
+  });
+
+  await logAudit({
+    actorId: user.id,
+    action: "PASSWORD_CHANGED",
+    targetType: "User",
+    targetId: user.id,
+  });
 
   return {};
 }

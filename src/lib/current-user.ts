@@ -7,10 +7,11 @@ export async function requireUser(role?: Role) {
   if (!session?.user) {
     redirect("/login");
   }
-  // session.user.status is refreshed from the database on every request
-  // (see the session callback in auth.ts) specifically so a suspension
-  // takes effect immediately, not just on the suspended user's next login.
-  if (session.user.status === "SUSPENDED") {
+  // session.user.status/sessionRevoked are refreshed from the database on
+  // every request (see the session callback in auth.ts) specifically so a
+  // suspension or a password change takes effect immediately, not just on
+  // that user's next login.
+  if (session.user.status === "SUSPENDED" || session.user.sessionRevoked) {
     redirect("/login");
   }
   if (role && session.user.role !== role) {
