@@ -18,11 +18,10 @@ export default async function ClientResourcesPage() {
             <Badge variant="gold">20% off with CHANNEL20</Badge>
           </div>
           <p className="mt-2 text-sm text-navy/70">
-            Tripos is a free-to-try practice platform for A-Level students
-            and anyone applying to Oxford or Cambridge, including entrance
-            exam prep. It offers practice questions built on real past
-            papers, mark schemes and examiner reports across a range of
-            subjects.
+            Tripos is an AI-powered study platform that marks exam papers
+            against real mark schemes in seconds, generates unlimited
+            practice questions, and helps with university applications
+            through mock interviews and personal statement reviews.
           </p>
           <p className="mt-3 text-sm text-navy/70">
             Channel Tutoring students get{" "}
@@ -34,7 +33,7 @@ export default async function ClientResourcesPage() {
             .
           </p>
           <a
-            href="https://www.tripos.org.uk"
+            href="https://tripos.org.uk"
             target="_blank"
             rel="noopener noreferrer"
             className="mt-4 inline-block rounded-md bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy/90"
