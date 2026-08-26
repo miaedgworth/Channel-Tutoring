@@ -10,19 +10,19 @@ export const metadata: Metadata = {
 const CLIENT_STEPS = [
   {
     title: "1. Search for a tutor",
-    body: "Use Find a Tutor to filter by subject and level (KS3, GCSE, A-Level or university admissions). Every tutor's profile shows their qualifications and general availability — the days and times of day they're usually free. Pricing is fixed by level, so it's the same wherever you book.",
+    body: "Use Find a Tutor to filter by subject, level (KS3, GCSE, A-Level or university admissions) and whether you'd like online or in-person sessions. Every tutor's profile shows their qualifications and weekly availability — the days and times of day they're usually free. Pricing is fixed by level, so it's the same wherever you book.",
   },
   {
     title: "2. Buy tokens for your level",
-    body: "Buy lesson tokens for the level you need, individually or in a block of 5+ for 10% off. One token is redeemable against one lesson at that level, with any tutor.",
+    body: "Buy lesson tokens for the level you need, individually or in a block of 5+ for 10% off. 1 token is equivalent to a 1-hour session at that level — session length is customisable, so a 1.5-hour session uses 1.5 tokens, a 2-hour session uses 2 tokens, and so on. Tokens work with any tutor teaching that level.",
   },
   {
     title: "3. Message your tutor",
-    body: "Use in-app messaging to agree a day and time with your tutor, along with subject, level and exam board. All messages stay on the platform for everyone's safety.",
+    body: "Use in-app messaging to agree a day, time and session length with your tutor, along with subject, level and exam board — you can also share files like worksheets or past papers directly in the chat. For online sessions, your tutor will share a Google Meet link beforehand. All messages stay on the platform for everyone's safety.",
   },
   {
     title: "4. Attend your session",
-    body: "After the lesson, your tutor logs it as complete, which uses one of your tokens for that level and pays them automatically — no extra step needed from you.",
+    body: "After the lesson, your tutor logs it as complete, which uses the right number of tokens for the session length and pays them automatically — no extra step needed from you.",
   },
 ];
 
