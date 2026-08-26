@@ -109,6 +109,23 @@ export default async function TutorOverviewPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardContent>
+          <h2 className="font-heading text-sm font-semibold text-navy">
+            How you get paid
+          </h2>
+          <p className="mt-1.5 text-sm text-navy/60">
+            Add your bank details on the{" "}
+            <Link href="/tutor-dashboard/earnings" className="underline">
+              Earnings
+            </Link>{" "}
+            page, then request a withdrawal whenever you have a balance.
+            Withdrawals are paid directly into your bank account by bank
+            transfer every Monday.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
