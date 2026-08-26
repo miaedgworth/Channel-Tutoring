@@ -13,11 +13,12 @@ export async function subscribeEmail(rawEmail: string, source: string) {
   const resend = getResend();
   const audienceId = process.env.RESEND_AUDIENCE_ID;
   if (resend && audienceId) {
-    await resend.contacts.create({
-      email,
-      audienceId,
-      unsubscribed: false,
-    });
+    // Resend is a best-effort sync — the database row above is the source
+    // of truth, so a provider hiccup (rate limit, network blip, contact
+    // already existing) shouldn't fail the caller's primary action.
+    await resend.contacts
+      .create({ email, audienceId, unsubscribed: false })
+      .catch(() => {});
   }
 
   return subscription;
@@ -36,7 +37,7 @@ export async function unsubscribeEmailForUser(rawEmail: string) {
   const resend = getResend();
   const audienceId = process.env.RESEND_AUDIENCE_ID;
   if (resend && audienceId) {
-    await resend.contacts.update({ email, audienceId, unsubscribed: true });
+    await resend.contacts.update({ email, audienceId, unsubscribed: true }).catch(() => {});
   }
 }
 
@@ -54,11 +55,9 @@ export async function unsubscribeEmail(token: string) {
   const resend = getResend();
   const audienceId = process.env.RESEND_AUDIENCE_ID;
   if (resend && audienceId) {
-    await resend.contacts.update({
-      email: subscription.email,
-      audienceId,
-      unsubscribed: true,
-    });
+    await resend.contacts
+      .update({ email: subscription.email, audienceId, unsubscribed: true })
+      .catch(() => {});
   }
 
   return subscription;
