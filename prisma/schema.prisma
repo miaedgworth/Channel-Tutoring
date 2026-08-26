@@ -53,6 +53,7 @@ enum TokenTransactionType {
   PURCHASE
   REDEEM
   REFUND
+  ADMIN_GRANT
 }
 
 enum TutorApplicationStatus {

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserStatusToggle } from "@/components/admin/user-status-toggle";
+import { GrantTokensControl } from "@/components/admin/grant-tokens-control";
 import { formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Clients" };
@@ -27,6 +28,7 @@ export default async function AdminClientsPage() {
               <th className="pb-2 font-medium">Newsletter</th>
               <th className="pb-2 font-medium">Status</th>
               <th className="pb-2 font-medium"></th>
+              <th className="pb-2 font-medium"></th>
             </tr>
           </thead>
           <tbody>
@@ -47,6 +49,9 @@ export default async function AdminClientsPage() {
                   <Badge variant={client.status === "ACTIVE" ? "success" : "danger"}>
                     {client.status}
                   </Badge>
+                </td>
+                <td className="py-2.5 text-right">
+                  <GrantTokensControl clientUserId={client.id} />
                 </td>
                 <td className="py-2.5 text-right">
                   <UserStatusToggle userId={client.id} status={client.status} />
