@@ -26,7 +26,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
   }
 
-  // Always respond with success to avoid leaking which emails are registered.
+  // Always respond with success (and after a consistent minimum delay) to
+  // avoid leaking which emails are registered — without the delay, the
+  // extra DB write + outbound email-provider call this branch does versus
+  // the other returning almost immediately is an easily measurable timing
+  // side-channel that defeats the point of always returning { ok: true }.
+  const startedAt = Date.now();
+  const MIN_RESPONSE_MS = 400;
+
   const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
   if (user) {
     const token = randomBytes(32).toString("hex");
@@ -49,6 +56,11 @@ export async function POST(request: Request) {
         <p>If you didn't request this, you can safely ignore this email.</p>
       `),
     }).catch(() => {});
+  }
+
+  const elapsed = Date.now() - startedAt;
+  if (elapsed < MIN_RESPONSE_MS) {
+    await new Promise((resolve) => setTimeout(resolve, MIN_RESPONSE_MS - elapsed));
   }
 
   return NextResponse.json({ ok: true });
