@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { courseInterestSchema } from "@/lib/validations/course";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
+import { escapeHtml } from "@/lib/utils";
 
 export async function POST(request: Request) {
   const ip = getClientIp(request.headers);
@@ -52,8 +53,8 @@ export async function POST(request: Request) {
     to: email,
     subject: `We've received your interest in ${course.title}`,
     html: baseEmailLayout(`
-      <p>Hi ${name},</p>
-      <p>Thanks for your interest in <strong>${course.title}</strong>. We'll
+      <p>Hi ${escapeHtml(name)},</p>
+      <p>Thanks for your interest in <strong>${escapeHtml(course.title)}</strong>. We'll
       be in touch as soon as booking details are confirmed.</p>
     `),
   }).catch(() => {});

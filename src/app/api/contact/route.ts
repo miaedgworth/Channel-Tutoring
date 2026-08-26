@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { contactSchema } from "@/lib/validations/contact";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
+import { escapeHtml } from "@/lib/utils";
 
 export async function POST(request: Request) {
   const ip = getClientIp(request.headers);
@@ -35,11 +36,11 @@ export async function POST(request: Request) {
     to: email,
     subject: "We've received your message",
     html: baseEmailLayout(`
-      <p>Hi ${name},</p>
+      <p>Hi ${escapeHtml(name)},</p>
       <p>Thanks for getting in touch with Channel Tutoring. We've received
       your message and will get back to you as soon as possible.</p>
       <p><strong>Your message:</strong></p>
-      <p>${message.replace(/\n/g, "<br />")}</p>
+      <p>${escapeHtml(message).replace(/\n/g, "<br />")}</p>
     `),
   }).catch(() => {});
 

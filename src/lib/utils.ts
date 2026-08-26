@@ -6,6 +6,20 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Escapes user-supplied text before it's interpolated into an HTML email
+// body. Without this, a name or message containing markup would be sent
+// as live HTML to whatever address the submitter typed in — effectively
+// letting them use the site's own outbound email to deliver arbitrary
+// HTML/links to anyone, under a legitimate "Channel Tutoring" sender.
+export function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function formatLevel(level: string) {
   return LEVEL_LABELS[level] ?? level;
 }
