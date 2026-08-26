@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { TokenPurchaseForm } from "@/components/dashboard/token-purchase-form";
-import { formatDateTime, formatLevel } from "@/lib/utils";
+import { formatDateTime, formatLevel, formatTokenQuantity } from "@/lib/utils";
 import { LEVELS } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Lesson Tokens" };
@@ -23,8 +23,8 @@ export default async function TokensPage({
       take: 50,
     }),
   ]);
-  const balanceByLevel = new Map<string, number>(
-    balances.map((b) => [b.level, b.balance]),
+  const balanceByLevel = new Map<string, string>(
+    balances.map((b) => [b.level, formatTokenQuantity(b.balance)]),
   );
 
   return (
@@ -46,15 +46,21 @@ export default async function TokensPage({
               >
                 <p className="text-xs text-navy/50">{l.label}</p>
                 <p className="mt-1 font-heading text-2xl font-bold text-navy">
-                  {balanceByLevel.get(l.value) ?? 0}
+                  {balanceByLevel.get(l.value) ?? "0"}
                 </p>
               </div>
             ))}
           </div>
           <p className="mt-3 text-sm text-navy/60">
             Buy tokens, then message a tutor to arrange a lesson at that
-            level — they&apos;ll log it once it&apos;s taught and a token is
-            used automatically.
+            level — they&apos;ll log it once it&apos;s taught and the right
+            number of tokens is used automatically. 1 token = a 1-hour
+            session; longer or shorter sessions use tokens proportionally
+            (e.g. a 1.5-hour session uses 1.5 tokens). See{" "}
+            <a href="/pricing" className="underline">
+              Pricing
+            </a>{" "}
+            for full details.
           </p>
         </CardContent>
       </Card>
@@ -84,10 +90,10 @@ export default async function TokensPage({
                     </p>
                   </div>
                   <span
-                    className={`font-medium ${tx.quantity >= 0 ? "text-emerald-700" : "text-navy"}`}
+                    className={`font-medium ${Number(tx.quantity) >= 0 ? "text-emerald-700" : "text-navy"}`}
                   >
-                    {tx.quantity >= 0 ? "+" : ""}
-                    {tx.quantity}
+                    {Number(tx.quantity) >= 0 ? "+" : ""}
+                    {formatTokenQuantity(tx.quantity)}
                   </span>
                 </li>
               ))}

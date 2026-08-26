@@ -17,7 +17,7 @@ const FAQS = [
   },
   {
     q: "How do I pay for a session?",
-    a: "Buy lesson tokens for the level you need, securely online via Stripe — individually, or in a block of 5+ for 10% off. Tokens don't expire and can be used with any tutor teaching that level. Once your tutor logs a lesson as taught, one token is used automatically and they're paid — no separate confirmation step needed from you.",
+    a: "Buy lesson tokens for the level you need, securely online via Stripe — individually, or in a block of 5+ for 10% off. Tokens don't expire and can be used with any tutor teaching that level. 1 token is equivalent to a 1-hour session; session length is customisable, so a 1.5-hour session uses 1.5 tokens, a 2-hour session uses 2 tokens, and so on. Once your tutor logs a lesson as taught, the right number of tokens is used automatically and they're paid — no separate confirmation step needed from you.",
   },
   {
     q: "What if a lesson gets logged by mistake?",

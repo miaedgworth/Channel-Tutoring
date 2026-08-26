@@ -58,7 +58,21 @@ export default async function PricingPage() {
           </Card>
         </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+        <div className="mt-10 rounded-xl border border-navy/10 bg-navy/[0.02] p-6">
+          <h2 className="font-heading text-lg font-semibold text-navy">
+            How tokens work
+          </h2>
+          <p className="mt-2 text-sm text-navy/70">
+            1 token is equivalent to a 1-hour session at that level&apos;s
+            price. Session length is customisable, and the tokens used
+            scale with it &mdash; for example, a 1.5-hour session uses 1.5
+            tokens, and a 2-hour session uses 2 tokens. Your tutor selects
+            the session length when they log a completed lesson, so the
+            right number of tokens is used automatically.
+          </p>
+        </div>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <div className="rounded-xl border border-navy/10 bg-navy/[0.02] p-6">
             <h2 className="font-heading text-lg font-semibold text-navy">
               Group lessons
@@ -84,7 +98,7 @@ export default async function PricingPage() {
         </div>
 
         <p className="mt-8 text-center text-sm text-navy/50">
-          One token is redeemable against one lesson at that level. See our{" "}
+          See our{" "}
           <a href="/legal/registration-agreement" className="underline">
             Registration Agreement
           </a>{" "}

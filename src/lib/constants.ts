@@ -7,9 +7,12 @@ export const SUBJECTS = [
   "Chemistry",
   "Physics",
   "Combined Science",
+  "Environmental Science",
   "Computer Science",
   "History",
   "Geography",
+  "Classics",
+  "Latin",
   "French",
   "Spanish",
   "German",
@@ -111,9 +114,19 @@ export const TUTOR_PAYOUT_PENCE: Record<string, number> = Object.fromEntries(
 export const BLOCK_BOOKING_MIN_SESSIONS = 5;
 export const BLOCK_BOOKING_DISCOUNT_RATE = 0.1;
 
-// A token is redeemable against one lesson of this length, at the token's
-// level. Matches the per-hour pricing shown on the Pricing page.
+// A token is redeemable against one hour of tuition, at the token's level —
+// matches the per-hour pricing shown on the Pricing page. Session length is
+// customisable; the tokens (and price) used scale with the length, e.g. a
+// 1.5-hour session uses 1.5 tokens.
 export const TOKEN_LESSON_DURATION_MINUTES = 60;
+
+export const SESSION_DURATION_OPTIONS_MINUTES = [30, 45, 60, 90, 120] as const;
+
+export function formatSessionDuration(minutes: number): string {
+  if (minutes % 60 === 0) return `${minutes / 60} hour${minutes === 60 ? "" : "s"}`;
+  if (minutes < 60) return `${minutes} minutes`;
+  return `${(minutes / 60).toFixed(1)} hours`;
+}
 
 // Group lessons: extra per-hour charge for each additional student beyond
 // the first, on top of the one-to-one session price.

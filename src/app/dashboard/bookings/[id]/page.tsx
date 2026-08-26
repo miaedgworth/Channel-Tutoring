@@ -4,8 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
-import { formatCurrencyGBP, formatDate, formatLevel } from "@/lib/utils";
-import { SESSION_MODE_LABELS } from "@/lib/constants";
+import { formatCurrencyGBP, formatDate, formatLevel, formatTokenQuantity } from "@/lib/utils";
+import { SESSION_MODE_LABELS, formatSessionDuration } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Booking Details" };
 export const dynamic = "force-dynamic";
@@ -46,6 +46,14 @@ export default async function ClientBookingDetailPage({
               <dt className="text-navy/50">Session mode</dt>
               <dd className="font-medium text-navy">{SESSION_MODE_LABELS[booking.sessionMode]}</dd>
             </div>
+            <div>
+              <dt className="text-navy/50">Session length</dt>
+              <dd className="font-medium text-navy">
+                {formatSessionDuration(
+                  (booking.endsAt.getTime() - booking.startsAt.getTime()) / 60000,
+                )}
+              </dd>
+            </div>
             {booking.examBoard && (
               <div>
                 <dt className="text-navy/50">Exam board</dt>
@@ -53,8 +61,10 @@ export default async function ClientBookingDetailPage({
               </div>
             )}
             <div>
-              <dt className="text-navy/50">Token value</dt>
-              <dd className="font-medium text-navy">{formatCurrencyGBP(booking.pricePence)}</dd>
+              <dt className="text-navy/50">Tokens used</dt>
+              <dd className="font-medium text-navy">
+                {formatTokenQuantity(booking.tokensUsed)} ({formatCurrencyGBP(booking.pricePence)})
+              </dd>
             </div>
           </dl>
 

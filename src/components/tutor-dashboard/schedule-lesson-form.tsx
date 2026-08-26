@@ -3,8 +3,8 @@
 import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { EXAM_BOARDS } from "@/lib/constants";
-import { formatLevel } from "@/lib/utils";
+import { EXAM_BOARDS, SESSION_DURATION_OPTIONS_MINUTES, formatSessionDuration } from "@/lib/constants";
+import { formatLevel, formatTokenQuantity } from "@/lib/utils";
 import { logCompletedLesson } from "@/lib/actions/bookings";
 
 const inputClass =
@@ -42,6 +42,7 @@ export function ScheduleLessonForm({
     tutorSessionMode === "BOTH" ? "ONLINE" : tutorSessionMode,
   );
   const [date, setDate] = useState(todayDateValue());
+  const [durationMinutes, setDurationMinutes] = useState(60);
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -60,6 +61,7 @@ export function ScheduleLessonForm({
         examBoard,
         sessionMode: sessionMode as "ONLINE" | "IN_PERSON",
         date: new Date(`${date}T12:00:00`),
+        durationMinutes,
         notes,
       });
       if (result.error) {
@@ -169,18 +171,37 @@ export function ScheduleLessonForm({
         </select>
       </div>
 
-      <div>
-        <label htmlFor="date" className="block text-sm font-medium text-navy">
-          Date the lesson happened
-        </label>
-        <input
-          id="date"
-          type="date"
-          max={todayDateValue()}
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className={inputClass}
-        />
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label htmlFor="date" className="block text-sm font-medium text-navy">
+            Date the lesson happened
+          </label>
+          <input
+            id="date"
+            type="date"
+            max={todayDateValue()}
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label htmlFor="durationMinutes" className="block text-sm font-medium text-navy">
+            Session length
+          </label>
+          <select
+            id="durationMinutes"
+            value={durationMinutes}
+            onChange={(e) => setDurationMinutes(Number(e.target.value))}
+            className={inputClass}
+          >
+            {SESSION_DURATION_OPTIONS_MINUTES.map((m) => (
+              <option key={m} value={m}>
+                {formatSessionDuration(m)}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div>
@@ -200,9 +221,9 @@ export function ScheduleLessonForm({
         {isPending ? "Logging..." : "Log Lesson"}
       </Button>
       <p className="text-xs text-navy/40">
-        This uses 1 of the client&apos;s {formatLevel(level)} tokens and pays
-        you immediately. You can undo it within 24 hours if you make a
-        mistake.
+        This uses {formatTokenQuantity(durationMinutes / 60)} of the
+        client&apos;s {formatLevel(level)} tokens and pays you immediately.
+        You can undo it within 24 hours if you make a mistake.
       </p>
     </form>
   );

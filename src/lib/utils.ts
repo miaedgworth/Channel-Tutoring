@@ -17,6 +17,12 @@ export function formatCurrencyGBP(amountInPence: number) {
   }).format(amountInPence / 100);
 }
 
+// Formats a token quantity (which may be a Prisma Decimal, string, or
+// number) as a plain number string, e.g. 1.5 -> "1.5", 2.00 -> "2".
+export function formatTokenQuantity(quantity: number | string | { toString(): string }) {
+  return parseFloat(quantity.toString()).toString();
+}
+
 export function formatDate(date: Date | string) {
   return new Intl.DateTimeFormat("en-GB", {
     weekday: "short",

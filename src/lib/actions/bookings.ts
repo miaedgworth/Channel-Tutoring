@@ -5,12 +5,12 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
-import { formatDate, formatCurrencyGBP, formatLevel } from "@/lib/utils";
+import { formatDate, formatCurrencyGBP, formatLevel, formatTokenQuantity } from "@/lib/utils";
 import {
   PLATFORM_FEE_PENCE,
   LEVEL_PRICE_PENCE,
-  TOKEN_LESSON_DURATION_MINUTES,
   LESSON_LOG_UNDO_WINDOW_MS,
+  formatSessionDuration,
 } from "@/lib/constants";
 import {
   logCompletedLessonSchema,
@@ -25,7 +25,8 @@ export async function logCompletedLesson(
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
-  const { clientId, subject, level, examBoard, sessionMode, date, notes } = parsed.data;
+  const { clientId, subject, level, examBoard, sessionMode, date, notes, durationMinutes } =
+    parsed.data;
 
   const profile = await prisma.tutorProfile.findUnique({
     where: { userId: user.id },
@@ -48,10 +49,12 @@ export async function logCompletedLesson(
     return { error: "You can only log lessons for clients you're already messaging." };
   }
 
-  const pricePence = LEVEL_PRICE_PENCE[level];
-  const tutorPayoutPence = pricePence - PLATFORM_FEE_PENCE;
+  const tokensUsed = durationMinutes / 60;
+  const pricePence = Math.round(LEVEL_PRICE_PENCE[level] * tokensUsed);
+  const platformFeePence = Math.round(PLATFORM_FEE_PENCE * tokensUsed);
+  const tutorPayoutPence = pricePence - platformFeePence;
   const startsAt = date;
-  const endsAt = new Date(startsAt.getTime() + TOKEN_LESSON_DURATION_MINUTES * 60 * 1000);
+  const endsAt = new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
 
   let booking;
   try {
@@ -59,23 +62,23 @@ export async function logCompletedLesson(
     const tokenBalance = await tx.tokenBalance.findUnique({
       where: { userId_level: { userId: clientId, level } },
     });
-    if (!tokenBalance || tokenBalance.balance < 1) {
+    if (!tokenBalance || Number(tokenBalance.balance) < tokensUsed) {
       throw new Error(
-        `${conversation.client.name} doesn't have any ${formatLevel(level)} tokens left. Ask them to buy more before you log this lesson.`,
+        `${conversation.client.name} doesn't have enough ${formatLevel(level)} tokens for a ${formatSessionDuration(durationMinutes)} session. Ask them to buy more before you log this lesson.`,
       );
     }
 
     await tx.tokenBalance.update({
       where: { id: tokenBalance.id },
-      data: { balance: { decrement: 1 } },
+      data: { balance: { decrement: tokensUsed } },
     });
     await tx.tokenTransaction.create({
       data: {
         userId: clientId,
         level,
         type: "REDEEM",
-        quantity: -1,
-        description: `${subject} lesson with ${profile.user.name} on ${formatDate(startsAt)}`,
+        quantity: -tokensUsed,
+        description: `${subject} lesson (${formatSessionDuration(durationMinutes)}) with ${profile.user.name} on ${formatDate(startsAt)}`,
       },
     });
 
@@ -89,8 +92,9 @@ export async function logCompletedLesson(
         sessionMode,
         startsAt,
         endsAt,
+        tokensUsed,
         pricePence,
-        platformFeePence: PLATFORM_FEE_PENCE,
+        platformFeePence,
         tutorPayoutPence,
         notes: notes || null,
         status: "COMPLETED",
@@ -102,7 +106,7 @@ export async function logCompletedLesson(
       data: {
         bookingId: created.id,
         amountPence: pricePence,
-        platformFeePence: PLATFORM_FEE_PENCE,
+        platformFeePence,
         tutorAmountPence: tutorPayoutPence,
         status: "SUCCEEDED",
       },
@@ -135,7 +139,7 @@ export async function logCompletedLesson(
     action: "LESSON_LOGGED",
     targetType: "Booking",
     targetId: booking.id,
-    metadata: { clientId, level },
+    metadata: { clientId, level, tokensUsed },
   });
 
   await Promise.all([
@@ -144,8 +148,9 @@ export async function logCompletedLesson(
       subject: "A lesson has been logged on Channel Tutoring",
       html: baseEmailLayout(`
         <p>Hi ${conversation.client.name},</p>
-        <p>${profile.user.name} logged your ${subject} lesson on
-        ${formatDate(startsAt)} as complete, using 1 of your
+        <p>${profile.user.name} logged your ${formatSessionDuration(durationMinutes)}
+        ${subject} lesson on ${formatDate(startsAt)} as complete, using
+        ${formatTokenQuantity(tokensUsed)} of your
         ${formatLevel(level)} tokens.</p>
         <p>If this doesn't look right, reply to your tutor or
         <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
@@ -186,20 +191,22 @@ export async function cancelBooking(
     return { error: "This lesson was logged more than 24 hours ago and can no longer be undone." };
   }
 
+  const tokensUsed = booking.tokensUsed;
+
   await prisma.$transaction(async (tx) => {
     await tx.tokenBalance.upsert({
       where: { userId_level: { userId: booking.clientId, level: booking.level } },
-      create: { userId: booking.clientId, level: booking.level, balance: 1 },
-      update: { balance: { increment: 1 } },
+      create: { userId: booking.clientId, level: booking.level, balance: tokensUsed },
+      update: { balance: { increment: tokensUsed } },
     });
     await tx.tokenTransaction.create({
       data: {
         userId: booking.clientId,
         level: booking.level,
         type: "REFUND",
-        quantity: 1,
+        quantity: tokensUsed,
         bookingId: booking.id,
-        description: `Token refunded — ${booking.subject} lesson on ${formatDate(booking.startsAt)} was undone by your tutor`,
+        description: `${formatTokenQuantity(tokensUsed)} token(s) refunded — ${booking.subject} lesson on ${formatDate(booking.startsAt)} was undone by your tutor`,
       },
     });
 
