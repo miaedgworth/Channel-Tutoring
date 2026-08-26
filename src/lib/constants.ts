@@ -93,6 +93,23 @@ export const DAY_OF_WEEK_LABELS: Record<string, string> = {
   SUNDAY: "Sunday",
 };
 
+export const MAX_ATTACHMENT_SIZE_BYTES = 15 * 1024 * 1024;
+
+export const ALLOWED_ATTACHMENT_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "text/plain",
+] as const;
+
 export const SESSION_MODE_LABELS: Record<string, string> = {
   ONLINE: "Online",
   IN_PERSON: "In person",

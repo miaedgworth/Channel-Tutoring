@@ -384,13 +384,17 @@ model Conversation {
 }
 
 model Message {
-  id             String    @id @default(cuid())
-  conversationId String
-  senderId       String
-  body           String
-  readAt         DateTime?
-  flagged        Boolean   @default(false)
-  createdAt      DateTime  @default(now())
+  id                  String    @id @default(cuid())
+  conversationId      String
+  senderId            String
+  body                String
+  attachmentUrl       String?
+  attachmentName      String?
+  attachmentType      String?
+  attachmentSizeBytes Int?
+  readAt              DateTime?
+  flagged             Boolean   @default(false)
+  createdAt           DateTime  @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation("SentMessages", fields: [senderId], references: [id])

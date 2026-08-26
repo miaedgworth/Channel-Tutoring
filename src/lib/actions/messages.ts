@@ -31,7 +31,7 @@ export async function getOrCreateConversation(
   return { conversationId: conversation.id };
 }
 
-async function assertParticipant(conversationId: string, userId: string) {
+export async function assertParticipant(conversationId: string, userId: string) {
   const conversation = await prisma.conversation.findUnique({
     where: { id: conversationId },
   });
@@ -45,10 +45,16 @@ async function assertParticipant(conversationId: string, userId: string) {
 export async function sendMessage(
   conversationId: string,
   body: string,
+  attachment?: {
+    url: string;
+    name: string;
+    type: string;
+    sizeBytes: number;
+  },
 ): Promise<{ error: string } | { error?: undefined }> {
   const user = await requireUser();
   const trimmed = body.trim();
-  if (!trimmed) return { error: "Message can't be empty." };
+  if (!trimmed && !attachment) return { error: "Message can't be empty." };
   if (trimmed.length > 4000) return { error: "Message is too long." };
 
   const participant = await assertParticipant(conversationId, user.id);
@@ -58,7 +64,16 @@ export async function sendMessage(
 
   await prisma.$transaction([
     prisma.message.create({
-      data: { conversationId, senderId: user.id, body: trimmed, flagged },
+      data: {
+        conversationId,
+        senderId: user.id,
+        body: trimmed,
+        flagged,
+        attachmentUrl: attachment?.url,
+        attachmentName: attachment?.name,
+        attachmentType: attachment?.type,
+        attachmentSizeBytes: attachment?.sizeBytes,
+      },
     }),
     prisma.conversation.update({
       where: { id: conversationId },
