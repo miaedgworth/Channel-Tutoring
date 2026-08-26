@@ -93,6 +93,15 @@ export default async function TutorAgreementPage() {
         <a href="/legal/acceptable-use-policy">Acceptable Use Policy</a> and{" "}
         <a href="/legal/safeguarding-policy">Safeguarding Policy</a>.
       </p>
+      <p>
+        For online sessions, use{" "}
+        <a href="https://meet.google.com" target="_blank" rel="noopener noreferrer">
+          Google Meet
+        </a>{" "}
+        — it&apos;s free, needs no account for the client, and works in any
+        browser. Share the meeting link with your client through the
+        Channel Tutoring messaging system beforehand.
+      </p>
 
       <h2>7. Profile accuracy</h2>
       <p>

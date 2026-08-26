@@ -126,6 +126,31 @@ export default async function TutorOverviewPage() {
           </p>
         </CardContent>
       </Card>
+
+      {profile.sessionMode !== "IN_PERSON" && (
+        <Card>
+          <CardContent>
+            <h2 className="font-heading text-sm font-semibold text-navy">
+              Running online sessions
+            </h2>
+            <p className="mt-1.5 text-sm text-navy/60">
+              Use{" "}
+              <a
+                href="https://meet.google.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                Google Meet
+              </a>{" "}
+              for online lessons — it&apos;s free, needs no account for
+              your client, and works in any browser. Share the meeting
+              link with your client through Channel Tutoring messages
+              before the session.
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
