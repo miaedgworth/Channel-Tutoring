@@ -15,6 +15,7 @@ const NAV = [
   { href: "/admin/revenue", label: "Revenue" },
   { href: "/admin/content", label: "Content" },
   { href: "/admin/courses", label: "Courses" },
+  { href: "/admin/admins", label: "Admins" },
 ];
 
 export function AdminSidebar() {

@@ -1,11 +1,102 @@
 "use server";
 
 import { randomBytes } from "crypto";
+import bcrypt from "bcryptjs";
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
+
+const addAdminSchema = z.object({
+  name: z.string().trim().min(1, "Enter a name").max(100),
+  email: z.string().trim().toLowerCase().email("Enter a valid email address"),
+});
+
+export async function adminCreateAdmin(
+  input: { name: string; email: string },
+): Promise<{ error: string } | { error?: undefined }> {
+  const admin = await requireUser("ADMIN");
+  const parsed = addAdminSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+  const { name, email } = parsed.data;
+
+  const existing = await prisma.user.findUnique({ where: { email } });
+
+  if (existing) {
+    if (existing.role === "ADMIN") {
+      return { error: "This email already belongs to an admin." };
+    }
+
+    await prisma.user.update({
+      where: { id: existing.id },
+      data: { role: "ADMIN", status: "ACTIVE" },
+    });
+
+    await logAudit({
+      actorId: admin.id,
+      action: "USER_PROMOTED_TO_ADMIN",
+      targetType: "User",
+      targetId: existing.id,
+    });
+
+    await sendEmail({
+      to: existing.email,
+      subject: "You've been made an admin on Channel Tutoring",
+      html: baseEmailLayout(`
+        <p>Hi ${existing.name},</p>
+        <p>Your Channel Tutoring account (${existing.email}) now has admin
+        access. Log in as usual with your existing password to get
+        started.</p>
+      `),
+    }).catch(() => {});
+
+    revalidatePath("/admin/admins");
+    return {};
+  }
+
+  const randomPassword = randomBytes(24).toString("hex");
+  const passwordHash = await bcrypt.hash(randomPassword, 12);
+
+  const user = await prisma.user.create({
+    data: { name, email, passwordHash, role: "ADMIN" },
+  });
+
+  await logAudit({
+    actorId: admin.id,
+    action: "ADMIN_CREATED",
+    targetType: "User",
+    targetId: user.id,
+  });
+
+  const resetToken = randomBytes(32).toString("hex");
+  await prisma.passwordResetToken.create({
+    data: {
+      token: resetToken,
+      userId: user.id,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  const setPasswordUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
+  await sendEmail({
+    to: user.email,
+    subject: "You've been added as a Channel Tutoring admin",
+    html: baseEmailLayout(`
+      <p>Hi ${user.name},</p>
+      <p>You've been given admin access to Channel Tutoring. Set your
+      password to get started:</p>
+      <p><a href="${setPasswordUrl}" style="color:#C9A227;font-weight:bold;">Set your password</a></p>
+      <p>This link expires in 7 days.</p>
+    `),
+  }).catch(() => {});
+
+  revalidatePath("/admin/admins");
+  return {};
+}
 
 export async function setUserStatus(
   userId: string,
