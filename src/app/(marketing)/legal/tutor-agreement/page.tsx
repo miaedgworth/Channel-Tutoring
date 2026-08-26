@@ -39,7 +39,7 @@ export default async function TutorAgreementPage() {
       <p>
         Session prices are fixed by Channel Tutoring according to level and
         are the same for every tutor. You are paid the following per hour,
-        deducted automatically via Stripe Connect at the time of payment:
+        with our platform fee deducted automatically at the time of payment:
       </p>
       <table className="w-full border-collapse text-left text-sm">
         <thead>
@@ -68,8 +68,8 @@ export default async function TutorAgreementPage() {
 
       <h2>4. Payments and payouts</h2>
       <ul>
-        <li>You must connect a valid bank account via Stripe Connect to receive payouts.</li>
-        <li>Your available balance can be withdrawn on demand, subject to Stripe&apos;s standard processing times.</li>
+        <li>You must add your UK bank account details in your tutor dashboard to receive payouts.</li>
+        <li>You can request a withdrawal of your available balance at any time. Withdrawals are paid by bank transfer every Monday.</li>
         <li>You can view a full ledger of your sessions, fees and payouts in your tutor dashboard.</li>
       </ul>
 

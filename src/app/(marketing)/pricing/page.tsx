@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrencyGBP } from "@/lib/utils";
+import { auth } from "@/lib/auth";
 import {
   LEVELS,
   LEVEL_PRICE_PENCE,
@@ -16,7 +18,12 @@ export const metadata: Metadata = {
   description: "How pricing works on Channel Tutoring.",
 };
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const session = await auth();
+  if (session?.user?.role === "TUTOR") {
+    redirect("/tutor-dashboard");
+  }
+
   return (
     <div className="py-16">
       <Container className="max-w-3xl">

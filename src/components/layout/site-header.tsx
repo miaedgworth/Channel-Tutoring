@@ -17,6 +17,10 @@ const NAV_LINKS = [
 
 export async function SiteHeader() {
   const session = await auth();
+  const navLinks =
+    session?.user?.role === "TUTOR"
+      ? NAV_LINKS.filter((link) => link.href !== "/pricing")
+      : NAV_LINKS;
 
   return (
     <header className="sticky top-0 z-40 border-b border-navy/10 bg-white/95 backdrop-blur">
@@ -36,7 +40,7 @@ export async function SiteHeader() {
         </Link>
 
         <nav className="hidden lg:flex items-center gap-6" aria-label="Primary">
-          {NAV_LINKS.map((link) => (
+          {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -69,7 +73,7 @@ export async function SiteHeader() {
         </div>
 
         <MobileNav
-          links={NAV_LINKS}
+          links={navLinks}
           isLoggedIn={Boolean(session?.user)}
           role={session?.user?.role}
         />

@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Container } from "@/components/ui/container";
 import { NewsletterForm } from "@/components/marketing/newsletter-form";
+import { auth } from "@/lib/auth";
 
 const columns = [
   {
@@ -36,7 +37,17 @@ const columns = [
   },
 ];
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const session = await auth();
+  const isTutor = session?.user?.role === "TUTOR";
+  const footerColumns = isTutor
+    ? columns.map((col) =>
+        col.heading === "For Clients"
+          ? { ...col, links: col.links.filter((link) => link.href !== "/pricing") }
+          : col,
+      )
+    : columns;
+
   return (
     <footer className="border-t border-navy/10 bg-navy text-white/90">
       <Container className="py-12">
@@ -72,7 +83,7 @@ export function SiteFooter() {
             </div>
           </div>
 
-          {columns.map((col) => (
+          {footerColumns.map((col) => (
             <div key={col.heading}>
               <h3 className="font-heading text-sm font-semibold text-gold">
                 {col.heading}
