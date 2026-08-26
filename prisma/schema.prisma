@@ -310,7 +310,10 @@ model TokenTransaction {
   type                    TokenTransactionType
   quantity                Decimal              @db.Decimal(6, 2)
   bookingId               String?
-  stripeCheckoutSessionId String?
+  // Unique (Postgres allows any number of NULLs here) so a redelivered
+  // Stripe webhook event can never credit the same checkout session's
+  // tokens twice — see the webhook handler's idempotency check.
+  stripeCheckoutSessionId String?              @unique
   description             String
   createdAt               DateTime             @default(now())
 
