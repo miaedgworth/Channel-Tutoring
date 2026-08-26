@@ -43,7 +43,13 @@ export async function POST(request: Request) {
     );
   }
 
-  const blob = await put(`messages/${conversationId}/${crypto.randomUUID()}-${file.name}`, file, {
+  // Strip any path segments and unsafe characters from the client-supplied
+  // filename before it goes into the blob's storage key — otherwise a
+  // crafted name (e.g. containing "/" or "..") could write outside the
+  // intended messages/{conversationId}/ prefix. The original name is still
+  // returned as-is below for display/download purposes.
+  const safeFileName = file.name.split(/[/\\]/).pop()?.replace(/[^\w.-]/g, "_") || "file";
+  const blob = await put(`messages/${conversationId}/${crypto.randomUUID()}-${safeFileName}`, file, {
     access: "public",
   });
 
