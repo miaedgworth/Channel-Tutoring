@@ -109,6 +109,9 @@ export default async function PricingPage() {
           <LinkButton href="/find-a-tutor" variant="gold">
             Find a Tutor
           </LinkButton>
+          <LinkButton href="/dashboard/tokens" variant="outline">
+            Buy Tokens
+          </LinkButton>
         </div>
       </Container>
     </div>
