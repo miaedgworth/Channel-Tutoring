@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { EXAM_BOARDS, SESSION_DURATION_OPTIONS_MINUTES, formatSessionDuration } from "@/lib/constants";
-import { formatLevel, formatTokenQuantity, toLocalDateInputValue } from "@/lib/utils";
+import { formatLevel, formatTokenQuantity, toLocalDateInputValue, londonWallTimeToUtc } from "@/lib/utils";
 import { adminScheduleSession } from "@/lib/actions/admin-bookings";
 
 const inputClass =
@@ -68,7 +68,7 @@ export function AdminScheduleSessionForm({
       setError("Choose the date and time of the session.");
       return;
     }
-    const startsAt = new Date(`${date}T${time}:00`);
+    const startsAt = londonWallTimeToUtc(date, time);
     if (startsAt.getTime() <= Date.now()) {
       setError("Choose a date and time in the future.");
       return;

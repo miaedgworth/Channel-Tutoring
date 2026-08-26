@@ -60,7 +60,7 @@ export function formatTime(date: Date | string) {
   }).format(new Date(date));
 }
 
-function datePart(date: Date, type: "year" | "month" | "day" | "hour" | "minute") {
+function londonDateParts(date: Date) {
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: DISPLAY_TIME_ZONE,
     year: "numeric",
@@ -68,18 +68,59 @@ function datePart(date: Date, type: "year" | "month" | "day" | "hour" | "minute"
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
+    second: "2-digit",
     hourCycle: "h23",
   }).formatToParts(date);
-  return parts.find((p) => p.type === type)?.value ?? "";
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return {
+    year: get("year"),
+    month: get("month"),
+    day: get("day"),
+    hour: get("hour"),
+    minute: get("minute"),
+    second: get("second"),
+  };
 }
 
 // Value for an <input type="date">, in Guernsey/UK local time rather than
 // the server's UTC runtime — see DISPLAY_TIME_ZONE above.
 export function toLocalDateInputValue(date: Date) {
-  return `${datePart(date, "year")}-${datePart(date, "month")}-${datePart(date, "day")}`;
+  const p = londonDateParts(date);
+  return `${p.year}-${p.month}-${p.day}`;
 }
 
 // Value for an <input type="time">, in Guernsey/UK local time.
 export function toLocalTimeInputValue(date: Date) {
-  return `${datePart(date, "hour")}:${datePart(date, "minute")}`;
+  const p = londonDateParts(date);
+  return `${p.hour}:${p.minute}`;
+}
+
+// The inverse of the two helpers above: given a date and time exactly as
+// entered into an <input type="date"> / <input type="time"> pair, returns
+// the UTC instant they represent in Europe/London — regardless of what
+// timezone the browser or server evaluating this happens to be in.
+//
+// `new Date(`${date}T${time}:00`)` looks like it does the same thing, but
+// a timezone-less date string like that is parsed in the *ambient*
+// timezone of wherever the JS engine is running, which is only ever
+// correct here by coincidence (a UK-based browser). Someone scheduling or
+// editing a session from a browser set to a different timezone would
+// otherwise have it silently saved at the wrong UTC instant.
+//
+// This works by taking the input as a naive UTC instant, checking what
+// wall-clock time that instant actually renders as in London, and
+// correcting by the difference — which naturally accounts for BST/GMT.
+export function londonWallTimeToUtc(dateValue: string, timeValue: string): Date {
+  const naiveUtc = new Date(`${dateValue}T${timeValue}:00Z`);
+  const p = londonDateParts(naiveUtc);
+  const londonWallAsUtc = Date.UTC(
+    Number(p.year),
+    Number(p.month) - 1,
+    Number(p.day),
+    Number(p.hour),
+    Number(p.minute),
+    Number(p.second),
+  );
+  const offsetMs = naiveUtc.getTime() - londonWallAsUtc;
+  return new Date(naiveUtc.getTime() + offsetMs);
 }
