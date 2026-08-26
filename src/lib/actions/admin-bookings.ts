@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
-import { formatDate, formatLevel, formatTokenQuantity } from "@/lib/utils";
+import { formatDate, formatLevel, formatTokenQuantity, escapeHtml } from "@/lib/utils";
 import { PLATFORM_FEE_PENCE, LEVEL_PRICE_PENCE, formatSessionDuration } from "@/lib/constants";
 import {
   adminScheduleSessionSchema,
@@ -13,6 +13,7 @@ import {
   type AdminScheduleSessionInput,
   type UpdateSessionInput,
 } from "@/lib/validations/schedule-lesson";
+import { hasSchedulingConflict } from "@/lib/booking-conflicts";
 
 export async function adminScheduleSession(
   input: AdminScheduleSessionInput,
@@ -46,6 +47,10 @@ export async function adminScheduleSession(
   const tutorPayoutPence = pricePence - platformFeePence;
   const startsAt = date;
   const endsAt = new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
+
+  if (await hasSchedulingConflict(profile.id, startsAt, endsAt)) {
+    return { error: `${profile.user.name} already has a session scheduled that overlaps with this time.` };
+  }
 
   let booking;
   try {
@@ -117,9 +122,9 @@ export async function adminScheduleSession(
       to: client.email,
       subject: "A session has been scheduled on Channel Tutoring",
       html: baseEmailLayout(`
-        <p>Hi ${client.name},</p>
+        <p>Hi ${escapeHtml(client.name)},</p>
         <p>Channel Tutoring has scheduled a ${formatSessionDuration(durationMinutes)}
-        ${subject} session for you with ${profile.user.name} on
+        ${escapeHtml(subject)} session for you with ${escapeHtml(profile.user.name)} on
         ${formatDate(startsAt)}, using ${formatTokenQuantity(tokensUsed)}
         of your ${formatLevel(level)} tokens. You'll see this under
         Upcoming Sessions on your dashboard.</p>
@@ -131,9 +136,9 @@ export async function adminScheduleSession(
       to: profile.user.email,
       subject: "Session scheduled",
       html: baseEmailLayout(`
-        <p>Hi ${profile.user.name},</p>
-        <p>Channel Tutoring has scheduled a ${subject} session for you
-        with ${client.name} on ${formatDate(startsAt)}. Once you've
+        <p>Hi ${escapeHtml(profile.user.name)},</p>
+        <p>Channel Tutoring has scheduled a ${escapeHtml(subject)} session for you
+        with ${escapeHtml(client.name)} on ${formatDate(startsAt)}. Once you've
         taught it, mark it as complete in your dashboard to get paid.</p>
       `),
     }),
@@ -197,6 +202,10 @@ export async function adminUpdateScheduledSession(
     ? Math.round(PLATFORM_FEE_PENCE * newTokensUsed)
     : booking.platformFeePence;
   const tutorPayoutPence = tokensChanged ? pricePence - platformFeePence : booking.tutorPayoutPence;
+
+  if (await hasSchedulingConflict(booking.tutorId, startsAt, endsAt, booking.id)) {
+    return { error: `${profile.user.name} already has a session scheduled that overlaps with this time.` };
+  }
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -282,9 +291,9 @@ export async function adminUpdateScheduledSession(
       to: booking.client.email,
       subject: "Your scheduled session was updated",
       html: baseEmailLayout(`
-        <p>Hi ${booking.client.name},</p>
-        <p>Channel Tutoring updated your ${subject} session with
-        ${profile.user.name} — it's now ${formatSessionDuration(durationMinutes)}
+        <p>Hi ${escapeHtml(booking.client.name)},</p>
+        <p>Channel Tutoring updated your ${escapeHtml(subject)} session with
+        ${escapeHtml(profile.user.name)} — it's now ${formatSessionDuration(durationMinutes)}
         on ${formatDate(startsAt)}.</p>
         <p>If this doesn't look right, reply to this email or
         <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
@@ -294,9 +303,9 @@ export async function adminUpdateScheduledSession(
       to: profile.user.email,
       subject: "A scheduled session was updated",
       html: baseEmailLayout(`
-        <p>Hi ${profile.user.name},</p>
-        <p>Channel Tutoring updated your ${subject} session with
-        ${booking.client.name} — it's now ${formatSessionDuration(durationMinutes)}
+        <p>Hi ${escapeHtml(profile.user.name)},</p>
+        <p>Channel Tutoring updated your ${escapeHtml(subject)} session with
+        ${escapeHtml(booking.client.name)} — it's now ${formatSessionDuration(durationMinutes)}
         on ${formatDate(startsAt)}.</p>
       `),
     }),

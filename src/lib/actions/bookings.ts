@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
-import { formatDate, formatCurrencyGBP, formatLevel, formatTokenQuantity } from "@/lib/utils";
+import { formatDate, formatCurrencyGBP, formatLevel, formatTokenQuantity, escapeHtml } from "@/lib/utils";
 import {
   PLATFORM_FEE_PENCE,
   LEVEL_PRICE_PENCE,
@@ -20,6 +20,7 @@ import {
   type ScheduleSessionInput,
   type UpdateSessionInput,
 } from "@/lib/validations/schedule-lesson";
+import { hasSchedulingConflict } from "@/lib/booking-conflicts";
 
 export async function scheduleSession(
   input: ScheduleSessionInput,
@@ -59,6 +60,10 @@ export async function scheduleSession(
   const tutorPayoutPence = pricePence - platformFeePence;
   const startsAt = date;
   const endsAt = new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
+
+  if (await hasSchedulingConflict(profile.id, startsAt, endsAt)) {
+    return { error: "You already have a session scheduled that overlaps with this time." };
+  }
 
   let booking;
   try {
@@ -134,9 +139,9 @@ export async function scheduleSession(
       to: conversation.client.email,
       subject: "A session has been scheduled on Channel Tutoring",
       html: baseEmailLayout(`
-        <p>Hi ${conversation.client.name},</p>
-        <p>${profile.user.name} has scheduled a ${formatSessionDuration(durationMinutes)}
-        ${subject} session with you on ${formatDate(startsAt)}, using
+        <p>Hi ${escapeHtml(conversation.client.name)},</p>
+        <p>${escapeHtml(profile.user.name)} has scheduled a ${formatSessionDuration(durationMinutes)}
+        ${escapeHtml(subject)} session with you on ${formatDate(startsAt)}, using
         ${formatTokenQuantity(tokensUsed)} of your
         ${formatLevel(level)} tokens. You'll see this under Upcoming
         Sessions on your dashboard.</p>
@@ -148,8 +153,8 @@ export async function scheduleSession(
       to: profile.user.email,
       subject: "Session scheduled",
       html: baseEmailLayout(`
-        <p>Hi ${profile.user.name},</p>
-        <p>Your ${subject} session with ${conversation.client.name} on
+        <p>Hi ${escapeHtml(profile.user.name)},</p>
+        <p>Your ${escapeHtml(subject)} session with ${escapeHtml(conversation.client.name)} on
         ${formatDate(startsAt)} is scheduled and their tokens have been
         reserved. Once you've taught it, come back and mark it as
         complete to get paid.</p>
@@ -220,8 +225,8 @@ export async function markSessionComplete(
       to: booking.client.email,
       subject: "Your session has been marked complete",
       html: baseEmailLayout(`
-        <p>Hi ${booking.client.name},</p>
-        <p>Your tutor marked your ${booking.subject} session on
+        <p>Hi ${escapeHtml(booking.client.name)},</p>
+        <p>Your tutor marked your ${escapeHtml(booking.subject)} session on
         ${formatDate(booking.startsAt)} as complete.</p>
       `),
     }),
@@ -229,8 +234,8 @@ export async function markSessionComplete(
       to: user.email,
       subject: "Session complete — you've been paid",
       html: baseEmailLayout(`
-        <p>Hi ${user.name},</p>
-        <p>Your ${booking.subject} session with ${booking.client.name} on
+        <p>Hi ${escapeHtml(user.name)},</p>
+        <p>Your ${escapeHtml(booking.subject)} session with ${escapeHtml(booking.client.name)} on
         ${formatDate(booking.startsAt)} has been marked complete &mdash;
         payout ${formatCurrencyGBP(booking.tutorPayoutPence)}.</p>
       `),
@@ -310,11 +315,11 @@ export async function cancelUpcomingSession(
     to: booking.client.email,
     subject: "An upcoming session was cancelled",
     html: baseEmailLayout(`
-      <p>Hi ${booking.client.name},</p>
-      <p>Your tutor cancelled the ${booking.subject} session scheduled for
+      <p>Hi ${escapeHtml(booking.client.name)},</p>
+      <p>Your tutor cancelled the ${escapeHtml(booking.subject)} session scheduled for
       ${formatDate(booking.startsAt)} &mdash; your tokens have been
       refunded in full.</p>
-      ${reason ? `<p>Reason: ${reason}</p>` : ""}
+      ${reason ? `<p>Reason: ${escapeHtml(reason)}</p>` : ""}
     `),
   }).catch(() => {});
 
@@ -376,6 +381,10 @@ export async function updateScheduledSession(
     ? Math.round(PLATFORM_FEE_PENCE * newTokensUsed)
     : booking.platformFeePence;
   const tutorPayoutPence = tokensChanged ? pricePence - platformFeePence : booking.tutorPayoutPence;
+
+  if (await hasSchedulingConflict(booking.tutorId, startsAt, endsAt, booking.id)) {
+    return { error: "You already have a session scheduled that overlaps with this time." };
+  }
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -460,8 +469,8 @@ export async function updateScheduledSession(
     to: booking.client.email,
     subject: "Your scheduled session was updated",
     html: baseEmailLayout(`
-      <p>Hi ${booking.client.name},</p>
-      <p>${profile.user.name} updated your ${subject} session — it's now
+      <p>Hi ${escapeHtml(booking.client.name)},</p>
+      <p>${escapeHtml(profile.user.name)} updated your ${escapeHtml(subject)} session — it's now
       ${formatSessionDuration(durationMinutes)} on ${formatDate(startsAt)}.</p>
       <p>If this doesn't look right, reply to your tutor or
       <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
@@ -605,9 +614,9 @@ export async function logCompletedLesson(
       to: conversation.client.email,
       subject: "A lesson has been logged on Channel Tutoring",
       html: baseEmailLayout(`
-        <p>Hi ${conversation.client.name},</p>
-        <p>${profile.user.name} logged your ${formatSessionDuration(durationMinutes)}
-        ${subject} lesson on ${formatDate(startsAt)} as complete, using
+        <p>Hi ${escapeHtml(conversation.client.name)},</p>
+        <p>${escapeHtml(profile.user.name)} logged your ${formatSessionDuration(durationMinutes)}
+        ${escapeHtml(subject)} lesson on ${formatDate(startsAt)} as complete, using
         ${formatTokenQuantity(tokensUsed)} of your
         ${formatLevel(level)} tokens.</p>
         <p>If this doesn't look right, reply to your tutor or
@@ -618,8 +627,8 @@ export async function logCompletedLesson(
       to: profile.user.email,
       subject: "Lesson logged — you've been paid",
       html: baseEmailLayout(`
-        <p>Hi ${profile.user.name},</p>
-        <p>Your ${subject} lesson with ${conversation.client.name} on
+        <p>Hi ${escapeHtml(profile.user.name)},</p>
+        <p>Your ${escapeHtml(subject)} lesson with ${escapeHtml(conversation.client.name)} on
         ${formatDate(startsAt)} has been logged &mdash; payout
         ${formatCurrencyGBP(tutorPayoutPence)}.</p>
       `),
@@ -647,6 +656,19 @@ export async function cancelBooking(
   if (booking.status !== "COMPLETED") return { error: "This lesson log can't be undone." };
   if (!booking.completedAt || Date.now() - booking.completedAt.getTime() > LESSON_LOG_UNDO_WINDOW_MS) {
     return { error: "This lesson was logged more than 24 hours ago and can no longer be undone." };
+  }
+
+  // Undoing this log reduces the tutor's balance, but a payout already
+  // requested was sized against the balance as it stood at request time —
+  // reducing it now would make that payout's amount stale (too high) once
+  // an admin approves it. Block the undo until that payout is resolved.
+  const pendingPayout = await prisma.payout.findFirst({
+    where: { tutorId: booking.tutorId, status: "PENDING" },
+  });
+  if (pendingPayout) {
+    return {
+      error: "This tutor has a withdrawal request being processed — it must be paid or resolved before this lesson log can be undone.",
+    };
   }
 
   const tokensUsed = booking.tokensUsed;
@@ -713,11 +735,11 @@ export async function cancelBooking(
     to: booking.client.email,
     subject: "A logged lesson was undone",
     html: baseEmailLayout(`
-      <p>Hi ${booking.client.name},</p>
+      <p>Hi ${escapeHtml(booking.client.name)},</p>
       <p>${booking.tutor.userId === user.id ? "Your tutor" : "Channel Tutoring"}
-      undid the ${booking.subject} lesson logged for
+      undid the ${escapeHtml(booking.subject)} lesson logged for
       ${formatDate(booking.startsAt)} &mdash; your token has been refunded.</p>
-      ${reason ? `<p>Reason: ${reason}</p>` : ""}
+      ${reason ? `<p>Reason: ${escapeHtml(reason)}</p>` : ""}
     `),
   }).catch(() => {});
 
