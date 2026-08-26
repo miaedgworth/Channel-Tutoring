@@ -397,12 +397,16 @@ model Message {
   attachmentSizeBytes Int?
   readAt              DateTime?
   flagged             Boolean   @default(false)
+  // Set once an "unread message" reminder email has been sent for this
+  // message, so the hourly cron job doesn't email the recipient twice.
+  reminderSentAt      DateTime?
   createdAt           DateTime  @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation("SentMessages", fields: [senderId], references: [id])
 
   @@index([conversationId, createdAt])
+  @@index([readAt, reminderSentAt, createdAt])
 }
 
 // ---------- Content ----------
