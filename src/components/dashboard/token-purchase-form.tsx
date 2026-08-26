@@ -7,10 +7,11 @@ import { LEVELS, LEVEL_PRICE_PENCE, BLOCK_BOOKING_MIN_SESSIONS, BLOCK_BOOKING_DI
 
 export function TokenPurchaseForm() {
   const [level, setLevel] = useState<string>(LEVELS[1].value);
-  const [quantity, setQuantity] = useState(1);
+  const [quantityInput, setQuantityInput] = useState("1");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const quantity = Math.max(1, Math.min(50, Number(quantityInput) || 1));
   const unitPricePence = LEVEL_PRICE_PENCE[level];
   const fullPricePence = unitPricePence * quantity;
   const applyDiscount = quantity >= BLOCK_BOOKING_MIN_SESSIONS;
@@ -71,8 +72,9 @@ export function TokenPurchaseForm() {
           min={1}
           max={50}
           step={1}
-          value={quantity}
-          onChange={(e) => setQuantity(Math.max(1, Math.min(50, Number(e.target.value) || 1)))}
+          value={quantityInput}
+          onChange={(e) => setQuantityInput(e.target.value)}
+          onBlur={() => setQuantityInput(String(quantity))}
           className="mt-1 w-24 rounded-md border border-navy/20 px-3 py-2 text-sm focus:border-gold-dark focus:outline-none"
         />
         <p className="mt-1 text-xs text-navy/50">

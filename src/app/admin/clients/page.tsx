@@ -4,17 +4,28 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserStatusToggle } from "@/components/admin/user-status-toggle";
 import { GrantTokensControl } from "@/components/admin/grant-tokens-control";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatTokenQuantity } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Clients" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminClientsPage() {
-  const clients = await prisma.user.findMany({
-    where: { role: "CLIENT" },
-    orderBy: { createdAt: "desc" },
-    include: { _count: { select: { bookingsAsClient: true } } },
-  });
+  const [clients, balances, purchases] = await Promise.all([
+    prisma.user.findMany({
+      where: { role: "CLIENT" },
+      orderBy: { createdAt: "desc" },
+      include: { _count: { select: { bookingsAsClient: true } } },
+    }),
+    prisma.tokenBalance.groupBy({ by: ["userId"], _sum: { balance: true } }),
+    prisma.tokenTransaction.groupBy({
+      by: ["userId"],
+      where: { type: { in: ["PURCHASE", "ADMIN_GRANT"] } },
+      _sum: { quantity: true },
+    }),
+  ]);
+
+  const remainingByUser = new Map(balances.map((b) => [b.userId, b._sum.balance ?? 0]));
+  const purchasedByUser = new Map(purchases.map((p) => [p.userId, p._sum.quantity ?? 0]));
 
   return (
     <Card>
@@ -25,6 +36,8 @@ export default async function AdminClientsPage() {
               <th className="pb-2 font-medium">Name</th>
               <th className="pb-2 font-medium">Joined</th>
               <th className="pb-2 font-medium">Bookings</th>
+              <th className="pb-2 font-medium">Tokens purchased</th>
+              <th className="pb-2 font-medium">Tokens remaining</th>
               <th className="pb-2 font-medium">Newsletter</th>
               <th className="pb-2 font-medium">Status</th>
               <th className="pb-2 font-medium"></th>
@@ -40,6 +53,12 @@ export default async function AdminClientsPage() {
                 </td>
                 <td className="py-2.5 text-navy/60">{formatDate(client.createdAt)}</td>
                 <td className="py-2.5 text-navy/60">{client._count.bookingsAsClient}</td>
+                <td className="py-2.5 text-navy/60">
+                  {formatTokenQuantity(purchasedByUser.get(client.id) ?? 0)}
+                </td>
+                <td className="py-2.5 text-navy/60">
+                  {formatTokenQuantity(remainingByUser.get(client.id) ?? 0)}
+                </td>
                 <td className="py-2.5">
                   <Badge variant={client.newsletterOptIn ? "gold" : "neutral"}>
                     {client.newsletterOptIn ? "Subscribed" : "Not subscribed"}
