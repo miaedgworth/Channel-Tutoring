@@ -6,7 +6,7 @@ import { SUBJECTS, LEVELS, TUTOR_PAYOUT_PENCE } from "@/lib/constants";
 import { CheckboxGroup } from "@/components/ui/checkbox-group";
 import { Button } from "@/components/ui/button";
 import { PhotoUpload } from "@/components/ui/photo-upload";
-import { updateTutorProfile } from "@/lib/actions/tutor-profile";
+import { updateTutorProfile, adminUpdateTutorProfile } from "@/lib/actions/tutor-profile";
 import { formatCurrencyGBP } from "@/lib/utils";
 
 const inputClass =
@@ -14,6 +14,7 @@ const inputClass =
 
 export function TutorProfileForm({
   profile,
+  adminTutorProfileId,
 }: {
   profile: {
     headline: string;
@@ -26,6 +27,8 @@ export function TutorProfileForm({
     isPublished: boolean;
     slug: string;
   };
+  /** When set, this form edits another tutor's profile as an admin. */
+  adminTutorProfileId?: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -48,7 +51,7 @@ export function TutorProfileForm({
     setSuccess(false);
 
     startTransition(async () => {
-      const result = await updateTutorProfile({
+      const input = {
         headline,
         bio,
         photoUrl,
@@ -57,7 +60,10 @@ export function TutorProfileForm({
         qualifications,
         sessionMode: sessionMode as "ONLINE" | "IN_PERSON" | "BOTH",
         isPublished,
-      });
+      };
+      const result = adminTutorProfileId
+        ? await adminUpdateTutorProfile(adminTutorProfileId, input)
+        : await updateTutorProfile(input);
       if (result.error) {
         setError(result.error);
         return;

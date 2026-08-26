@@ -36,6 +36,7 @@ export default async function AdminTutorsPage() {
               <th className="pb-2 font-medium"></th>
               <th className="pb-2 font-medium"></th>
               <th className="pb-2 font-medium"></th>
+              <th className="pb-2 font-medium"></th>
             </tr>
           </thead>
           <tbody>
@@ -61,6 +62,14 @@ export default async function AdminTutorsPage() {
                   <Badge variant={tutor.user.status === "ACTIVE" ? "success" : "danger"}>
                     {tutor.user.status}
                   </Badge>
+                </td>
+                <td className="py-2.5 text-right">
+                  <Link
+                    href={`/admin/tutors/${tutor.id}/edit`}
+                    className="text-sm font-medium text-navy underline"
+                  >
+                    Edit
+                  </Link>
                 </td>
                 <td className="py-2.5 text-right">
                   <PublishTutorToggle tutorProfileId={tutor.id} isPublished={tutor.isPublished} />
