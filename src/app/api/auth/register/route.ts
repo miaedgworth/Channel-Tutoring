@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations/auth";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
@@ -39,16 +40,30 @@ export async function POST(request: Request) {
 
   const passwordHash = await bcrypt.hash(password, 12);
 
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      passwordHash,
-      role: "CLIENT",
-      newsletterOptIn,
-      agreedToTermsAt: agreedToTerms ? new Date() : null,
-    },
-  });
+  let user;
+  try {
+    user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        passwordHash,
+        role: "CLIENT",
+        newsletterOptIn,
+        agreedToTermsAt: agreedToTerms ? new Date() : null,
+      },
+    });
+  } catch (err) {
+    // The findUnique check above is a check-then-act — it can't see a
+    // second signup for the same email that's already in flight — so the
+    // unique constraint on email is the actual guarantee here.
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      return NextResponse.json(
+        { error: "An account with that email already exists." },
+        { status: 409 },
+      );
+    }
+    throw err;
+  }
 
   if (newsletterOptIn) {
     await subscribeEmail(email, "signup").catch(() => {
