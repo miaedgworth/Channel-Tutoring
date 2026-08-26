@@ -37,47 +37,62 @@ export async function approveTutorApplication(
   const randomPassword = randomBytes(24).toString("hex");
   const passwordHash = await bcrypt.hash(randomPassword, 12);
 
-  const user = await prisma.$transaction(async (tx) => {
-    const user = existingUser
-      ? await tx.user.update({
-          where: { id: existingUser.id },
-          data: { role: "TUTOR" },
-        })
-      : await tx.user.create({
-          data: {
-            name: application.name,
-            email: application.email,
-            phone: application.phone,
-            passwordHash,
-            role: "TUTOR",
-          },
-        });
+  let user;
+  try {
+    user = await prisma.$transaction(async (tx) => {
+      // Atomically claim the application before doing anything else — the
+      // conditional update only affects the row while it's still PENDING,
+      // so two concurrent approvals of the same application (a double
+      // click, a retried request) can't both create a tutor account for
+      // it. Whichever transaction commits first wins; the other's claim
+      // affects zero rows and aborts here instead of hitting a duplicate
+      // TutorProfile/slug constraint mid-transaction.
+      const claimed = await tx.tutorApplication.updateMany({
+        where: { id: application.id, status: "PENDING" },
+        data: { status: "APPROVED", reviewedById: admin.id, reviewedAt: new Date() },
+      });
+      if (claimed.count === 0) {
+        throw new Error("This application has already been reviewed.");
+      }
 
-    await tx.tutorProfile.create({
-      data: {
-        userId: user.id,
-        slug,
-        headline: `${application.subjects[0] ?? "Tutor"} Tutor`,
-        bio: application.bio,
-        subjects: application.subjects,
-        levels: application.levels,
-        qualifications: application.qualifications,
-        isPublished: false,
-      },
+      const user = existingUser
+        ? await tx.user.update({
+            where: { id: existingUser.id },
+            data: { role: "TUTOR" },
+          })
+        : await tx.user.create({
+            data: {
+              name: application.name,
+              email: application.email,
+              phone: application.phone,
+              passwordHash,
+              role: "TUTOR",
+            },
+          });
+
+      await tx.tutorProfile.create({
+        data: {
+          userId: user.id,
+          slug,
+          headline: `${application.subjects[0] ?? "Tutor"} Tutor`,
+          bio: application.bio,
+          subjects: application.subjects,
+          levels: application.levels,
+          qualifications: application.qualifications,
+          isPublished: false,
+        },
+      });
+
+      await tx.tutorApplication.update({
+        where: { id: application.id },
+        data: { userId: user.id },
+      });
+
+      return user;
     });
-
-    await tx.tutorApplication.update({
-      where: { id: application.id },
-      data: {
-        status: "APPROVED",
-        reviewedById: admin.id,
-        reviewedAt: new Date(),
-        userId: user.id,
-      },
-    });
-
-    return user;
-  });
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Something went wrong." };
+  }
 
   const resetToken = randomBytes(32).toString("hex");
   await prisma.passwordResetToken.create({
