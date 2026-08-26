@@ -74,10 +74,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return token;
     },
-    session({ session, token }) {
+    async session({ session, token }) {
       session.user.id = token.id as string;
-      session.user.role = token.role as Role;
-      session.user.status = token.status as UserStatus;
+      // Re-read role/status from the database on every request instead of
+      // trusting the JWT's snapshot from sign-in time — otherwise
+      // suspending a user (or changing their role) has no effect on
+      // sessions they already hold until that JWT expires (up to 30 days
+      // by default), leaving a suspended account fully able to use the
+      // site in the meantime.
+      const current = await prisma.user.findUnique({
+        where: { id: token.id as string },
+        select: { role: true, status: true },
+      });
+      session.user.role = current?.role ?? (token.role as Role);
+      session.user.status = current?.status ?? (token.status as UserStatus);
       return session;
     },
   },
