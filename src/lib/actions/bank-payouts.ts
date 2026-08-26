@@ -102,29 +102,40 @@ export async function markPayoutPaid(
   const admin = await requireUser("ADMIN");
 
   const payout = await prisma.payout.findUnique({ where: { id: payoutId } });
-  if (!payout || payout.status !== "PENDING") {
-    return { error: "Payout not found or already processed." };
-  }
+  if (!payout) return { error: "Payout not found or already processed." };
 
-  await prisma.$transaction([
-    prisma.payout.update({
-      where: { id: payoutId },
-      data: { status: "PAID", paidAt: new Date() },
-    }),
-    prisma.tutorProfile.update({
-      where: { id: payout.tutorId },
-      data: { balancePence: { decrement: payout.amountPence } },
-    }),
-    prisma.tutorLedgerEntry.create({
-      data: {
-        tutorId: payout.tutorId,
-        type: "PAYOUT",
-        amountPence: -payout.amountPence,
-        payoutId: payout.id,
-        description: "Withdrawal via bank transfer",
-      },
-    }),
-  ]);
+  try {
+    await prisma.$transaction(async (tx) => {
+      // Atomic conditional claim — guards against two concurrent calls (a
+      // double-click, or two admin sessions) both passing the findUnique
+      // check above and double-decrementing the tutor's balance.
+      const claimed = await tx.payout.updateMany({
+        where: { id: payoutId, status: "PENDING" },
+        data: { status: "PAID", paidAt: new Date() },
+      });
+      if (claimed.count === 0) {
+        throw new Error("ALREADY_PROCESSED");
+      }
+      await tx.tutorProfile.update({
+        where: { id: payout.tutorId },
+        data: { balancePence: { decrement: payout.amountPence } },
+      });
+      await tx.tutorLedgerEntry.create({
+        data: {
+          tutorId: payout.tutorId,
+          type: "PAYOUT",
+          amountPence: -payout.amountPence,
+          payoutId: payout.id,
+          description: "Withdrawal via bank transfer",
+        },
+      });
+    });
+  } catch (err) {
+    if (err instanceof Error && err.message === "ALREADY_PROCESSED") {
+      return { error: "Payout not found or already processed." };
+    }
+    throw err;
+  }
 
   await logAudit({
     actorId: admin.id,
