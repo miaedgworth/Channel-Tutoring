@@ -55,17 +55,20 @@ async function TutorResults({
 }: {
   searchParams: PageProps<"/find-a-tutor">["searchParams"];
 }) {
+  const VALID_LEVELS = ["KS3", "GCSE", "A_LEVEL", "UNIVERSITY_ADMISSIONS"] as const;
+
   const params = await searchParams;
   const subject = typeof params.subject === "string" ? params.subject : undefined;
-  const level = typeof params.level === "string" ? params.level : undefined;
+  const rawLevel = typeof params.level === "string" ? params.level : undefined;
+  const level = VALID_LEVELS.includes(rawLevel as (typeof VALID_LEVELS)[number])
+    ? (rawLevel as (typeof VALID_LEVELS)[number])
+    : undefined;
   const sessionMode = typeof params.sessionMode === "string" ? params.sessionMode : undefined;
 
   const where: Prisma.TutorProfileWhereInput = {
     isPublished: true,
     ...(subject ? { subjects: { has: subject } } : {}),
-    ...(level
-      ? { levels: { has: level as "KS3" | "GCSE" | "A_LEVEL" | "UNIVERSITY_ADMISSIONS" } }
-      : {}),
+    ...(level ? { levels: { has: level } } : {}),
     ...(sessionMode === "ONLINE"
       ? { sessionMode: { in: ["ONLINE", "BOTH"] } }
       : sessionMode === "IN_PERSON"
