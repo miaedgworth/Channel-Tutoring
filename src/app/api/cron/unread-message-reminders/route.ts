@@ -52,7 +52,6 @@ export async function GET(request: Request) {
       conversationId: string;
       recipientIsClient: boolean;
       messageIds: string[];
-      count: number;
     }
   >();
 
@@ -64,7 +63,6 @@ export async function GET(request: Request) {
     const existing = groups.get(key);
     if (existing) {
       existing.messageIds.push(message.id);
-      existing.count += 1;
     } else {
       groups.set(key, {
         recipient,
@@ -72,38 +70,44 @@ export async function GET(request: Request) {
         conversationId: conversation.id,
         recipientIsClient,
         messageIds: [message.id],
-        count: 1,
       });
     }
   }
 
-  let remindersSent = 0;
-  for (const group of groups.values()) {
-    const path = group.recipientIsClient
-      ? `/dashboard/messages/${group.conversationId}`
-      : `/tutor-dashboard/messages/${group.conversationId}`;
-    const link = `${process.env.NEXT_PUBLIC_APP_URL}${path}`;
+  const results = await Promise.allSettled(
+    Array.from(groups.values()).map(async (group) => {
+      // Claim these messages before sending: the conditional update only
+      // affects rows still unclaimed, so if another overlapping run (or a
+      // retry) grabs the same group first, this returns 0 and we skip the
+      // send instead of emailing the recipient twice. Claiming first (not
+      // after) also means a crash between send and claim can only cause a
+      // missed reminder, never a duplicate one.
+      const claimed = await prisma.message.updateMany({
+        where: { id: { in: group.messageIds }, reminderSentAt: null },
+        data: { reminderSentAt: new Date() },
+      });
+      if (claimed.count === 0) return false;
 
-    try {
+      const path = group.recipientIsClient
+        ? `/dashboard/messages/${group.conversationId}`
+        : `/tutor-dashboard/messages/${group.conversationId}`;
+      const link = `${process.env.NEXT_PUBLIC_APP_URL}${path}`;
+
       await sendEmail({
         to: group.recipient.email,
         subject: "You have an unread message on Channel Tutoring",
         html: baseEmailLayout(`
           <p>Hi ${group.recipient.name},</p>
-          <p>${group.senderName} sent you ${group.count > 1 ? `${group.count} messages` : "a message"}
+          <p>${group.senderName} sent you ${group.messageIds.length > 1 ? `${group.messageIds.length} messages` : "a message"}
           on Channel Tutoring over 10 hours ago that you haven't opened yet.</p>
           <p><a href="${link}">View your messages</a></p>
         `),
       });
-      await prisma.message.updateMany({
-        where: { id: { in: group.messageIds } },
-        data: { reminderSentAt: new Date() },
-      });
-      remindersSent += 1;
-    } catch {
-      // Leave reminderSentAt unset so this group is retried on the next run.
-    }
-  }
+      return true;
+    }),
+  );
+
+  const remindersSent = results.filter((r) => r.status === "fulfilled" && r.value).length;
 
   return NextResponse.json({ remindersSent, messagesChecked: unread.length });
 }

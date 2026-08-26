@@ -69,9 +69,6 @@ export async function sendMessage(
   const conversation = participant.conversation;
 
   const flagged = containsContactInfo(trimmed);
-  const isFirstMessageFromClient =
-    user.id === conversation.clientId &&
-    (await prisma.message.count({ where: { conversationId } })) === 0;
 
   await prisma.$transaction([
     prisma.message.create({
@@ -94,22 +91,31 @@ export async function sendMessage(
 
   // Alert the tutor immediately the first time a new client messages them —
   // this is a lead, so it doesn't wait for the general unread-message
-  // reminder like every other message does.
-  if (isFirstMessageFromClient) {
-    const tutorUser = await prisma.user.findUnique({
-      where: { id: conversation.tutorUserId },
-      select: { name: true, email: true },
+  // reminder like every other message does. The conditional update below
+  // only succeeds for one caller even if the client's first message is
+  // submitted twice concurrently (double-click, retry), so the tutor is
+  // guaranteed exactly one email rather than racing on a plain count().
+  if (user.id === conversation.clientId) {
+    const claimed = await prisma.conversation.updateMany({
+      where: { id: conversationId, firstClientMessageNotifiedAt: null },
+      data: { firstClientMessageNotifiedAt: new Date() },
     });
-    if (tutorUser) {
-      await sendEmail({
-        to: tutorUser.email,
-        subject: "New client message on Channel Tutoring",
-        html: baseEmailLayout(`
-          <p>Hi ${tutorUser.name},</p>
-          <p>${user.name} has messaged you for the first time on Channel Tutoring.</p>
-          <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/tutor-dashboard/messages/${conversationId}">View the conversation</a></p>
-        `),
-      }).catch(() => {});
+    if (claimed.count > 0) {
+      const tutorUser = await prisma.user.findUnique({
+        where: { id: conversation.tutorUserId },
+        select: { name: true, email: true },
+      });
+      if (tutorUser) {
+        await sendEmail({
+          to: tutorUser.email,
+          subject: "New client message on Channel Tutoring",
+          html: baseEmailLayout(`
+            <p>Hi ${tutorUser.name},</p>
+            <p>${user.name} has messaged you for the first time on Channel Tutoring.</p>
+            <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/tutor-dashboard/messages/${conversationId}">View the conversation</a></p>
+          `),
+        }).catch(() => {});
+      }
     }
   }
 

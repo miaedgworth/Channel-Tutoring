@@ -375,6 +375,11 @@ model Conversation {
   tutorProfileId String
   lastMessageAt  DateTime @default(now())
   createdAt      DateTime @default(now())
+  // Set the first time the tutor is emailed about a new client on this
+  // conversation. An atomic conditional update on this column (only set
+  // when null) is what guarantees that email is sent exactly once even if
+  // the client's first message is submitted twice concurrently.
+  firstClientMessageNotifiedAt DateTime?
 
   client       User         @relation("ClientConversations", fields: [clientId], references: [id])
   tutorUser    User         @relation("TutorConversations", fields: [tutorUserId], references: [id])
