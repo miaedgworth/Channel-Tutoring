@@ -21,8 +21,12 @@ const CLIENT_STEPS = [
     body: "Use in-app messaging to agree a day, time and session length with your tutor, along with subject, level and exam board — you can also share files like worksheets or past papers directly in the chat. For online sessions, your tutor will share a Google Meet link beforehand. All messages stay on the platform for everyone's safety.",
   },
   {
-    title: "4. Attend your session",
-    body: "After the lesson, your tutor logs it as complete, which uses the right number of tokens for the session length and pays them automatically — no extra step needed from you.",
+    title: "4. Your tutor schedules the session",
+    body: "Once you've agreed a date and time, your tutor schedules the session on the platform. The right number of tokens for the session length is reserved straight away, and it appears as an upcoming session on your dashboard.",
+  },
+  {
+    title: "5. Attend your session",
+    body: "After the lesson, your tutor marks it as complete and is paid automatically — no extra step needed from you. If your tutor needs to cancel a scheduled session, your tokens are refunded in full.",
   },
 ];
 

@@ -63,17 +63,20 @@ export default function RegistrationAgreementPage() {
       <p>
         Payment for tokens is taken securely online by card at the time of
         purchase. We don&apos;t take payment by bank transfer or in
-        person. No token is deducted until a tutor logs a session as
-        complete, so nothing is charged in advance for a specific date or
-        time.
+        person. Once you&apos;ve agreed a date and time with a tutor, they
+        schedule the session on the platform, which reserves the right
+        number of tokens for that session and shows it as an upcoming
+        session on your dashboard. Your tutor is only paid once the
+        session has taken place and they&apos;ve marked it as complete.
       </p>
 
       <h2>Cancellation policy</h2>
       <p>
-        Since tokens are only used once a tutor logs a session as
-        complete, changing or cancelling a planned session in advance
-        doesn&apos;t cost you anything &mdash; just message your tutor as
-        soon as you can. See our full{" "}
+        If you need to change or cancel a session that&apos;s been
+        scheduled, message your tutor as soon as you can. If it won&apos;t
+        be going ahead, your tutor cancels it on the platform and your
+        reserved tokens are refunded to your balance automatically. See
+        our full{" "}
         <a href="/legal/cancellation-refund-policy">
           Cancellation &amp; Refund Policy
         </a>{" "}

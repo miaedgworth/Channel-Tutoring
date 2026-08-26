@@ -34,12 +34,12 @@ export default async function TutorBookingsPage() {
       <Card>
         <CardContent>
           <p className="text-sm text-navy/60">
-            No lessons logged yet. Once you&apos;ve taught a session, log it
-            below to redeem the client&apos;s token and get paid.
+            No sessions yet. Schedule an upcoming session with a client, or
+            log one you&apos;ve already taught, to redeem their token.
           </p>
           <div className="mt-4">
             <LinkButton href="/tutor-dashboard/bookings/new" variant="primary" size="sm">
-              Log a Lesson
+              Schedule or Log a Session
             </LinkButton>
           </div>
         </CardContent>
@@ -51,7 +51,7 @@ export default async function TutorBookingsPage() {
     <div className="space-y-3">
       <div className="flex justify-end">
         <LinkButton href="/tutor-dashboard/bookings/new" variant="primary" size="sm">
-          Schedule a Lesson
+          Schedule or Log a Session
         </LinkButton>
       </div>
       {bookings.map((booking) => (

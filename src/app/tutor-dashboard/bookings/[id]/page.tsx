@@ -5,7 +5,9 @@ import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CancelBookingButton } from "@/components/cancel-booking-button";
-import { formatCurrencyGBP, formatDate, formatLevel, formatTokenQuantity } from "@/lib/utils";
+import { MarkSessionCompleteButton } from "@/components/tutor-dashboard/mark-session-complete-button";
+import { CancelUpcomingSessionButton } from "@/components/tutor-dashboard/cancel-upcoming-session-button";
+import { formatCurrencyGBP, formatDate, formatDateTime, formatLevel, formatTokenQuantity } from "@/lib/utils";
 import { SESSION_MODE_LABELS, LESSON_LOG_UNDO_WINDOW_MS, formatSessionDuration } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Booking Details" };
@@ -44,8 +46,14 @@ export default async function TutorBookingDetailPage({
 
           <dl className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <dt className="text-navy/50">Lesson date</dt>
-              <dd className="font-medium text-navy">{formatDate(booking.startsAt)}</dd>
+              <dt className="text-navy/50">
+                {booking.status === "CONFIRMED" ? "Scheduled for" : "Lesson date"}
+              </dt>
+              <dd className="font-medium text-navy">
+                {booking.status === "CONFIRMED"
+                  ? formatDateTime(booking.startsAt)
+                  : formatDate(booking.startsAt)}
+              </dd>
             </div>
             <div>
               <dt className="text-navy/50">Level</dt>
@@ -66,7 +74,9 @@ export default async function TutorBookingDetailPage({
               </dd>
             </div>
             <div>
-              <dt className="text-navy/50">Your payout</dt>
+              <dt className="text-navy/50">
+                {booking.status === "CONFIRMED" ? "Your payout (once complete)" : "Your payout"}
+              </dt>
               <dd className="font-medium text-navy">
                 {formatCurrencyGBP(booking.tutorPayoutPence)}
               </dd>
@@ -85,6 +95,23 @@ export default async function TutorBookingDetailPage({
           )}
         </CardContent>
       </Card>
+
+      {booking.status === "CONFIRMED" && (
+        <Card>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-navy/60">
+              Once you&apos;ve taught this session, mark it as complete to
+              redeem the client&apos;s reserved tokens and get paid. If it
+              won&apos;t be going ahead, cancel it to refund the client in
+              full.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <MarkSessionCompleteButton bookingId={booking.id} />
+              <CancelUpcomingSessionButton bookingId={booking.id} />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {canUndo && (
         <div>

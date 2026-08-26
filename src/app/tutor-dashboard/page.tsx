@@ -67,21 +67,36 @@ export default async function TutorOverviewPage() {
               a session — subject, level, session length and date.
             </li>
             <li>
-              2. You teach the session, in person or online (see below for
+              2. Go to{" "}
+              <Link href="/tutor-dashboard/bookings/new" className="underline">
+                Schedule a session
+              </Link>{" "}
+              for the agreed date and time. The client&apos;s tokens are
+              reserved straight away and it shows up as an upcoming session
+              on their dashboard.
+            </li>
+            <li>
+              3. You teach the session, in person or online (see below for
               online sessions).
             </li>
             <li>
-              3. Afterwards, go to{" "}
-              <Link href="/tutor-dashboard/bookings/new" className="underline">
-                Log a lesson
+              4. Afterwards, open the session from your{" "}
+              <Link href="/tutor-dashboard/bookings" className="underline">
+                bookings
               </Link>{" "}
-              and mark it as complete. The right number of tokens is used
-              based on the session length, and you&apos;re paid
-              immediately — no extra step needed from the client.
+              and mark it as complete to get paid. If it doesn&apos;t go
+              ahead, cancel it instead to refund the client in full.
             </li>
             <li>
-              4. Logged a lesson by mistake? You can undo it within 24
-              hours from the booking&apos;s page.
+              5. Taught a session you didn&apos;t schedule in advance? Use{" "}
+              <Link href="/tutor-dashboard/bookings/new" className="underline">
+                Log a past lesson
+              </Link>{" "}
+              to redeem the token and get paid in one step.
+            </li>
+            <li>
+              6. Marked a session complete by mistake? You can undo it
+              within 24 hours from the booking&apos;s page.
             </li>
           </ol>
         </CardContent>
@@ -147,7 +162,9 @@ export default async function TutorOverviewPage() {
             How you get paid
           </h2>
           <p className="mt-1.5 text-sm text-navy/60">
-            Add your bank details on the{" "}
+            You&apos;re paid as soon as you mark a session complete (or
+            straight away when you log a past lesson). Add your bank
+            details on the{" "}
             <Link href="/tutor-dashboard/earnings" className="underline">
               Earnings
             </Link>{" "}

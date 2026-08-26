@@ -73,12 +73,26 @@ export default async function TutorAgreementPage() {
         <li>You can view a full ledger of your sessions, fees and payouts in your tutor dashboard.</li>
       </ul>
 
-      <h2>5. Cancellations and lessons logged in error</h2>
+      <h2>5. Scheduling, cancellations and errors</h2>
       <p>
-        If you log a session as complete by mistake, you can undo it
-        within 24 hours, which refunds the client&apos;s tokens and
-        reverses your payout. Repeated errors or cancellations may affect
-        your standing on the platform. See our{" "}
+        Once you&apos;ve agreed a date and time with a client, schedule the
+        session on the platform — this reserves their tokens straight
+        away and shows it as an upcoming session on their dashboard.
+        Afterwards, mark it as complete to redeem the tokens and get paid.
+        If a session won&apos;t be going ahead, cancel it instead to
+        refund the client&apos;s tokens in full; no payout is made for a
+        cancelled session.
+      </p>
+      <p>
+        Taught a session that wasn&apos;t scheduled in advance? You can
+        log it as a completed lesson instead, which redeems the
+        client&apos;s token and pays you in one step.
+      </p>
+      <p>
+        If you mark a session complete, or log a completed lesson, by
+        mistake, you can undo it within 24 hours, which refunds the
+        client&apos;s tokens and reverses your payout. Repeated errors or
+        cancellations may affect your standing on the platform. See our{" "}
         <a href="/legal/cancellation-refund-policy">
           Cancellation &amp; Refund Policy
         </a>{" "}

@@ -9,39 +9,45 @@ export default function CancellationRefundPolicyPage() {
       <h2>How charging works</h2>
       <p>
         Buying lesson tokens and arranging a session are two separate
-        steps. Tokens are only ever used once a session has actually taken
-        place: your tutor logs it as complete afterwards, which is the
-        point a token is deducted from your balance and your tutor is
-        paid. Nothing is charged in advance for a specific date or time,
-        so there&apos;s nothing to refund for a session that never
-        happened.
+        steps. Once you&apos;ve agreed a date and time with a tutor, they
+        schedule the session on the platform — this reserves the right
+        number of tokens for the session length straight away, and it
+        appears as an upcoming session on your dashboard. Your tutor is
+        only paid once the session has taken place and they&apos;ve marked
+        it as complete.
+      </p>
+      <p>
+        If a tutor teaches a session that wasn&apos;t scheduled in advance,
+        they can instead log it as a completed lesson afterwards, which
+        uses a token and pays them in one step.
       </p>
 
-      <h2>Changing or cancelling a planned session</h2>
+      <h2>Changing or cancelling a scheduled session</h2>
       <p>
-        If you need to change or cancel a session you&apos;ve arranged
-        with a tutor, just message them through Channel Tutoring as soon
-        as you can. Since no token is used until the tutor logs the
-        session as complete, cancelling or rescheduling in advance doesn&apos;t
-        cost you anything.
+        If you need to change or cancel a session that&apos;s been
+        scheduled, message your tutor through Channel Tutoring as soon as
+        you can. If the session won&apos;t be going ahead, your tutor
+        cancels it on the platform and your reserved tokens are refunded
+        to your balance in full, automatically.
       </p>
 
-      <h2>Lessons logged in error</h2>
+      <h2>Lessons logged or marked complete in error</h2>
       <p>
-        If a tutor logs a session as complete by mistake, they can undo it
-        within 24 hours of logging it. This refunds the exact number of
-        tokens used and reverses their payout. If it&apos;s outside that
-        24-hour window, contact us at{" "}
+        If a tutor marks a session complete, or logs a completed lesson,
+        by mistake, they can undo it within 24 hours. This refunds the
+        exact number of tokens used and reverses their payout. If
+        it&apos;s outside that 24-hour window, contact us at{" "}
         <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>{" "}
         and we&apos;ll sort it out.
       </p>
 
       <h2>No-shows</h2>
       <p>
-        Tutors only log — and get paid for — sessions that actually took
-        place, so a client no-show shouldn&apos;t result in any tokens
-        being used. If a tutor doesn&apos;t attend a session you&apos;d
-        arranged, please contact us so we can look into it.
+        Tutors only mark a session complete — and get paid — once it has
+        actually taken place, so a client no-show shouldn&apos;t result in
+        a tutor being paid. If a tutor doesn&apos;t attend a scheduled
+        session, please contact us so we can look into it and, where
+        appropriate, cancel the session and refund your tokens.
       </p>
 
       <h2>Failed or disputed token purchases</h2>

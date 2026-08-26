@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
-import { formatCurrencyGBP, formatDate, formatLevel, formatTokenQuantity } from "@/lib/utils";
+import { formatCurrencyGBP, formatDate, formatDateTime, formatLevel, formatTokenQuantity } from "@/lib/utils";
 import { SESSION_MODE_LABELS, formatSessionDuration } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Booking Details" };
@@ -35,8 +35,14 @@ export default async function ClientBookingDetailPage({
 
           <dl className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <dt className="text-navy/50">Lesson date</dt>
-              <dd className="font-medium text-navy">{formatDate(booking.startsAt)}</dd>
+              <dt className="text-navy/50">
+                {booking.status === "CONFIRMED" ? "Scheduled for" : "Lesson date"}
+              </dt>
+              <dd className="font-medium text-navy">
+                {booking.status === "CONFIRMED"
+                  ? formatDateTime(booking.startsAt)
+                  : formatDate(booking.startsAt)}
+              </dd>
             </div>
             <div>
               <dt className="text-navy/50">Level</dt>
@@ -75,9 +81,19 @@ export default async function ClientBookingDetailPage({
             </div>
           )}
 
-          {booking.status === "CANCELLED_BY_TUTOR" && booking.cancellationReason && (
+          {booking.status === "CONFIRMED" && (
+            <p className="text-sm text-navy/60">
+              This session is scheduled. Your tutor will mark it as complete
+              after it takes place — if your plans change, just message
+              them to reschedule or cancel.
+            </p>
+          )}
+
+          {booking.status === "CANCELLED_BY_TUTOR" && (
             <p className="text-sm text-red">
-              Undone by your tutor: {booking.cancellationReason}
+              Cancelled by your tutor
+              {booking.cancellationReason ? `: ${booking.cancellationReason}` : ""} — your
+              tokens have been refunded.
             </p>
           )}
         </CardContent>

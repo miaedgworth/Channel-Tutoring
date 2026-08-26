@@ -3,9 +3,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
-import { ScheduleLessonForm } from "@/components/tutor-dashboard/schedule-lesson-form";
+import { NewSessionTabs } from "@/components/tutor-dashboard/new-session-tabs";
 
-export const metadata: Metadata = { title: "Log a Lesson" };
+export const metadata: Metadata = { title: "Schedule or Log a Session" };
 export const dynamic = "force-dynamic";
 
 export default async function ScheduleLessonPage({
@@ -38,8 +38,8 @@ export default async function ScheduleLessonPage({
         <CardContent>
           <p className="text-sm text-navy/60">
             You don&apos;t have any client conversations yet. Once a client
-            messages you, you&apos;ve taught them a lesson, and they have a
-            token to spend, come back here to log it.{" "}
+            messages you, come back here to schedule a session with them or
+            log one you&apos;ve already taught.{" "}
             <Link href="/tutor-dashboard/messages" className="underline">
               View messages
             </Link>
@@ -53,14 +53,10 @@ export default async function ScheduleLessonPage({
     <Card>
       <CardContent>
         <h2 className="font-heading text-lg font-semibold text-navy">
-          Log a Lesson
+          Schedule or Log a Session
         </h2>
-        <p className="mt-1 text-sm text-navy/60">
-          Once you&apos;ve taught a lesson, log it here to redeem one of the
-          client&apos;s tokens for that level and get paid straight away.
-        </p>
-        <div className="mt-6">
-          <ScheduleLessonForm
+        <div className="mt-4">
+          <NewSessionTabs
             clients={conversations.map((c) => c.client)}
             subjects={profile.subjects}
             levels={profile.levels}
