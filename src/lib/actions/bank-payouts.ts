@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { logAudit } from "@/lib/audit";
@@ -66,9 +67,20 @@ export async function requestBankPayout(): Promise<
     return { error: "You already have a withdrawal request being processed." };
   }
 
-  await prisma.payout.create({
-    data: { tutorId: profile.id, amountPence: profile.balancePence, status: "PENDING" },
-  });
+  try {
+    await prisma.payout.create({
+      data: { tutorId: profile.id, amountPence: profile.balancePence, status: "PENDING" },
+    });
+  } catch (err) {
+    // A partial unique index (Payout_tutorId_one_pending) is what actually
+    // makes this safe under a double-click or a retried request — the
+    // findFirst check above is just a fast path for the common case, since
+    // it can't see a concurrent request that hasn't committed yet.
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      return { error: "You already have a withdrawal request being processed." };
+    }
+    throw err;
+  }
 
   await logAudit({
     actorId: user.id,

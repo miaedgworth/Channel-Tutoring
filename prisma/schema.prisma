@@ -336,6 +336,9 @@ model TutorLedgerEntry {
   @@index([tutorId, createdAt])
 }
 
+// A partial unique index (Payout_tutorId_one_pending, added via migration
+// since Prisma's @@unique can't be filtered by WHERE) enforces at most one
+// PENDING row per tutorId at the database level — see requestBankPayout().
 model Payout {
   id            String       @id @default(cuid())
   tutorId       String
