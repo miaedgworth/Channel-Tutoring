@@ -378,6 +378,21 @@ model Review {
   @@index([tutorId])
 }
 
+// Free-form session feedback submitted from the public /feedback page — not
+// tied to a specific booking or a logged-in account, unlike Review above.
+model Feedback {
+  id             String   @id @default(cuid())
+  clientName     String
+  tutorName      String
+  rating         Int
+  helpfulText    String
+  improveText    String?
+  consentToShare Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 // ---------- Messaging ----------
 
 model Conversation {

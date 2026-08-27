@@ -20,6 +20,7 @@ const columns = [
       { href: "/news", label: "News" },
       { href: "/blog", label: "Blog" },
       { href: "/contact", label: "Contact" },
+      { href: "/feedback", label: "Feedback" },
       { href: "/join-as-a-tutor", label: "Become a Tutor" },
     ],
   },
