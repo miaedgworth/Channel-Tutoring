@@ -9,8 +9,10 @@ import { formatDate, formatLevel, formatTokenQuantity, escapeHtml } from "@/lib/
 import { PLATFORM_FEE_PENCE, LEVEL_PRICE_PENCE, formatSessionDuration } from "@/lib/constants";
 import {
   adminScheduleSessionSchema,
+  adminLogCompletedLessonSchema,
   updateSessionSchema,
   type AdminScheduleSessionInput,
+  type AdminLogCompletedLessonInput,
   type UpdateSessionInput,
 } from "@/lib/validations/schedule-lesson";
 import { hasSchedulingConflict } from "@/lib/booking-conflicts";
@@ -321,4 +323,155 @@ export async function adminUpdateScheduledSession(
   revalidatePath("/tutor-dashboard");
 
   return {};
+}
+
+export async function adminLogCompletedLesson(
+  input: AdminLogCompletedLessonInput,
+): Promise<{ error: string; bookingId?: undefined } | { error?: undefined; bookingId: string }> {
+  const admin = await requireUser("ADMIN");
+  const parsed = adminLogCompletedLessonSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+  const { clientId, tutorProfileId, subject, level, examBoard, sessionMode, date, notes, durationMinutes } =
+    parsed.data;
+
+  const [client, profile] = await Promise.all([
+    prisma.user.findUnique({ where: { id: clientId } }),
+    prisma.tutorProfile.findUnique({
+      where: { id: tutorProfileId },
+      include: { user: { select: { name: true, email: true } } },
+    }),
+  ]);
+  if (!client || client.role !== "CLIENT") return { error: "Client not found." };
+  if (!profile) return { error: "Tutor not found." };
+  if (profile.sessionMode !== "BOTH" && profile.sessionMode !== sessionMode) {
+    return {
+      error: `${profile.user.name} only offers ${profile.sessionMode === "ONLINE" ? "online" : "in-person"} sessions.`,
+    };
+  }
+
+  const tokensUsed = durationMinutes / 60;
+  const pricePence = Math.round(LEVEL_PRICE_PENCE[level] * tokensUsed);
+  const platformFeePence = Math.round(PLATFORM_FEE_PENCE * tokensUsed);
+  const tutorPayoutPence = pricePence - platformFeePence;
+  const startsAt = date;
+  const endsAt = new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
+
+  let booking;
+  try {
+    booking = await prisma.$transaction(async (tx) => {
+      const claimed = await tx.tokenBalance.updateMany({
+        where: { userId: clientId, level, balance: { gte: tokensUsed } },
+        data: { balance: { decrement: tokensUsed } },
+      });
+      if (claimed.count === 0) {
+        throw new Error(
+          `${client.name} doesn't have enough ${formatLevel(level)} tokens for a ${formatSessionDuration(durationMinutes)} session. Grant them tokens first, or reduce the session length.`,
+        );
+      }
+      await tx.tokenTransaction.create({
+        data: {
+          userId: clientId,
+          level,
+          type: "REDEEM",
+          quantity: -tokensUsed,
+          description: `${subject} lesson (${formatSessionDuration(durationMinutes)}) with ${profile.user.name} on ${formatDate(startsAt)}, logged by Channel Tutoring`,
+        },
+      });
+
+      const created = await tx.booking.create({
+        data: {
+          clientId,
+          tutorId: profile.id,
+          subject,
+          level,
+          examBoard: examBoard || null,
+          sessionMode,
+          startsAt,
+          endsAt,
+          tokensUsed,
+          pricePence,
+          platformFeePence,
+          tutorPayoutPence,
+          notes: notes || null,
+          status: "COMPLETED",
+          completedAt: new Date(),
+        },
+      });
+
+      await tx.payment.create({
+        data: {
+          bookingId: created.id,
+          amountPence: pricePence,
+          platformFeePence,
+          tutorAmountPence: tutorPayoutPence,
+          status: "SUCCEEDED",
+        },
+      });
+      await tx.tutorProfile.update({
+        where: { id: profile.id },
+        data: {
+          balancePence: { increment: tutorPayoutPence },
+          totalEarnedPence: { increment: tutorPayoutPence },
+        },
+      });
+      await tx.tutorLedgerEntry.create({
+        data: {
+          tutorId: profile.id,
+          type: "EARNING",
+          amountPence: tutorPayoutPence,
+          bookingId: created.id,
+          description: `${subject} lesson with ${client.name} on ${formatDate(startsAt)}`,
+        },
+      });
+
+      return created;
+    });
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Something went wrong." };
+  }
+
+  await logAudit({
+    actorId: admin.id,
+    action: "ADMIN_LESSON_LOGGED",
+    targetType: "Booking",
+    targetId: booking.id,
+    metadata: { clientId, tutorProfileId, level, tokensUsed },
+  });
+
+  await Promise.all([
+    sendEmail({
+      to: client.email,
+      subject: "A lesson has been logged on Channel Tutoring",
+      html: baseEmailLayout(`
+        <p>Hi ${escapeHtml(client.name)},</p>
+        <p>Channel Tutoring logged your ${formatSessionDuration(durationMinutes)}
+        ${escapeHtml(subject)} lesson with ${escapeHtml(profile.user.name)} on
+        ${formatDate(startsAt)} as complete, using
+        ${formatTokenQuantity(tokensUsed)} of your
+        ${formatLevel(level)} tokens.</p>
+        <p>If this doesn't look right, reply to this email or
+        <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
+      `),
+    }),
+    sendEmail({
+      to: profile.user.email,
+      subject: "A lesson was logged for you",
+      html: baseEmailLayout(`
+        <p>Hi ${escapeHtml(profile.user.name)},</p>
+        <p>Channel Tutoring logged your ${escapeHtml(subject)} lesson with
+        ${escapeHtml(client.name)} on ${formatDate(startsAt)} as complete
+        &mdash; payout ${formatTokenQuantity(tokensUsed)} token(s) /
+        you&apos;ve been paid.</p>
+      `),
+    }),
+  ]).catch(() => {});
+
+  revalidatePath("/admin/bookings");
+  revalidatePath("/tutor-dashboard/bookings");
+  revalidatePath("/tutor-dashboard/earnings");
+  revalidatePath("/dashboard/bookings");
+
+  return { bookingId: booking.id };
 }
