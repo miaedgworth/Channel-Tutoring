@@ -21,11 +21,19 @@ export default async function AdminMessagesPage() {
 
   return (
     <div>
-      <p className="mb-4 text-sm text-navy/60">
-        All client &harr; tutor conversations, for safeguarding oversight.
-        Flagged messages may contain contact details or requests to
-        communicate off-platform.
-      </p>
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <p className="text-sm text-navy/60">
+          All client &harr; tutor conversations, for safeguarding oversight.
+          Flagged messages may contain contact details or requests to
+          communicate off-platform.
+        </p>
+        <Link
+          href="/admin/messages/new"
+          className="shrink-0 whitespace-nowrap text-sm font-medium text-navy underline"
+        >
+          Start a Conversation
+        </Link>
+      </div>
 
       {conversations.length === 0 ? (
         <Card>
