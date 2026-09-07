@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { MarkPayoutPaidButton } from "@/components/admin/mark-payout-paid-button";
 import { formatCurrencyGBP, formatDate } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Payouts" };
+export const metadata: Metadata = { title: "Tutor Payouts" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminPayoutsPage() {
