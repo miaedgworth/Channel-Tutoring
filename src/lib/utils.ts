@@ -66,6 +66,13 @@ export function formatDateTime(date: Date | string) {
   }).format(new Date(date));
 }
 
+export function formatWeekday(date: Date | string) {
+  return new Intl.DateTimeFormat("en-GB", {
+    weekday: "long",
+    timeZone: DISPLAY_TIME_ZONE,
+  }).format(new Date(date));
+}
+
 export function formatTime(date: Date | string) {
   return new Intl.DateTimeFormat("en-GB", {
     hour: "2-digit",

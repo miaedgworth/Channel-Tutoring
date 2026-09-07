@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CancelBookingButton } from "@/components/cancel-booking-button";
 import { MarkSessionCompleteButton } from "@/components/tutor-dashboard/mark-session-complete-button";
@@ -42,7 +43,12 @@ export default async function TutorBookingDetailPage({
             <h2 className="font-heading text-xl font-bold text-navy">
               {booking.subject} with {booking.client.name}
             </h2>
-            <BookingStatusBadge status={booking.status} />
+            <div className="flex items-center gap-2">
+              {booking.status === "CONFIRMED" && !booking.tokensReserved && (
+                <Badge variant="warning">Awaiting payment</Badge>
+              )}
+              <BookingStatusBadge status={booking.status} />
+            </div>
           </div>
 
           <dl className="grid grid-cols-2 gap-4 text-sm">
@@ -100,15 +106,24 @@ export default async function TutorBookingDetailPage({
       {booking.status === "CONFIRMED" && (
         <Card>
           <CardContent className="space-y-4">
-            <p className="text-sm text-navy/60">
-              Once you&apos;ve taught this session, mark it as complete to
-              redeem the client&apos;s reserved tokens and get paid. If it
-              won&apos;t be going ahead, cancel it to refund the client in
-              full.
-            </p>
+            {booking.tokensReserved ? (
+              <p className="text-sm text-navy/60">
+                Once you&apos;ve taught this session, mark it as complete to
+                redeem the client&apos;s reserved tokens and get paid. If it
+                won&apos;t be going ahead, cancel it to refund the client in
+                full.
+              </p>
+            ) : (
+              <p className="text-sm text-amber-700">
+                {booking.client.name} hasn&apos;t paid for this session yet
+                — it can&apos;t be marked complete until they&apos;ve added
+                enough tokens. They&apos;ll get a reminder if the date
+                arrives still unpaid.
+              </p>
+            )}
             <div className="flex flex-wrap gap-3">
               <MarkSessionCompleteButton bookingId={booking.id} />
-              <CancelUpcomingSessionButton bookingId={booking.id} />
+              <CancelUpcomingSessionButton bookingId={booking.id} tokensReserved={booking.tokensReserved} />
             </div>
           </CardContent>
         </Card>

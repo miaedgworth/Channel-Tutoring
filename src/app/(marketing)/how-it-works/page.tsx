@@ -22,7 +22,7 @@ const CLIENT_STEPS = [
   },
   {
     title: "4. Your tutor schedules the session",
-    body: "Once you've agreed a date and time, your tutor schedules the session on the platform. The right number of tokens for the session length is reserved straight away, and it appears as an upcoming session on your dashboard.",
+    body: "Once you've agreed a day and time, your tutor schedules the session on the platform — including an ongoing weekly slot, if that's what suits you. The right number of tokens for the session length is reserved as soon as you have enough; it still appears as an upcoming session even before then, marked as awaiting payment until you top up (you'll get a reminder if a session's date arrives still unpaid).",
   },
   {
     title: "5. Attend your session",

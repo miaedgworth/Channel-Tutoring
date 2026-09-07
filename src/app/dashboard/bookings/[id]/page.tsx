@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
+import { Badge } from "@/components/ui/badge";
+import { LinkButton } from "@/components/ui/button";
 import { formatCurrencyGBP, formatDate, formatDateTime, formatLevel, formatTokenQuantity } from "@/lib/utils";
 import { SESSION_MODE_LABELS, formatSessionDuration } from "@/lib/constants";
 
@@ -30,7 +32,12 @@ export default async function ClientBookingDetailPage({
             <h2 className="font-heading text-xl font-bold text-navy">
               {booking.subject} with {booking.tutor.user.name}
             </h2>
-            <BookingStatusBadge status={booking.status} />
+            <div className="flex items-center gap-2">
+              {booking.status === "CONFIRMED" && !booking.tokensReserved && (
+                <Badge variant="warning">Needs payment</Badge>
+              )}
+              <BookingStatusBadge status={booking.status} />
+            </div>
           </div>
 
           <dl className="grid grid-cols-2 gap-4 text-sm">
@@ -67,7 +74,9 @@ export default async function ClientBookingDetailPage({
               </div>
             )}
             <div>
-              <dt className="text-navy/50">Tokens used</dt>
+              <dt className="text-navy/50">
+                {booking.tokensReserved ? "Tokens used" : "Tokens needed"}
+              </dt>
               <dd className="font-medium text-navy">
                 {formatTokenQuantity(booking.tokensUsed)} ({formatCurrencyGBP(booking.pricePence)})
               </dd>
@@ -81,12 +90,28 @@ export default async function ClientBookingDetailPage({
             </div>
           )}
 
-          {booking.status === "CONFIRMED" && (
+          {booking.status === "CONFIRMED" && booking.tokensReserved && (
             <p className="text-sm text-navy/60">
               This session is scheduled. Your tutor will mark it as complete
               after it takes place — if your plans change, just message
               them to reschedule or cancel.
             </p>
+          )}
+
+          {booking.status === "CONFIRMED" && !booking.tokensReserved && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <p className="text-sm text-amber-900">
+                This session is scheduled but not paid for yet — add{" "}
+                {formatLevel(booking.level)} tokens to your account before
+                the date above so it can go ahead. You&apos;ll get a
+                reminder if it&apos;s still unpaid on the day.
+              </p>
+              <div className="mt-3">
+                <LinkButton href="/dashboard/tokens" variant="gold" size="sm">
+                  Buy tokens
+                </LinkButton>
+              </div>
+            </div>
           )}
 
           {booking.status === "CANCELLED_BY_TUTOR" && (

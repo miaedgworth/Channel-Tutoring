@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
+import { Badge } from "@/components/ui/badge";
 import { formatDateTime, formatTokenQuantity } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "My Dashboard" };
@@ -80,7 +81,10 @@ export default async function ClientOverviewPage() {
                       {formatDateTime(booking.startsAt)}
                     </p>
                   </div>
-                  <BookingStatusBadge status={booking.status} />
+                  <div className="flex items-center gap-2">
+                    {!booking.tokensReserved && <Badge variant="warning">Needs payment</Badge>}
+                    <BookingStatusBadge status={booking.status} />
+                  </div>
                 </CardContent>
               </Card>
             </Link>

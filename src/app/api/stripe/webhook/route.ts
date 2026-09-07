@@ -6,6 +6,7 @@ import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
 import { logAudit } from "@/lib/audit";
 import { formatLevel } from "@/lib/utils";
+import { reserveTokensForUnpaidBookings } from "@/lib/actions/token-reservation";
 
 export async function POST(request: Request) {
   if (!isStripeConfigured()) {
@@ -77,6 +78,9 @@ export async function POST(request: Request) {
             create: { userId, level, balance: quantity },
             update: { balance: { increment: quantity } },
           });
+          // Catch up any still-unpaid recurring sessions at this level now
+          // that the client has more tokens.
+          await reserveTokensForUnpaidBookings(tx, userId, level);
           return tx.user.findUniqueOrThrow({ where: { id: userId } });
         });
       } catch (err) {

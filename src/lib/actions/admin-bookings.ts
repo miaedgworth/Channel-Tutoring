@@ -1,11 +1,20 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
-import { formatDate, formatLevel, formatTokenQuantity, escapeHtml } from "@/lib/utils";
+import {
+  formatDate,
+  formatDateTime,
+  formatWeekday,
+  formatTime,
+  formatLevel,
+  formatTokenQuantity,
+  escapeHtml,
+} from "@/lib/utils";
 import { PLATFORM_FEE_PENCE, LEVEL_PRICE_PENCE, formatSessionDuration } from "@/lib/constants";
 import {
   adminScheduleSessionSchema,
@@ -16,16 +25,20 @@ import {
   type UpdateSessionInput,
 } from "@/lib/validations/schedule-lesson";
 import { hasSchedulingConflict } from "@/lib/booking-conflicts";
+import { tryClaimTokens } from "@/lib/actions/token-reservation";
 
 export async function adminScheduleSession(
   input: AdminScheduleSessionInput,
-): Promise<{ error: string; bookingId?: undefined } | { error?: undefined; bookingId: string }> {
+): Promise<
+  | { error: string; bookingId?: undefined }
+  | { error?: undefined; bookingId: string; scheduledCount: number; unpaidCount: number }
+> {
   const admin = await requireUser("ADMIN");
   const parsed = adminScheduleSessionSchema.safeParse(input);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
-  const { clientId, tutorProfileId, subject, level, examBoard, sessionMode, date, notes, durationMinutes } =
+  const { clientId, tutorProfileId, subject, level, examBoard, sessionMode, date, notes, durationMinutes, repeatWeeks } =
     parsed.data;
 
   const [client, profile] = await Promise.all([
@@ -47,102 +60,164 @@ export async function adminScheduleSession(
   const pricePence = Math.round(LEVEL_PRICE_PENCE[level] * tokensUsed);
   const platformFeePence = Math.round(PLATFORM_FEE_PENCE * tokensUsed);
   const tutorPayoutPence = pricePence - platformFeePence;
-  const startsAt = date;
-  const endsAt = new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
+  const durationMs = durationMinutes * 60 * 1000;
+  const isRecurring = repeatWeeks > 1;
+  const occurrences = Array.from({ length: repeatWeeks }, (_, i) => {
+    const startsAt = new Date(date.getTime() + i * 7 * 24 * 60 * 60 * 1000);
+    return { startsAt, endsAt: new Date(startsAt.getTime() + durationMs) };
+  });
 
-  if (await hasSchedulingConflict(profile.id, startsAt, endsAt)) {
-    return { error: `${profile.user.name} already has a session scheduled that overlaps with this time.` };
+  const conflicts = await Promise.all(
+    occurrences.map((occ) => hasSchedulingConflict(profile.id, occ.startsAt, occ.endsAt)),
+  );
+  const conflictIndex = conflicts.findIndex(Boolean);
+  if (conflictIndex !== -1) {
+    return {
+      error: `${profile.user.name} already has a session scheduled that overlaps with ${formatDateTime(occurrences[conflictIndex].startsAt)}.`,
+    };
   }
 
-  let booking;
+  const seriesId = isRecurring ? randomUUID() : null;
+
+  let bookings;
   try {
-    booking = await prisma.$transaction(async (tx) => {
-      const claimed = await tx.tokenBalance.updateMany({
-        where: { userId: clientId, level, balance: { gte: tokensUsed } },
-        data: { balance: { decrement: tokensUsed } },
-      });
-      if (claimed.count === 0) {
-        throw new Error(
-          `${client.name} doesn't have enough ${formatLevel(level)} tokens for a ${formatSessionDuration(durationMinutes)} session. Grant them tokens first, or reduce the session length.`,
-        );
+    bookings = await prisma.$transaction(async (tx) => {
+      const created = [];
+      for (const occ of occurrences) {
+        const claimed = await tryClaimTokens(tx, clientId, level, tokensUsed);
+        if (!claimed && !isRecurring) {
+          throw new Error(
+            `${client.name} doesn't have enough ${formatLevel(level)} tokens for a ${formatSessionDuration(durationMinutes)} session. Grant them tokens first, or reduce the session length.`,
+          );
+        }
+        if (claimed) {
+          await tx.tokenTransaction.create({
+            data: {
+              userId: clientId,
+              level,
+              type: "REDEEM",
+              quantity: -tokensUsed,
+              description: `${subject} session (${formatSessionDuration(durationMinutes)}) scheduled with ${profile.user.name} for ${formatDate(occ.startsAt)} by Channel Tutoring`,
+            },
+          });
+        }
+
+        const bookingRow = await tx.booking.create({
+          data: {
+            clientId,
+            tutorId: profile.id,
+            subject,
+            level,
+            examBoard: examBoard || null,
+            sessionMode,
+            startsAt: occ.startsAt,
+            endsAt: occ.endsAt,
+            tokensUsed,
+            pricePence,
+            platformFeePence,
+            tutorPayoutPence,
+            notes: notes || null,
+            status: "CONFIRMED",
+            seriesId,
+            tokensReserved: claimed,
+          },
+        });
+
+        if (claimed) {
+          await tx.payment.create({
+            data: {
+              bookingId: bookingRow.id,
+              amountPence: pricePence,
+              platformFeePence,
+              tutorAmountPence: tutorPayoutPence,
+              status: "PENDING",
+            },
+          });
+        }
+
+        created.push(bookingRow);
       }
-      await tx.tokenTransaction.create({
-        data: {
-          userId: clientId,
-          level,
-          type: "REDEEM",
-          quantity: -tokensUsed,
-          description: `${subject} session (${formatSessionDuration(durationMinutes)}) scheduled with ${profile.user.name} for ${formatDate(startsAt)} by Channel Tutoring`,
-        },
-      });
-
-      const created = await tx.booking.create({
-        data: {
-          clientId,
-          tutorId: profile.id,
-          subject,
-          level,
-          examBoard: examBoard || null,
-          sessionMode,
-          startsAt,
-          endsAt,
-          tokensUsed,
-          pricePence,
-          platformFeePence,
-          tutorPayoutPence,
-          notes: notes || null,
-          status: "CONFIRMED",
-        },
-      });
-
-      await tx.payment.create({
-        data: {
-          bookingId: created.id,
-          amountPence: pricePence,
-          platformFeePence,
-          tutorAmountPence: tutorPayoutPence,
-          status: "PENDING",
-        },
-      });
-
       return created;
     });
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Something went wrong." };
   }
 
+  const firstBooking = bookings[0];
+  const unpaidCount = bookings.filter((b) => !b.tokensReserved).length;
+
   await logAudit({
     actorId: admin.id,
-    action: "ADMIN_SESSION_SCHEDULED",
+    action: isRecurring ? "ADMIN_RECURRING_SESSION_SCHEDULED" : "ADMIN_SESSION_SCHEDULED",
     targetType: "Booking",
-    targetId: booking.id,
-    metadata: { clientId, tutorProfileId, level, tokensUsed },
+    targetId: firstBooking.id,
+    metadata: { clientId, tutorProfileId, level, tokensUsed, repeatWeeks, seriesId, unpaidCount },
   });
 
-  await Promise.all([
-    sendEmail({
-      to: client.email,
-      subject: "A session has been scheduled on Channel Tutoring",
-      html: baseEmailLayout(`
+  const clientEmailBody = isRecurring
+    ? `
+        <p>Hi ${escapeHtml(client.name)},</p>
+        <p>Channel Tutoring has scheduled ${bookings.length} weekly
+        ${escapeHtml(subject)} sessions for you with ${escapeHtml(profile.user.name)}, every
+        ${formatWeekday(date)} at ${formatTime(date)}, starting ${formatDate(date)}. You'll
+        see these under Upcoming Sessions on your dashboard.</p>
+        ${
+          unpaidCount > 0
+            ? `<p>${unpaidCount} of these ${unpaidCount === 1 ? "session isn't" : "sessions aren't"}
+               paid for yet — please add ${formatLevel(level)} tokens to your account before
+               each session's date, or we'll remind you on the day.
+               <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/tokens">Buy tokens</a></p>`
+            : `<p>${formatTokenQuantity(bookings.length * tokensUsed)} of your ${formatLevel(level)}
+               tokens have been used to cover this series.</p>`
+        }
+        <p>If this doesn't look right, reply to this email or
+        <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
+      `
+    : `
         <p>Hi ${escapeHtml(client.name)},</p>
         <p>Channel Tutoring has scheduled a ${formatSessionDuration(durationMinutes)}
         ${escapeHtml(subject)} session for you with ${escapeHtml(profile.user.name)} on
-        ${formatDate(startsAt)}, using ${formatTokenQuantity(tokensUsed)}
+        ${formatDate(date)}, using ${formatTokenQuantity(tokensUsed)}
         of your ${formatLevel(level)} tokens. You'll see this under
         Upcoming Sessions on your dashboard.</p>
         <p>If this doesn't look right, reply to this email or
         <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
-      `),
+      `;
+
+  const tutorEmailBody = isRecurring
+    ? `
+        <p>Hi ${escapeHtml(profile.user.name)},</p>
+        <p>Channel Tutoring has scheduled ${bookings.length} weekly ${escapeHtml(subject)}
+        sessions for you with ${escapeHtml(client.name)}, every ${formatWeekday(date)} at
+        ${formatTime(date)}, starting ${formatDate(date)}.</p>
+        ${
+          unpaidCount > 0
+            ? `<p>${unpaidCount} of these ${unpaidCount === 1 ? "isn't" : "aren't"} paid for
+               yet — they'll show as awaiting payment until ${client.name} tops up their
+               tokens.</p>`
+            : ""
+        }
+        <p>Mark each one as complete once you've taught it to get paid.</p>
+      `
+    : `
+        <p>Hi ${escapeHtml(profile.user.name)},</p>
+        <p>Channel Tutoring has scheduled a ${escapeHtml(subject)} session for you
+        with ${escapeHtml(client.name)} on ${formatDate(date)}. Once you've
+        taught it, mark it as complete in your dashboard to get paid.</p>
+      `;
+
+  await Promise.all([
+    sendEmail({
+      to: client.email,
+      subject: isRecurring
+        ? "Your weekly sessions have been scheduled on Channel Tutoring"
+        : "A session has been scheduled on Channel Tutoring",
+      html: baseEmailLayout(clientEmailBody),
     }),
     sendEmail({
       to: profile.user.email,
-      subject: "Session scheduled",
-      html: baseEmailLayout(`
-        <p>Hi ${escapeHtml(profile.user.name)},</p>
-        <p>Channel Tutoring has scheduled a ${escapeHtml(subject)} session for you
-        with ${escapeHtml(client.name)} on ${formatDate(startsAt)}. Once you've
-        taught it, mark it as complete in your dashboard to get paid.</p>
-      `),
+      subject: isRecurring ? "Weekly sessions scheduled" : "Session scheduled",
+      html: baseEmailLayout(tutorEmailBody),
     }),
   ]).catch(() => {});
 
@@ -152,7 +227,7 @@ export async function adminScheduleSession(
   revalidatePath("/dashboard");
   revalidatePath("/tutor-dashboard");
 
-  return { bookingId: booking.id };
+  return { bookingId: firstBooking.id, scheduledCount: bookings.length, unpaidCount };
 }
 
 export async function adminUpdateScheduledSession(
@@ -211,10 +286,13 @@ export async function adminUpdateScheduledSession(
 
   try {
     await prisma.$transaction(async (tx) => {
-      if (tokensChanged) {
-        // Release the old reservation, then make a fresh one for the new
-        // level/length — handles a level change, a length change, or both,
-        // the same way a cancel-and-reschedule would.
+      let tokensReserved = booking.tokensReserved;
+
+      if (booking.tokensReserved && tokensChanged) {
+        // Was already paid — release the old reservation, then make a
+        // fresh one for the new level/length, the same way a
+        // cancel-and-reschedule would. Fails loudly if the client can't
+        // cover the new config, same as today.
         await tx.tokenBalance.upsert({
           where: { userId_level: { userId: booking.clientId, level: oldLevel } },
           create: { userId: booking.clientId, level: oldLevel, balance: oldTokensUsed },
@@ -231,11 +309,8 @@ export async function adminUpdateScheduledSession(
           },
         });
 
-        const claimed = await tx.tokenBalance.updateMany({
-          where: { userId: booking.clientId, level, balance: { gte: newTokensUsed } },
-          data: { balance: { decrement: newTokensUsed } },
-        });
-        if (claimed.count === 0) {
+        const claimed = await tryClaimTokens(tx, booking.clientId, level, newTokensUsed);
+        if (!claimed) {
           throw new Error(
             `${booking.client.name} doesn't have enough ${formatLevel(level)} tokens for a ${formatSessionDuration(durationMinutes)} session. Grant them tokens first, or choose a shorter length.`,
           );
@@ -250,6 +325,24 @@ export async function adminUpdateScheduledSession(
             description: `${subject} session (${formatSessionDuration(durationMinutes)}) rescheduled for ${formatDate(startsAt)} by Channel Tutoring`,
           },
         });
+      } else if (!booking.tokensReserved) {
+        // Wasn't paid yet (a still-unpaid recurring occurrence) — try to
+        // claim a token for the (possibly just-changed) level/length now.
+        // No error if it still can't be afforded; it just stays unpaid.
+        const claimed = await tryClaimTokens(tx, booking.clientId, level, newTokensUsed);
+        if (claimed) {
+          tokensReserved = true;
+          await tx.tokenTransaction.create({
+            data: {
+              userId: booking.clientId,
+              level,
+              type: "REDEEM",
+              quantity: -newTokensUsed,
+              bookingId: booking.id,
+              description: `${subject} session (${formatSessionDuration(durationMinutes)}) scheduled for ${formatDate(startsAt)} by Channel Tutoring`,
+            },
+          });
+        }
       }
 
       await tx.booking.update({
@@ -266,13 +359,24 @@ export async function adminUpdateScheduledSession(
           platformFeePence,
           tutorPayoutPence,
           notes: notes || null,
+          tokensReserved,
         },
       });
 
-      if (tokensChanged && booking.payment) {
+      if (booking.tokensReserved && tokensChanged && booking.payment) {
         await tx.payment.update({
           where: { id: booking.payment.id },
           data: { amountPence: pricePence, platformFeePence, tutorAmountPence: tutorPayoutPence },
+        });
+      } else if (!booking.tokensReserved && tokensReserved) {
+        await tx.payment.create({
+          data: {
+            bookingId: booking.id,
+            amountPence: pricePence,
+            platformFeePence,
+            tutorAmountPence: tutorPayoutPence,
+            status: "PENDING",
+          },
         });
       }
     });

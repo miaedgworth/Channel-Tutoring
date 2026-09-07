@@ -71,9 +71,13 @@ export default async function TutorOverviewPage() {
               <Link href="/tutor-dashboard/bookings/new" className="underline">
                 Schedule a session
               </Link>{" "}
-              for the agreed date and time. The client&apos;s tokens are
-              reserved straight away and it shows up as an upcoming session
-              on their dashboard.
+              for the agreed date and time — tick &ldquo;Repeat weekly&rdquo;
+              for an ongoing slot, e.g. the same time every week. Each
+              session&apos;s token is reserved as soon as the client has
+              one; it still shows up as upcoming even if they haven&apos;t
+              paid yet, marked &ldquo;Awaiting payment&rdquo; until they do
+              (they get a reminder if a session&apos;s date arrives still
+              unpaid).
             </li>
             <li>
               3. You teach the session, in person or online (see below for

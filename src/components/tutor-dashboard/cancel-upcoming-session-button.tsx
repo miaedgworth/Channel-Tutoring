@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cancelUpcomingSession } from "@/lib/actions/bookings";
 
-export function CancelUpcomingSessionButton({ bookingId }: { bookingId: string }) {
+export function CancelUpcomingSessionButton({
+  bookingId,
+  tokensReserved = true,
+}: {
+  bookingId: string;
+  tokensReserved?: boolean;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showConfirm, setShowConfirm] = useState(false);
@@ -40,8 +46,9 @@ export function CancelUpcomingSessionButton({ bookingId }: { bookingId: string }
         </p>
       )}
       <p className="text-sm text-navy">
-        Are you sure you want to cancel this session? The client&apos;s
-        tokens will be refunded in full.
+        {tokensReserved
+          ? "Are you sure you want to cancel this session? The client's tokens will be refunded in full."
+          : "Are you sure you want to cancel this session? It hasn't been paid for yet, so there's no token to refund."}
       </p>
       <textarea
         value={reason}

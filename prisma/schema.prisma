@@ -265,6 +265,21 @@ model Booking {
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
 
+  // Groups the occurrences of a recurring weekly series together (null for
+  // a one-off booking). Not a foreign key to another table — there's no
+  // separate "series" record, just a shared id across the individual
+  // Booking rows the series creates.
+  seriesId                String?
+  // False when this CONFIRMED booking was scheduled before the client had
+  // enough tokens to cover it (only possible for recurring sessions — see
+  // scheduleSession). No Payment or REDEEM TokenTransaction exists yet in
+  // that case; a token is claimed for it automatically the moment the
+  // client's balance covers it (a purchase, an admin grant, or editing the
+  // booking), and a reminder email goes out if it's still unpaid on the
+  // day.
+  tokensReserved          Boolean       @default(true)
+  paymentReminderSentAt   DateTime?
+
   client        User                @relation("ClientBookings", fields: [clientId], references: [id])
   tutor         TutorProfile        @relation("TutorBookings", fields: [tutorId], references: [id])
   payment       Payment?
@@ -274,6 +289,7 @@ model Booking {
   @@index([clientId])
   @@index([tutorId])
   @@index([status])
+  @@index([seriesId])
 }
 
 model Payment {

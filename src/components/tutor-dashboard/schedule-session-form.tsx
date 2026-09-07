@@ -45,6 +45,8 @@ export function ScheduleSessionForm({
   const [time, setTime] = useState("16:00");
   const [durationMinutes, setDurationMinutes] = useState(60);
   const [notes, setNotes] = useState("");
+  const [repeatWeekly, setRepeatWeekly] = useState(false);
+  const [repeatWeeks, setRepeatWeeks] = useState(8);
   const [error, setError] = useState<string | null>(null);
 
   function handleSubmit(e: FormEvent) {
@@ -69,6 +71,7 @@ export function ScheduleSessionForm({
         date: startsAt,
         durationMinutes,
         notes,
+        repeatWeeks: repeatWeekly ? repeatWeeks : 1,
       });
       if (result.error) {
         setError(result.error);
@@ -235,13 +238,47 @@ export function ScheduleSessionForm({
         />
       </div>
 
+      <div className="rounded-lg border border-navy/10 p-4">
+        <label className="flex items-center gap-2.5 text-sm font-medium text-navy">
+          <input
+            type="checkbox"
+            checked={repeatWeekly}
+            onChange={(e) => setRepeatWeekly(e.target.checked)}
+            className="h-4 w-4 rounded border-navy/30 text-gold-dark focus:ring-gold-dark"
+          />
+          Repeat weekly, same day and time
+        </label>
+        {repeatWeekly && (
+          <div className="mt-3">
+            <label htmlFor="scheduleRepeatWeeks" className="block text-sm font-medium text-navy">
+              For how many weeks?
+            </label>
+            <input
+              id="scheduleRepeatWeeks"
+              type="number"
+              min={2}
+              max={52}
+              value={repeatWeeks}
+              onChange={(e) => setRepeatWeeks(Number(e.target.value))}
+              className={`${inputClass} max-w-[8rem]`}
+            />
+            <p className="mt-1.5 text-xs text-navy/40">
+              You don&apos;t need to have enough tokens for every week up
+              front — each week&apos;s token is reserved as soon as the
+              client has one, and they&apos;ll get a reminder if a session&apos;s
+              date arrives still unpaid.
+            </p>
+          </div>
+        )}
+      </div>
+
       <Button type="submit" variant="primary" size="lg" disabled={isPending}>
-        {isPending ? "Scheduling..." : "Schedule Session"}
+        {isPending ? "Scheduling..." : repeatWeekly ? "Schedule Weekly Sessions" : "Schedule Session"}
       </Button>
       <p className="text-xs text-navy/40">
-        This reserves {formatTokenQuantity(durationMinutes / 60)} of the
-        client&apos;s {formatLevel(level)} tokens now. Once you&apos;ve
-        taught the session, come back and mark it as complete to get paid.
+        {repeatWeekly
+          ? `This schedules ${repeatWeeks} weekly sessions, reserving each client's ${formatLevel(level)} token as it's available. Mark each one as complete after you've taught it to get paid.`
+          : `This reserves ${formatTokenQuantity(durationMinutes / 60)} of the client's ${formatLevel(level)} tokens now. Once you've taught the session, come back and mark it as complete to get paid.`}
       </p>
     </form>
   );

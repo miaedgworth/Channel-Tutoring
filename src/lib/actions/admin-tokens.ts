@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { logAudit } from "@/lib/audit";
 import { formatLevel } from "@/lib/utils";
+import { reserveTokensForUnpaidBookings } from "@/lib/actions/token-reservation";
 
 const grantTokensSchema = z.object({
   clientUserId: z.string().min(1),
@@ -31,13 +32,13 @@ export async function adminGrantTokens(
     ? `${quantity} ${formatLevel(level)} token${quantity === 1 ? "" : "s"} added by Channel Tutoring — ${note}`
     : `${quantity} ${formatLevel(level)} token${quantity === 1 ? "" : "s"} added by Channel Tutoring`;
 
-  await prisma.$transaction([
-    prisma.tokenBalance.upsert({
+  await prisma.$transaction(async (tx) => {
+    await tx.tokenBalance.upsert({
       where: { userId_level: { userId: clientUserId, level } },
       create: { userId: clientUserId, level, balance: quantity },
       update: { balance: { increment: quantity } },
-    }),
-    prisma.tokenTransaction.create({
+    });
+    await tx.tokenTransaction.create({
       data: {
         userId: clientUserId,
         level,
@@ -45,8 +46,11 @@ export async function adminGrantTokens(
         quantity,
         description,
       },
-    }),
-  ]);
+    });
+    // Catch up any still-unpaid recurring sessions at this level now that
+    // the client has more tokens.
+    await reserveTokensForUnpaidBookings(tx, clientUserId, level);
+  });
 
   await logAudit({
     actorId: admin.id,

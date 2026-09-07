@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
+import { Badge } from "@/components/ui/badge";
 import { EditScheduledSessionForm } from "@/components/admin/edit-scheduled-session-form";
 import { formatCurrencyGBP, formatDate, formatDateTime, formatLevel, formatTokenQuantity } from "@/lib/utils";
 import { SESSION_MODE_LABELS, formatSessionDuration } from "@/lib/constants";
@@ -34,7 +35,12 @@ export default async function AdminBookingDetailPage({
             <h2 className="font-heading text-xl font-bold text-navy">
               {booking.subject} — {booking.client.name} &amp; {booking.tutor.user.name}
             </h2>
-            <BookingStatusBadge status={booking.status} />
+            <div className="flex items-center gap-2">
+              {booking.status === "CONFIRMED" && !booking.tokensReserved && (
+                <Badge variant="warning">Awaiting payment</Badge>
+              )}
+              <BookingStatusBadge status={booking.status} />
+            </div>
           </div>
 
           <dl className="grid grid-cols-2 gap-4 text-sm">

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
+import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { formatCurrencyGBP, formatDate } from "@/lib/utils";
 
@@ -67,7 +68,12 @@ export default async function TutorBookingsPage() {
                   {formatCurrencyGBP(booking.tutorPayoutPence)} payout
                 </p>
               </div>
-              <BookingStatusBadge status={booking.status} />
+              <div className="flex items-center gap-2">
+                {booking.status === "CONFIRMED" && !booking.tokensReserved && (
+                  <Badge variant="warning">Awaiting payment</Badge>
+                )}
+                <BookingStatusBadge status={booking.status} />
+              </div>
             </CardContent>
           </Card>
         </Link>

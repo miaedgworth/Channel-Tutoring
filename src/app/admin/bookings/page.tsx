@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
+import { Badge } from "@/components/ui/badge";
 import { formatCurrencyGBP, formatDateTime } from "@/lib/utils";
 import type { BookingStatus } from "@prisma/client";
 
@@ -110,7 +111,13 @@ export default async function AdminBookingsPage({
                     </Link>
                   </td>
                   <td className="p-0">
-                    <Link href={`/admin/bookings/${booking.id}`} className="block px-0 py-2.5">
+                    <Link
+                      href={`/admin/bookings/${booking.id}`}
+                      className="flex items-center gap-2 px-0 py-2.5"
+                    >
+                      {booking.status === "CONFIRMED" && !booking.tokensReserved && (
+                        <Badge variant="warning">Awaiting payment</Badge>
+                      )}
                       <BookingStatusBadge status={booking.status} />
                     </Link>
                   </td>

@@ -20,6 +20,10 @@ export const logCompletedLessonSchema = z.object({
 
 export type LogCompletedLessonInput = z.infer<typeof logCompletedLessonSchema>;
 
+// A series repeats weekly for this many occurrences (including the first) —
+// 1 means a normal one-off session. Capped at a year's worth of weeks.
+const repeatWeeksField = z.coerce.number().int().min(1).max(52).default(1);
+
 export const scheduleSessionSchema = z.object({
   clientId: z.string().min(1),
   subject: z.string().trim().min(1).max(60),
@@ -35,6 +39,7 @@ export const scheduleSessionSchema = z.object({
     message: "Choose a date and time in the future",
   }),
   notes: z.string().trim().max(1000).optional().or(z.literal("")),
+  repeatWeeks: repeatWeeksField,
 });
 
 export type ScheduleSessionInput = z.infer<typeof scheduleSessionSchema>;
@@ -55,6 +60,7 @@ export const adminScheduleSessionSchema = z.object({
     message: "Choose a date and time in the future",
   }),
   notes: z.string().trim().max(1000).optional().or(z.literal("")),
+  repeatWeeks: repeatWeeksField,
 });
 
 export type AdminScheduleSessionInput = z.infer<typeof adminScheduleSessionSchema>;
