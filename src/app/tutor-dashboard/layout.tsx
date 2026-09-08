@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/current-user";
+import { prisma } from "@/lib/prisma";
 import { Container } from "@/components/ui/container";
 import { TutorSidebar } from "@/components/tutor-dashboard/tutor-sidebar";
 
@@ -7,7 +9,18 @@ export default async function TutorDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireUser("TUTOR");
+  const user = await requireUser("TUTOR");
+
+  const profile = await prisma.tutorProfile.findUnique({
+    where: { userId: user.id },
+    select: { agreementRequestedAt: true, agreementSignedAt: true },
+  });
+  const needsToSign =
+    !!profile?.agreementRequestedAt &&
+    (!profile.agreementSignedAt || profile.agreementRequestedAt > profile.agreementSignedAt);
+  if (needsToSign) {
+    redirect("/sign-tutor-agreement");
+  }
 
   return (
     <div className="bg-navy/[0.02] py-10">

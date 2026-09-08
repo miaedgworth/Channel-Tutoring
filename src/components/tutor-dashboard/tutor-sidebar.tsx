@@ -12,6 +12,7 @@ const NAV = [
   { href: "/tutor-dashboard/messages", label: "Messages" },
   { href: "/tutor-dashboard/earnings", label: "Earnings" },
   { href: "/tutor-dashboard/resources", label: "Resources" },
+  { href: "/tutor-dashboard/compliance", label: "Compliance" },
   { href: "/tutor-dashboard/settings", label: "Settings" },
   { href: "/legal/tutor-agreement", label: "Tutor Agreement" },
 ];

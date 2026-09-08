@@ -80,6 +80,7 @@ export async function approveTutorApplication(
           levels: application.levels,
           qualifications: application.qualifications,
           isPublished: false,
+          agreementRequestedAt: new Date(),
         },
       });
 
@@ -173,6 +174,7 @@ export async function adminCreateTutor(
         qualifications: data.qualifications,
         sessionMode: data.sessionMode,
         isPublished: false,
+        agreementRequestedAt: new Date(),
       },
     });
 

@@ -215,6 +215,26 @@ model TutorProfile {
   createdAt                DateTime  @default(now())
   updatedAt                DateTime  @updatedAt
 
+  // Electronic signature of the Tutor Agreement. agreementRequestedAt is
+  // set automatically for every newly-created tutor (so signing is always
+  // required at signup), or manually by admin for a specific existing
+  // tutor via the Compliance page — existing tutors are never gated on
+  // this automatically. Signed once agreementSignedAt is newer than
+  // agreementRequestedAt; re-requesting doesn't clear the old signature,
+  // so admin can still see what was previously signed until it's replaced.
+  agreementRequestedAt     DateTime?
+  agreementSignedAt        DateTime?
+  agreementSignedName      String?
+  agreementVersion         String?
+
+  // A copy of the tutor's DBS (criminal record) check, uploaded by the
+  // tutor and viewable by admin. Stored as a private Vercel Blob — access
+  // is only ever through the authenticated download route, never a bare
+  // public URL.
+  dbsCheckUrl              String?
+  dbsCheckFileName         String?
+  dbsCheckUploadedAt       DateTime?
+
   user           User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   availability   TutorAvailabilitySlot[]
   bookings       Booking[]               @relation("TutorBookings")

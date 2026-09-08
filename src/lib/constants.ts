@@ -152,3 +152,9 @@ export const ADDITIONAL_STUDENT_SURCHARGE_PENCE = 700;
 // How long after a tutor logs a completed lesson they (or an admin) can
 // undo it, refunding the token.
 export const LESSON_LOG_UNDO_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+// Shown as the "Last updated" date on the Tutor Agreement, and stamped on
+// every signature so admin can see which version of the agreement a given
+// signature actually applied to. Bump this whenever the agreement's terms
+// change.
+export const TUTOR_AGREEMENT_VERSION = "26 August 2026";
