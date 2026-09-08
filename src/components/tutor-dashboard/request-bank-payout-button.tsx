@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { requestBankPayout } from "@/lib/actions/bank-payouts";
-import { formatCurrencyGBP } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 
 export function RequestBankPayoutButton({
   balancePence,
@@ -42,7 +42,7 @@ export function RequestBankPayoutButton({
           onClick={handleClick}
           disabled={isPending || balancePence <= 0}
         >
-          {isPending ? "Requesting..." : `Withdraw ${formatCurrencyGBP(balancePence)}`}
+          {isPending ? "Requesting..." : `Withdraw ${formatCurrency(balancePence)}`}
         </Button>
       )}
     </div>

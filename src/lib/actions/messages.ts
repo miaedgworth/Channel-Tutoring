@@ -7,6 +7,7 @@ import { containsContactInfo } from "@/lib/moderation";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
 import { escapeHtml } from "@/lib/utils";
+import { region } from "@/lib/region";
 import type { Conversation } from "@prisma/client";
 
 export async function getOrCreateConversation(
@@ -109,10 +110,10 @@ export async function sendMessage(
       if (tutorUser) {
         await sendEmail({
           to: tutorUser.email,
-          subject: "New client message on Channel Tutoring",
+          subject: `New client message on ${region.brandName}`,
           html: baseEmailLayout(`
             <p>Hi ${escapeHtml(tutorUser.name)},</p>
-            <p>${escapeHtml(user.name)} has messaged you for the first time on Channel Tutoring.</p>
+            <p>${escapeHtml(user.name)} has messaged you for the first time on ${region.brandName}.</p>
             <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/tutor-dashboard/messages/${conversationId}">View the conversation</a></p>
           `),
         }).catch(() => {});

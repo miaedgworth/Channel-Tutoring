@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { region } from "@/lib/region";
 
 const STORAGE_KEY = "ct-cookie-consent";
 
@@ -42,7 +43,7 @@ export function CookieConsent() {
     >
       <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-navy/80">
-          We use essential cookies to make Channel Tutoring work, and optional
+          We use essential cookies to make {region.brandName} work, and optional
           analytics cookies to help us improve it. Read our{" "}
           <Link href="/legal/cookie-policy" className="underline text-navy">
             Cookie Policy

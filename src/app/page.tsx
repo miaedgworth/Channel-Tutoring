@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/button";
 import { TutorCard } from "@/components/tutors/tutor-card";
+import { region, REGION } from "@/lib/region";
 
 export const dynamic = "force-dynamic";
 
@@ -27,10 +28,17 @@ const TRUST_POINTS = [
     title: "Face-to-face and Remote Learning Available",
     body: "Choose whichever format suits your family, in person or online.",
   },
-  {
-    title: "Supported by the University of Cambridge",
-    body: "Backed by the Homerton College Changemakers Catalyst Fund Award, recognising our work widening access to education in Guernsey.",
-  },
+  // This award was specifically won by Channel Tutoring in Guernsey — don't
+  // reuse it for Nines Tutoring, that would be a false claim. Swap in a
+  // real Swiss trust point once Mia has one.
+  ...(REGION === "GG"
+    ? [
+        {
+          title: "Supported by the University of Cambridge",
+          body: "Backed by the Homerton College Changemakers Catalyst Fund Award, recognising our work widening access to education in Guernsey.",
+        },
+      ]
+    : []),
 ];
 
 const STEPS = [
@@ -52,12 +60,12 @@ export default async function HomePage() {
       <section className="border-b border-navy/10 bg-gradient-to-b from-navy/[0.03] to-white py-20">
         <Container className="text-center">
           <h1 className="mx-auto max-w-3xl font-heading text-4xl font-bold leading-tight text-navy sm:text-5xl">
-            Unlock Your Potential with Channel Tutoring
+            Unlock Your Potential with {region.brandName}
           </h1>
           <div className="relative mx-auto mt-8 aspect-[3/2] w-full max-w-2xl overflow-hidden rounded-2xl shadow-md">
             <Image
               src="/home-hero.webp"
-              alt="A Channel Tutoring tutor working through a session with a student"
+              alt={`A ${region.brandName} tutor working through a session with a student`}
               fill
               priority
               sizes="(min-width: 672px) 672px, 100vw"
@@ -65,9 +73,9 @@ export default async function HomePage() {
             />
           </div>
           <p className="mx-auto mt-8 max-w-2xl text-lg text-navy/70">
-            Channel Tutoring connects students and parents online or in
-            person in Guernsey with high-quality tutors. Build confidence
-            through tailored support.
+            {region.brandName} connects students and parents online or in
+            person in {region.country} with high-quality tutors. Build
+            confidence through tailored support.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <LinkButton href="/about" variant="gold" size="lg">

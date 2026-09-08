@@ -1,3 +1,5 @@
+import { REGION, type RegionId } from "@/lib/region";
+
 export const SUBJECTS = [
   "Maths",
   "Further Maths",
@@ -52,14 +54,28 @@ export const LEVEL_LABELS: Record<string, string> = {
   UNIVERSITY_ADMISSIONS: "University Admissions",
 };
 
-// Fixed session pricing by level. Every tutor charges the same rate for the
-// same level — see the Channel Tutoring Registration and Agreement Form.
-export const LEVEL_PRICE_PENCE: Record<string, number> = {
-  KS3: 3500,
-  GCSE: 4000,
-  A_LEVEL: 4500,
-  UNIVERSITY_ADMISSIONS: 5000,
+// Fixed session pricing by level, in the region's minor currency unit
+// (pence for GBP, rappen for CHF). Every tutor charges the same rate for
+// the same level — see the Registration and Agreement Form.
+//
+// The CH figures are a placeholder (same numbers as GG, just relabelled
+// CHF) — Mia needs to confirm real Swiss market pricing before launch.
+const LEVEL_PRICE_PENCE_BY_REGION: Record<RegionId, Record<string, number>> = {
+  GG: {
+    KS3: 3500,
+    GCSE: 4000,
+    A_LEVEL: 4500,
+    UNIVERSITY_ADMISSIONS: 5000,
+  },
+  CH: {
+    KS3: 3500,
+    GCSE: 4000,
+    A_LEVEL: 4500,
+    UNIVERSITY_ADMISSIONS: 5000,
+  },
 };
+
+export const LEVEL_PRICE_PENCE: Record<string, number> = LEVEL_PRICE_PENCE_BY_REGION[REGION];
 
 export const AVAILABILITY_PERIODS = [
   { value: "MORNING", label: "Morning" },

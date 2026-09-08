@@ -1,12 +1,13 @@
 import { LEVELS, TUTOR_PAYOUT_PENCE } from "@/lib/constants";
-import { formatCurrencyGBP } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
+import { region } from "@/lib/region";
 
 export function TutorAgreementContent() {
   return (
     <>
       <p>
-        This agreement applies to anyone approved as a tutor on the Channel
-        Tutoring platform. By completing your tutor application and
+        This agreement applies to anyone approved as a tutor on the{" "}
+        {region.brandName} platform. By completing your tutor application and
         accepting an approved account, you agree to these terms in addition
         to our general{" "}
         <a href="/legal/terms">Terms &amp; Conditions</a>.
@@ -15,21 +16,21 @@ export function TutorAgreementContent() {
       <h2>1. Independent contractor status</h2>
       <p>
         You provide tutoring services as an independent contractor, not as
-        an employee, worker or agent of Channel Tutoring. You are
+        an employee, worker or agent of {region.brandName}. You are
         responsible for your own tax and National Insurance/social security
         obligations in respect of income earned through the platform.
       </p>
 
-      <h2>2. Vetting and DBS checks</h2>
+      <h2>2. Vetting and {region.criminalRecordCheckLabel}s</h2>
       <ul>
         <li>You must provide accurate information about your qualifications and experience.</li>
-        <li>You are responsible for obtaining your own DBS (criminal record) check where appropriate.</li>
+        <li>You are responsible for obtaining your own {region.criminalRecordCheckLabel} where appropriate.</li>
         <li>You must notify us immediately of any safeguarding-relevant matter.</li>
       </ul>
 
       <h2>3. What you&apos;re paid</h2>
       <p>
-        Session prices are fixed by Channel Tutoring according to level and
+        Session prices are fixed by {region.brandName} according to level and
         are the same for every tutor. You are paid the following per hour,
         with our platform fee deducted automatically at the time of payment:
       </p>
@@ -45,7 +46,7 @@ export function TutorAgreementContent() {
             <tr key={l.value} className="border-b border-navy/10 last:border-0">
               <td className="py-2 pr-4">{l.label}</td>
               <td className="py-2 font-semibold">
-                {formatCurrencyGBP(TUTOR_PAYOUT_PENCE[l.value])}/hour
+                {formatCurrency(TUTOR_PAYOUT_PENCE[l.value])}/hour
               </td>
             </tr>
           ))}
@@ -60,7 +61,7 @@ export function TutorAgreementContent() {
 
       <h2>4. Payments and payouts</h2>
       <ul>
-        <li>You must add your UK bank account details in your tutor dashboard to receive payouts.</li>
+        <li>You must add your {region.bankAccountLine} details in your tutor dashboard to receive payouts.</li>
         <li>You can request a withdrawal of your available balance at any time. Withdrawals are paid by bank transfer every Monday.</li>
         <li>You can view a full ledger of your sessions, fees and payouts in your tutor dashboard.</li>
       </ul>
@@ -93,10 +94,10 @@ export function TutorAgreementContent() {
 
       <h2>6. Conduct and communication</h2>
       <p>
-        All communication with clients must take place through the Channel
-        Tutoring messaging system. You must not request or share personal
-        contact details, or attempt to arrange payment or sessions outside
-        the platform. See our{" "}
+        All communication with clients must take place through the{" "}
+        {region.brandName} messaging system. You must not request or share
+        personal contact details, or attempt to arrange payment or sessions
+        outside the platform. See our{" "}
         <a href="/legal/acceptable-use-policy">Acceptable Use Policy</a> and{" "}
         <a href="/legal/safeguarding-policy">Safeguarding Policy</a>.
       </p>
@@ -106,8 +107,8 @@ export function TutorAgreementContent() {
           Google Meet
         </a>{" "}
         — it&apos;s free, needs no account for the client, and works in any
-        browser. Share the meeting link with your client through the
-        Channel Tutoring messaging system beforehand.
+        browser. Share the meeting link with your client through the{" "}
+        {region.brandName} messaging system beforehand.
       </p>
 
       <h2>7. Profile accuracy</h2>
@@ -128,7 +129,7 @@ export function TutorAgreementContent() {
       <h2>9. Contact</h2>
       <p>
         Questions about this agreement? Email{" "}
-        <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>.
+        <a href={`mailto:${region.supportEmail}`}>{region.supportEmail}</a>.
       </p>
     </>
   );

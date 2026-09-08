@@ -8,6 +8,7 @@ import { requireUser } from "@/lib/current-user";
 import { uniqueTutorSlug } from "@/lib/slug";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
 import { logAudit } from "@/lib/audit";
+import { region } from "@/lib/region";
 import { adminCreateTutorSchema, type AdminCreateTutorInput } from "@/lib/validations/admin-create-tutor";
 
 export async function approveTutorApplication(
@@ -107,10 +108,10 @@ export async function approveTutorApplication(
   const setPasswordUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
   await sendEmail({
     to: user.email,
-    subject: "You're approved to tutor with Channel Tutoring!",
+    subject: `You're approved to tutor with ${region.brandName}!`,
     html: baseEmailLayout(`
       <p>Hi ${application.name},</p>
-      <p>Great news — your application to tutor with Channel Tutoring has
+      <p>Great news — your application to tutor with ${region.brandName} has
       been approved.</p>
       <p>Set a password to access your tutor dashboard and complete your
       public profile:</p>
@@ -193,10 +194,10 @@ export async function adminCreateTutor(
   const setPasswordUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
   await sendEmail({
     to: user.email,
-    subject: "You're set up to tutor with Channel Tutoring!",
+    subject: `You're set up to tutor with ${region.brandName}!`,
     html: baseEmailLayout(`
       <p>Hi ${data.name},</p>
-      <p>An account has been created for you to tutor with Channel Tutoring.</p>
+      <p>An account has been created for you to tutor with ${region.brandName}.</p>
       <p>Set a password to access your tutor dashboard and complete your
       public profile:</p>
       <p><a href="${setPasswordUrl}" style="color:#C9A227;font-weight:bold;">Set your password</a></p>
@@ -242,10 +243,10 @@ export async function rejectTutorApplication(
 
   await sendEmail({
     to: application.email,
-    subject: "Update on your Channel Tutoring application",
+    subject: `Update on your ${region.brandName} application`,
     html: baseEmailLayout(`
       <p>Hi ${application.name},</p>
-      <p>Thank you for your interest in tutoring with Channel Tutoring.
+      <p>Thank you for your interest in tutoring with ${region.brandName}.
       After review, we're not able to move forward with your application
       at this time.</p>
       ${reason ? `<p>${reason}</p>` : ""}

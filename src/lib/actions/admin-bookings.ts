@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
+import { region } from "@/lib/region";
 import {
   formatDate,
   formatDateTime,
@@ -92,7 +93,7 @@ export async function adminScheduleSession(
               level,
               type: "REDEEM",
               quantity: -tokensUsed,
-              description: `${subject} session (${formatSessionDuration(durationMinutes)}) scheduled with ${profile.user.name} for ${formatDate(occ.startsAt)} by Channel Tutoring`,
+              description: `${subject} session (${formatSessionDuration(durationMinutes)}) scheduled with ${profile.user.name} for ${formatDate(occ.startsAt)} by ${region.brandName}`,
             },
           });
         }
@@ -151,11 +152,11 @@ export async function adminScheduleSession(
 
   const sessionWord = bookings.length === 1 ? "session" : "sessions";
   const clientIntro = isRecurring
-    ? `Channel Tutoring has scheduled ${bookings.length} weekly
+    ? `${region.brandName} has scheduled ${bookings.length} weekly
        ${escapeHtml(subject)} sessions for you with ${escapeHtml(profile.user.name)}, every
        ${formatWeekday(date)} at ${formatTime(date)}, starting ${formatDate(date)}. You'll
        see these under Upcoming Sessions on your dashboard.`
-    : `Channel Tutoring has scheduled a ${formatSessionDuration(durationMinutes)}
+    : `${region.brandName} has scheduled a ${formatSessionDuration(durationMinutes)}
        ${escapeHtml(subject)} session for you with ${escapeHtml(profile.user.name)} on
        ${formatDate(date)}. You'll see this under Upcoming Sessions on your dashboard.`;
 
@@ -179,14 +180,14 @@ export async function adminScheduleSession(
     <p>${clientIntro}</p>
     ${clientPaymentStatus}
     <p>If this doesn't look right, reply to this email or
-    <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
+    <a href="mailto:${region.supportEmail}">contact us</a>.</p>
   `;
 
   const tutorIntro = isRecurring
-    ? `Channel Tutoring has scheduled ${bookings.length} weekly ${escapeHtml(subject)}
+    ? `${region.brandName} has scheduled ${bookings.length} weekly ${escapeHtml(subject)}
        sessions for you with ${escapeHtml(client.name)}, every ${formatWeekday(date)} at
        ${formatTime(date)}, starting ${formatDate(date)}.`
-    : `Channel Tutoring has scheduled a ${escapeHtml(subject)} session for you
+    : `${region.brandName} has scheduled a ${escapeHtml(subject)} session for you
        with ${escapeHtml(client.name)} on ${formatDate(date)}.`;
 
   let tutorPaymentStatus: string;
@@ -213,8 +214,8 @@ export async function adminScheduleSession(
     sendEmail({
       to: client.email,
       subject: isRecurring
-        ? "Your weekly sessions have been scheduled on Channel Tutoring"
-        : "A session has been scheduled on Channel Tutoring",
+        ? `Your weekly sessions have been scheduled on ${region.brandName}`
+        : `A session has been scheduled on ${region.brandName}`,
       html: baseEmailLayout(clientEmailBody),
     }),
     sendEmail({
@@ -308,7 +309,7 @@ export async function adminUpdateScheduledSession(
               type: "REFUND",
               quantity: oldTokensUsed,
               bookingId: booking.id,
-              description: `${formatTokenQuantity(oldTokensUsed)} token(s) released — ${booking.subject} session on ${formatDate(booking.startsAt)} was edited by Channel Tutoring`,
+              description: `${formatTokenQuantity(oldTokensUsed)} token(s) released — ${booking.subject} session on ${formatDate(booking.startsAt)} was edited by ${region.brandName}`,
             },
           });
           tokensReserved = false;
@@ -327,7 +328,7 @@ export async function adminUpdateScheduledSession(
               type: "REDEEM",
               quantity: -newTokensUsed,
               bookingId: booking.id,
-              description: `${subject} session (${formatSessionDuration(durationMinutes)}) rescheduled for ${formatDate(startsAt)} by Channel Tutoring`,
+              description: `${subject} session (${formatSessionDuration(durationMinutes)}) rescheduled for ${formatDate(startsAt)} by ${region.brandName}`,
             },
           });
         }
@@ -344,7 +345,7 @@ export async function adminUpdateScheduledSession(
               type: "REDEEM",
               quantity: -newTokensUsed,
               bookingId: booking.id,
-              description: `${subject} session (${formatSessionDuration(durationMinutes)}) scheduled for ${formatDate(startsAt)} by Channel Tutoring`,
+              description: `${subject} session (${formatSessionDuration(durationMinutes)}) scheduled for ${formatDate(startsAt)} by ${region.brandName}`,
             },
           });
         }
@@ -410,7 +411,7 @@ export async function adminUpdateScheduledSession(
       subject: "Your scheduled session was updated",
       html: baseEmailLayout(`
         <p>Hi ${escapeHtml(booking.client.name)},</p>
-        <p>Channel Tutoring updated your ${escapeHtml(subject)} session with
+        <p>${region.brandName} updated your ${escapeHtml(subject)} session with
         ${escapeHtml(profile.user.name)} — it's now ${formatSessionDuration(durationMinutes)}
         on ${formatDate(startsAt)}.</p>
         ${
@@ -421,7 +422,7 @@ export async function adminUpdateScheduledSession(
             : ""
         }
         <p>If this doesn't look right, reply to this email or
-        <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
+        <a href="mailto:${region.supportEmail}">contact us</a>.</p>
       `),
     }),
     sendEmail({
@@ -429,7 +430,7 @@ export async function adminUpdateScheduledSession(
       subject: "A scheduled session was updated",
       html: baseEmailLayout(`
         <p>Hi ${escapeHtml(profile.user.name)},</p>
-        <p>Channel Tutoring updated your ${escapeHtml(subject)} session with
+        <p>${region.brandName} updated your ${escapeHtml(subject)} session with
         ${escapeHtml(booking.client.name)} — it's now ${formatSessionDuration(durationMinutes)}
         on ${formatDate(startsAt)}.</p>
       `),
@@ -499,7 +500,7 @@ export async function adminLogCompletedLesson(
           level,
           type: "REDEEM",
           quantity: -tokensUsed,
-          description: `${subject} lesson (${formatSessionDuration(durationMinutes)}) with ${profile.user.name} on ${formatDate(startsAt)}, logged by Channel Tutoring`,
+          description: `${subject} lesson (${formatSessionDuration(durationMinutes)}) with ${profile.user.name} on ${formatDate(startsAt)}, logged by ${region.brandName}`,
         },
       });
 
@@ -566,16 +567,16 @@ export async function adminLogCompletedLesson(
   await Promise.all([
     sendEmail({
       to: client.email,
-      subject: "A lesson has been logged on Channel Tutoring",
+      subject: `A lesson has been logged on ${region.brandName}`,
       html: baseEmailLayout(`
         <p>Hi ${escapeHtml(client.name)},</p>
-        <p>Channel Tutoring logged your ${formatSessionDuration(durationMinutes)}
+        <p>${region.brandName} logged your ${formatSessionDuration(durationMinutes)}
         ${escapeHtml(subject)} lesson with ${escapeHtml(profile.user.name)} on
         ${formatDate(startsAt)} as complete, using
         ${formatTokenQuantity(tokensUsed)} of your
         ${formatLevel(level)} tokens.</p>
         <p>If this doesn't look right, reply to this email or
-        <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
+        <a href="mailto:${region.supportEmail}">contact us</a>.</p>
       `),
     }),
     sendEmail({
@@ -583,7 +584,7 @@ export async function adminLogCompletedLesson(
       subject: "A lesson was logged for you",
       html: baseEmailLayout(`
         <p>Hi ${escapeHtml(profile.user.name)},</p>
-        <p>Channel Tutoring logged your ${escapeHtml(subject)} lesson with
+        <p>${region.brandName} logged your ${escapeHtml(subject)} lesson with
         ${escapeHtml(client.name)} on ${formatDate(startsAt)} as complete
         &mdash; payout ${formatTokenQuantity(tokensUsed)} token(s) /
         you&apos;ve been paid.</p>

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
-import { escapeHtml, formatLevel, formatTime, toLocalDateInputValue, londonWallTimeToUtc } from "@/lib/utils";
+import { escapeHtml, formatLevel, formatTime, toLocalDateInputValue, regionWallTimeToUtc } from "@/lib/utils";
+import { region } from "@/lib/region";
 
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
@@ -14,7 +15,7 @@ export async function GET(request: Request) {
   }
 
   const todayLondon = toLocalDateInputValue(new Date());
-  const dayStart = londonWallTimeToUtc(todayLondon, "00:00");
+  const dayStart = regionWallTimeToUtc(todayLondon, "00:00");
   const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
 
   const unpaid = await prisma.booking.findMany({
@@ -66,7 +67,7 @@ export async function GET(request: Request) {
         to: group.client.email,
         subject:
           claimed.count > 1
-            ? "You have unpaid sessions today on Channel Tutoring"
+            ? `You have unpaid sessions today on ${region.brandName}`
             : "Your session today isn't paid for yet",
         html: baseEmailLayout(`
           <p>Hi ${escapeHtml(group.client.name)},</p>

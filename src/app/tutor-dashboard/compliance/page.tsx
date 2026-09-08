@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { DbsCheckUpload } from "@/components/tutor-dashboard/dbs-check-upload";
+import { region } from "@/lib/region";
 import { requireUser } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
 
@@ -61,10 +62,10 @@ export default async function TutorCompliancePage() {
 
       <Card>
         <CardContent>
-          <h2 className="font-heading text-lg font-bold text-navy">DBS check</h2>
+          <h2 className="font-heading text-lg font-bold text-navy">{region.criminalRecordCheckLabel}</h2>
           <p className="mt-1 text-sm text-navy/60">
-            Upload a copy of your DBS (criminal record) check. Only you and
-            Channel Tutoring admin can view it.
+            Upload a copy of your {region.criminalRecordCheckLabel}. Only you
+            and {region.brandName} admin can view it.
           </p>
           <div className="mt-4">
             <DbsCheckUpload

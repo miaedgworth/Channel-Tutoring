@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { formatCurrencyGBP, formatLevel } from "@/lib/utils";
+import { formatCurrency, formatLevel } from "@/lib/utils";
 import { LEVELS, LEVEL_PRICE_PENCE, BLOCK_BOOKING_MIN_SESSIONS, BLOCK_BOOKING_DISCOUNT_RATE } from "@/lib/constants";
 
 export function TokenPurchaseForm() {
@@ -56,7 +56,7 @@ export function TokenPurchaseForm() {
         >
           {LEVELS.map((l) => (
             <option key={l.value} value={l.value}>
-              {l.label} — {formatCurrencyGBP(LEVEL_PRICE_PENCE[l.value])}/token
+              {l.label} — {formatCurrency(LEVEL_PRICE_PENCE[l.value])}/token
             </option>
           ))}
         </select>
@@ -86,16 +86,16 @@ export function TokenPurchaseForm() {
       <div className="rounded-md bg-navy/[0.03] px-4 py-3 text-sm">
         <p className="text-navy/70">
           {quantity} {formatLevel(level)} token{quantity > 1 ? "s" : ""} at{" "}
-          {formatCurrencyGBP(unitPricePence)} each
+          {formatCurrency(unitPricePence)} each
           {applyDiscount && " — 10% block discount applied"}
         </p>
         <p className="mt-1 font-heading text-lg font-semibold text-navy">
-          {formatCurrencyGBP(totalPence)}
+          {formatCurrency(totalPence)}
         </p>
       </div>
 
       <Button variant="gold" size="lg" disabled={loading} onClick={handleBuy}>
-        {loading ? "Redirecting to payment..." : `Buy ${formatCurrencyGBP(totalPence)}`}
+        {loading ? "Redirecting to payment..." : `Buy ${formatCurrency(totalPence)}`}
       </Button>
     </div>
   );

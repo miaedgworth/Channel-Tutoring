@@ -4,6 +4,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CookieConsent } from "@/components/layout/cookie-consent";
+import { region } from "@/lib/region";
 
 const bodyFont = Inter({
   variable: "--font-inter",
@@ -19,12 +20,11 @@ const headingFont = Source_Serif_4({
 
 export const metadata: Metadata = {
   title: {
-    default: "Channel Tutoring | GCSE & A-Level Tutors in Guernsey",
-    template: "%s | Channel Tutoring",
+    default: `${region.brandName} | ${region.tagline}`,
+    template: `%s | ${region.brandName}`,
   },
-  description:
-    "Channel Tutoring connects Guernsey students and parents with vetted, experienced GCSE and A-Level tutors. Book trusted, one-to-one tuition online.",
-  metadataBase: new URL("https://www.channeltutoring.com"),
+  description: `${region.brandName} connects ${region.country} students and parents with vetted, experienced GCSE and A-Level tutors. Book trusted, one-to-one tuition online.`,
+  metadataBase: new URL(`https://${region.domain}`),
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

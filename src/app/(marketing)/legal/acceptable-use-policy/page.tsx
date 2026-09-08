@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/legal-page";
+import { region } from "@/lib/region";
 
 export const metadata: Metadata = { title: "Acceptable Use Policy" };
 
@@ -7,15 +8,15 @@ export default function AcceptableUsePolicyPage() {
   return (
     <LegalPage title="Acceptable Use Policy" lastUpdated="21 August 2026">
       <p>
-        This policy sets out what we expect from everyone using Channel
-        Tutoring — clients, students and tutors alike — to keep the
+        This policy sets out what we expect from everyone using {region.brandName}
+        {" "}— clients, students and tutors alike — to keep the
         platform safe, respectful and trustworthy.
       </p>
 
       <h2>You must not:</h2>
       <ul>
         <li>Share personal contact details (phone number, personal email, social media handles) with another user, or ask another user for theirs.</li>
-        <li>Attempt to arrange tutoring sessions, payment, or communication outside the Channel Tutoring platform.</li>
+        <li>Attempt to arrange tutoring sessions, payment, or communication outside the {region.brandName} platform.</li>
         <li>Use abusive, threatening, discriminatory or sexually inappropriate language or behaviour towards any other user.</li>
         <li>Impersonate another person, or provide false information about your identity or qualifications.</li>
         <li>Attempt to access another user&apos;s account, or any part of the platform you&apos;re not authorised to use.</li>
@@ -45,8 +46,8 @@ export default function AcceptableUsePolicyPage() {
       <p>
         If you experience or witness a breach of this policy, please
         contact us at{" "}
-        <a href="mailto:info@channeltutoring.com">
-          info@channeltutoring.com
+        <a href={`mailto:${region.supportEmail}`}>
+          {region.supportEmail}
         </a>
         .
       </p>

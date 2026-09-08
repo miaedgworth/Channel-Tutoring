@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
+import { region } from "@/lib/region";
 
 export const metadata: Metadata = {
   title: "FAQ",
-  description: "Frequently asked questions about Channel Tutoring.",
+  description: `Frequently asked questions about ${region.brandName}.`,
 };
 
 const FAQS = [
@@ -13,7 +14,7 @@ const FAQS = [
   },
   {
     q: "Is it safe for my child to message a tutor directly?",
-    a: "Yes. All messaging happens within Channel Tutoring, not over personal phone numbers or social media. Messages are monitored, and anything that looks like an attempt to move communication off-platform is flagged for our team to review.",
+    a: `Yes. All messaging happens within ${region.brandName}, not over personal phone numbers or social media. Messages are monitored, and anything that looks like an attempt to move communication off-platform is flagged for our team to review.`,
   },
   {
     q: "How do I pay for a session?",
@@ -29,7 +30,7 @@ const FAQS = [
   },
   {
     q: "What subjects and levels do you cover?",
-    a: "We cover core subjects from KS3 through GCSE, A-Level and university admissions, across the main UK exam boards used in Guernsey (AQA, Edexcel, OCR, WJEC/Eduqas and others). Use Find a Tutor to filter by subject and level, and let us know your exam board when you book a session.",
+    a: "We cover core subjects from KS3 through GCSE, A-Level and university admissions, across the main UK exam boards (AQA, Edexcel, OCR, WJEC/Eduqas and others). Use Find a Tutor to filter by subject and level, and let us know your exam board when you book a session.",
   },
 ];
 

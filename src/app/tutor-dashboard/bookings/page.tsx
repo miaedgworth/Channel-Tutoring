@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
-import { formatCurrencyGBP, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "My Bookings" };
 export const dynamic = "force-dynamic";
@@ -65,7 +65,7 @@ export default async function TutorBookingsPage() {
                 </p>
                 <p className="text-sm text-navy/60">
                   {formatDate(booking.startsAt)} &middot;{" "}
-                  {formatCurrencyGBP(booking.tutorPayoutPence)} payout
+                  {formatCurrency(booking.tutorPayoutPence)} payout
                 </p>
               </div>
               <div className="flex items-center gap-2">

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
+import { region } from "@/lib/region";
 
 const schema = z.object({ email: z.string().trim().toLowerCase().email() });
 
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
     const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}`;
     await sendEmail({
       to: user.email,
-      subject: "Reset your Channel Tutoring password",
+      subject: `Reset your ${region.brandName} password`,
       html: baseEmailLayout(`
         <p>Hi ${user.name},</p>
         <p>We received a request to reset your password. This link expires in 1 hour.</p>

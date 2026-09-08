@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BankDetailsForm } from "@/components/tutor-dashboard/bank-details-form";
 import { RequestBankPayoutButton } from "@/components/tutor-dashboard/request-bank-payout-button";
-import { formatCurrencyGBP, formatDateTime } from "@/lib/utils";
+import { formatCurrency, formatDateTime } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Earnings" };
 export const dynamic = "force-dynamic";
@@ -72,7 +72,7 @@ export default async function EarningsPage() {
             <CardContent>
               <p className="text-sm text-navy/60">Available balance</p>
               <p className="mt-2 font-heading text-3xl font-bold text-navy">
-                {formatCurrencyGBP(profile.balancePence)}
+                {formatCurrency(profile.balancePence)}
               </p>
               <div className="mt-4">
                 <RequestBankPayoutButton
@@ -86,7 +86,7 @@ export default async function EarningsPage() {
             <CardContent>
               <p className="text-sm text-navy/60">Total earned to date</p>
               <p className="mt-2 font-heading text-3xl font-bold text-navy">
-                {formatCurrencyGBP(profile.totalEarnedPence)}
+                {formatCurrency(profile.totalEarnedPence)}
               </p>
               <Badge variant="success" className="mt-3">
                 Bank details added
@@ -143,7 +143,7 @@ export default async function EarningsPage() {
                         }`}
                       >
                         {entry.amountPence < 0 ? "-" : "+"}
-                        {formatCurrencyGBP(Math.abs(entry.amountPence))}
+                        {formatCurrency(Math.abs(entry.amountPence))}
                       </td>
                     </tr>
                   ))}

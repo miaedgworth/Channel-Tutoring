@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrencyGBP } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
+import { region } from "@/lib/region";
 
 export const metadata: Metadata = { title: "Tutor Overview" };
 export const dynamic = "force-dynamic";
@@ -63,7 +64,7 @@ export default async function TutorOverviewPage() {
           </h2>
           <ol className="mt-2 space-y-1.5 text-sm text-navy/60">
             <li>
-              1. A client messages you through Channel Tutoring to arrange
+              1. A client messages you through {region.brandName} to arrange
               a session — subject, level, session length and date.
             </li>
             <li>
@@ -140,7 +141,7 @@ export default async function TutorOverviewPage() {
           <CardContent>
             <p className="text-sm text-navy/60">Available balance</p>
             <p className="mt-2 font-heading text-3xl font-bold text-navy">
-              {formatCurrencyGBP(profile.balancePence)}
+              {formatCurrency(profile.balancePence)}
             </p>
             <Link
               href="/tutor-dashboard/earnings"
@@ -154,7 +155,7 @@ export default async function TutorOverviewPage() {
           <CardContent>
             <p className="text-sm text-navy/60">Total earned to date</p>
             <p className="mt-2 font-heading text-3xl font-bold text-navy">
-              {formatCurrencyGBP(profile.totalEarnedPence)}
+              {formatCurrency(profile.totalEarnedPence)}
             </p>
           </CardContent>
         </Card>
@@ -197,7 +198,7 @@ export default async function TutorOverviewPage() {
               </a>{" "}
               for online lessons — it&apos;s free, needs no account for
               your client, and works in any browser. Share the meeting
-              link with your client through Channel Tutoring messages
+              link with your client through {region.brandName} messages
               before the session.
             </p>
           </CardContent>

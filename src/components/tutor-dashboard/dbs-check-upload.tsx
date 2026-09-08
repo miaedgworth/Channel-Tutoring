@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { region } from "@/lib/region";
 
 export function DbsCheckUpload({
   tutorProfileId,
@@ -72,7 +73,7 @@ export function DbsCheckUpload({
           </a>
         </div>
       ) : (
-        <p className="text-sm text-navy/60">No DBS check uploaded yet.</p>
+        <p className="text-sm text-navy/60">No {region.criminalRecordCheckLabel} uploaded yet.</p>
       )}
       <input
         ref={inputRef}
@@ -89,7 +90,7 @@ export function DbsCheckUpload({
         disabled={uploading}
         onClick={() => inputRef.current?.click()}
       >
-        {uploading ? "Uploading..." : fileName ? "Replace file" : "Upload DBS check"}
+        {uploading ? "Uploading..." : fileName ? "Replace file" : `Upload ${region.criminalRecordCheckLabel}`}
       </Button>
     </div>
   );

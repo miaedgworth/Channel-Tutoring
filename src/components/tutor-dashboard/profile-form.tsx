@@ -7,7 +7,8 @@ import { CheckboxGroup } from "@/components/ui/checkbox-group";
 import { Button } from "@/components/ui/button";
 import { PhotoUpload } from "@/components/ui/photo-upload";
 import { updateTutorProfile, adminUpdateTutorProfile } from "@/lib/actions/tutor-profile";
-import { formatCurrencyGBP } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
+import { region } from "@/lib/region";
 
 const inputClass =
   "mt-1.5 block w-full rounded-md border border-navy/20 px-3 py-2.5 text-sm focus:border-gold-dark focus:outline-none focus:ring-1 focus:ring-gold-dark";
@@ -144,7 +145,7 @@ export function TutorProfileForm({
         </h2>
         <div className="rounded-md border border-navy/10 bg-navy/[0.02] p-4 text-sm text-navy/70">
           <p>
-            Session prices are fixed by Channel Tutoring and the same for
+            Session prices are fixed by {region.brandName} and the same for
             every tutor. You&apos;re paid:
           </p>
           <ul className="mt-2 space-y-1">
@@ -152,7 +153,7 @@ export function TutorProfileForm({
               <li key={l.value} className="flex items-center justify-between">
                 <span>{l.label}</span>
                 <span className="font-semibold text-navy">
-                  {formatCurrencyGBP(TUTOR_PAYOUT_PENCE[l.value])}/hour
+                  {formatCurrency(TUTOR_PAYOUT_PENCE[l.value])}/hour
                 </span>
               </li>
             ))}

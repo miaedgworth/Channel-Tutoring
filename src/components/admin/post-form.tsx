@@ -4,6 +4,7 @@ import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { createPost, updatePost, deletePost } from "@/lib/actions/posts";
+import { region } from "@/lib/region";
 
 const inputClass =
   "mt-1.5 block w-full rounded-md border border-navy/20 px-3 py-2.5 text-sm focus:border-gold-dark focus:outline-none focus:ring-1 focus:ring-gold-dark";
@@ -32,7 +33,7 @@ export function PostForm({
   const [excerpt, setExcerpt] = useState(post?.excerpt ?? "");
   const [content, setContent] = useState(post?.content ?? "");
   const [coverImageUrl, setCoverImageUrl] = useState(post?.coverImageUrl ?? "");
-  const [authorName, setAuthorName] = useState(post?.authorName ?? "Channel Tutoring Team");
+  const [authorName, setAuthorName] = useState(post?.authorName ?? `${region.brandName} Team`);
   const [status, setStatus] = useState<PostStatus>(post?.status ?? "DRAFT");
   const [error, setError] = useState<string | null>(null);
 

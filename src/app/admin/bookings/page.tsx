@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrencyGBP, formatDateTime } from "@/lib/utils";
+import { formatCurrency, formatDateTime } from "@/lib/utils";
 import type { BookingStatus } from "@prisma/client";
 
 export const metadata: Metadata = { title: "Bookings" };
@@ -123,7 +123,7 @@ export default async function AdminBookingsPage({
                   </td>
                   <td className="p-0 text-right">
                     <Link href={`/admin/bookings/${booking.id}`} className="block px-0 py-2.5 text-right font-medium text-navy">
-                      {formatCurrencyGBP(booking.pricePence)}
+                      {formatCurrency(booking.pricePence)}
                     </Link>
                   </td>
                 </tr>

@@ -7,6 +7,7 @@ import { sendEmail, baseEmailLayout } from "@/lib/email";
 import { logAudit } from "@/lib/audit";
 import { formatLevel } from "@/lib/utils";
 import { reserveTokensForUnpaidBookings } from "@/lib/actions/token-reservation";
+import { region } from "@/lib/region";
 
 export async function POST(request: Request) {
   if (!isStripeConfigured()) {
@@ -96,7 +97,7 @@ export async function POST(request: Request) {
 
       await sendEmail({
         to: user.email,
-        subject: "Your Channel Tutoring tokens are ready",
+        subject: `Your ${region.brandName} tokens are ready`,
         html: baseEmailLayout(`
           <p>Hi ${user.name},</p>
           <p>You've added ${quantity} ${formatLevel(level)} lesson token${quantity > 1 ? "s" : ""}

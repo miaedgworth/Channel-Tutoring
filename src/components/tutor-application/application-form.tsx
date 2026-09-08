@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { SUBJECTS, LEVELS } from "@/lib/constants";
 import { CheckboxGroup } from "@/components/ui/checkbox-group";
 import { Button } from "@/components/ui/button";
+import { region } from "@/lib/region";
 
 const inputClass =
   "mt-1.5 block w-full rounded-md border border-navy/20 px-3 py-2.5 text-sm focus:border-gold-dark focus:outline-none focus:ring-1 focus:ring-gold-dark";
@@ -67,7 +68,7 @@ export function TutorApplicationForm() {
           Application received
         </h2>
         <p className="mt-2 text-sm text-navy/70">
-          Thank you for applying to tutor with Channel Tutoring. We&apos;ll
+          Thank you for applying to tutor with {region.brandName}. We&apos;ll
           review your details and be in touch by email soon.
         </p>
       </div>
@@ -226,7 +227,7 @@ export function TutorApplicationForm() {
         </div>
         <p className="text-xs text-navy/50">
           No file yet? Share a Google Drive/Dropbox link, or email documents
-          to info@channeltutoring.com after applying.
+          to {region.supportEmail} after applying.
         </p>
       </section>
 

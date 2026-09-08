@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Container } from "@/components/ui/container";
 import { NewsletterForm } from "@/components/marketing/newsletter-form";
 import { auth } from "@/lib/auth";
+import { region } from "@/lib/region";
 
 const columns = [
   {
@@ -57,19 +58,19 @@ export async function SiteFooter() {
             <Link href="/" className="flex items-center gap-2">
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/95 p-1">
                 <Image
-                  src="/logo-icon.png"
-                  alt="Channel Tutoring"
+                  src={region.logoSrc}
+                  alt={region.logoAlt}
                   width={449}
                   height={419}
                   className="h-full w-auto"
                 />
               </span>
               <span className="font-heading text-lg font-bold text-white">
-                Channel Tutoring
+                {region.brandName}
               </span>
             </Link>
             <p className="mt-4 max-w-xs text-sm text-white/70">
-              Trusted, one-to-one tuition for students across Guernsey —
+              Trusted, one-to-one tuition for students across {region.country} —
               delivered by high-quality specialist tutors.
             </p>
             <div className="mt-6 max-w-xs">
@@ -77,7 +78,7 @@ export async function SiteFooter() {
                 Stay up to date
               </p>
               <p className="mt-1 text-xs text-white/60">
-                Occasional tips and news from Channel Tutoring. Unsubscribe
+                Occasional tips and news from {region.brandName}. Unsubscribe
                 any time.
               </p>
               <NewsletterForm compact />
@@ -107,10 +108,10 @@ export async function SiteFooter() {
 
         <div className="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            &copy; {new Date().getFullYear()} Channel Tutoring, Guernsey. All
+            &copy; {new Date().getFullYear()} {region.legalEntityLine}. All
             rights reserved.
           </p>
-          <p>Registered in Guernsey · GCSE &amp; A-Level Tuition</p>
+          <p>Registered in {region.country} · GCSE &amp; A-Level Tuition</p>
         </div>
       </Container>
     </footer>

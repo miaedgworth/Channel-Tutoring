@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/button";
+import { region } from "@/lib/region";
 
 export const metadata: Metadata = {
   title: "How It Works",
-  description: "How booking a tutor works on Channel Tutoring.",
+  description: `How booking a tutor works on ${region.brandName}.`,
 };
 
 const CLIENT_STEPS = [

@@ -5,6 +5,7 @@ import { LinkButton } from "@/components/ui/button";
 import { auth } from "@/lib/auth";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { UserMenu } from "@/components/layout/user-menu";
+import { region } from "@/lib/region";
 
 const NAV_LINKS = [
   { href: "/about", label: "About" },
@@ -27,15 +28,15 @@ export async function SiteHeader() {
       <Container className="flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2 shrink-0">
           <Image
-            src="/logo-icon.png"
-            alt="Channel Tutoring"
+            src={region.logoSrc}
+            alt={region.logoAlt}
             width={449}
             height={419}
             priority
             className="h-10 w-auto"
           />
           <span className="font-heading text-lg font-bold text-navy hidden sm:inline">
-            Channel Tutoring
+            {region.brandName}
           </span>
         </Link>
 

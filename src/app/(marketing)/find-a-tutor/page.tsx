@@ -5,11 +5,11 @@ import { prisma } from "@/lib/prisma";
 import { Container } from "@/components/ui/container";
 import { TutorFilters } from "@/components/tutors/tutor-filters";
 import { TutorCard } from "@/components/tutors/tutor-card";
+import { region } from "@/lib/region";
 
 export const metadata: Metadata = {
   title: "Find a Tutor",
-  description:
-    "Search vetted tutors in Guernsey by subject and level, from KS3 through to university admissions.",
+  description: `Search vetted tutors in ${region.country} by subject and level, from KS3 through to university admissions.`,
 };
 export const dynamic = "force-dynamic";
 
@@ -28,8 +28,8 @@ export default function FindATutorPage({
         <div className="mx-auto mt-6 max-w-2xl rounded-xl border border-gold/30 bg-gold/5 px-5 py-4 text-center text-sm text-navy">
           We&apos;re currently updating our roster of tutors. In the
           meantime, email{" "}
-          <a href="mailto:info@channeltutoring.com" className="underline">
-            info@channeltutoring.com
+          <a href={`mailto:${region.supportEmail}`} className="underline">
+            {region.supportEmail}
           </a>{" "}
           to make an enquiry and we&apos;ll help you find the right tutor.
         </div>

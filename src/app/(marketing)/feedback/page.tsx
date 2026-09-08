@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { FeedbackForm } from "@/components/marketing/feedback-form";
+import { region } from "@/lib/region";
 
 export const metadata: Metadata = {
   title: "Feedback",
-  description: "Tell us how your tutoring sessions went with Channel Tutoring.",
+  description: `Tell us how your tutoring sessions went with ${region.brandName}.`,
 };
 
 export default function FeedbackPage() {

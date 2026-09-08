@@ -4,6 +4,7 @@ import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { adminCreateAdmin } from "@/lib/actions/admin-users";
+import { region } from "@/lib/region";
 
 const inputClass =
   "mt-1.5 block w-full rounded-md border border-navy/20 px-3 py-2.5 text-sm focus:border-gold-dark focus:outline-none focus:ring-1 focus:ring-gold-dark";
@@ -68,7 +69,7 @@ export function AddAdminForm() {
         {isPending ? "Adding..." : "Add Admin"}
       </Button>
       <p className="text-xs text-navy/40">
-        If this email already has a Channel Tutoring account, it&apos;s
+        If this email already has a {region.brandName} account, it&apos;s
         upgraded to admin. Otherwise a new account is created and they&apos;re
         emailed a link to set their password.
       </p>

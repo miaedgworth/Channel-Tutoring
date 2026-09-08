@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
+import { region } from "@/lib/region";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,7 @@ const STATIC_ROUTES = [
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.channeltutoring.com";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${region.domain}`;
 
   const [tutors, posts] = await Promise.all([
     prisma.tutorProfile.findMany({

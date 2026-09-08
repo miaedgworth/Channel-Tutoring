@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { ContactForm } from "@/components/marketing/contact-form";
+import { region } from "@/lib/region";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Get in touch with the Channel Tutoring team.",
+  description: `Get in touch with the ${region.brandName} team.`,
 };
 
 export default function ContactPage() {
@@ -27,8 +28,8 @@ export default function ContactPage() {
 
         <p className="mt-8 text-center text-sm text-navy/50">
           You can also email us directly at{" "}
-          <a href="mailto:info@channeltutoring.com" className="underline">
-            info@channeltutoring.com
+          <a href={`mailto:${region.supportEmail}`} className="underline">
+            {region.supportEmail}
           </a>
         </p>
       </Container>

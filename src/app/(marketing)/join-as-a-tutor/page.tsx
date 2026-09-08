@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { TutorApplicationForm } from "@/components/tutor-application/application-form";
+import { region } from "@/lib/region";
 
 export const metadata: Metadata = {
   title: "Join as a Tutor",
-  description:
-    "Apply to become a Channel Tutoring tutor. Fixed, fair session rates, choose your own hours, and get paid securely through the platform.",
+  description: `Apply to become a ${region.brandName} tutor. Fixed, fair session rates, choose your own hours, and get paid securely through the platform.`,
 };
 
 const TUTOR_STEPS = [
@@ -19,7 +19,7 @@ const TUTOR_STEPS = [
   },
   {
     title: "3. Set your weekly availability",
-    body: "Session prices are fixed by Channel Tutoring based on level, the same for every tutor — see our Pricing page. Just tick the days and times of day you're generally free each week, so clients know before they message you.",
+    body: `Session prices are fixed by ${region.brandName} based on level, the same for every tutor — see our Pricing page. Just tick the days and times of day you're generally free each week, so clients know before they message you.`,
   },
   {
     title: "4. Get booked and paid",
@@ -37,10 +37,10 @@ export default function JoinAsATutorPage() {
       <Container className="max-w-3xl">
         <div className="text-center">
           <h1 className="font-heading text-3xl font-bold text-navy sm:text-4xl">
-            Tutor with Channel Tutoring
+            Tutor with {region.brandName}
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-navy/70">
-            Join a trusted network of tutors across Guernsey, from KS3
+            Join a trusted network of tutors across {region.country}, from KS3
             through to university admissions. Fixed, fair session rates,
             choose your own hours, and we&apos;ll handle bookings, payments
             and admin — you focus on teaching.

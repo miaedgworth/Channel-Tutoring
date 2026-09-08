@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/legal-page";
+import { region } from "@/lib/region";
 
 export const metadata: Metadata = { title: "Terms & Conditions" };
 
@@ -7,18 +8,18 @@ export default function TermsPage() {
   return (
     <LegalPage title="Terms &amp; Conditions" lastUpdated="21 August 2026">
       <p>
-        These Terms &amp; Conditions govern your use of the Channel Tutoring
-        platform. By creating an account or using the platform, you agree to
+        These Terms &amp; Conditions govern your use of the {region.brandName}
+        {" "}platform. By creating an account or using the platform, you agree to
         these terms. If you are booking for a child under 18, you confirm you
         are their parent or legal guardian and are agreeing on their behalf.
       </p>
 
       <h2>1. Who we are</h2>
       <p>
-        Channel Tutoring is a Guernsey-based platform that connects clients
-        with independent tutors. We are not a party to the tutoring
+        {region.brandName} is a {region.country}-based platform that connects
+        clients with independent tutors. We are not a party to the tutoring
         agreement itself — tutors provide their services as independent
-        contractors, not as employees of Channel Tutoring.
+        contractors, not as employees of {region.brandName}.
       </p>
 
       <h2>2. Accounts</h2>
@@ -32,14 +33,14 @@ export default function TermsPage() {
       <ul>
         <li>Session prices are fixed by level and the same for every tutor &mdash; see our <a href="/pricing">Pricing</a> page.</li>
         <li>Payment is taken in full at the time of booking via our payment processor, Stripe.</li>
-        <li>Channel Tutoring retains a platform fee from each completed session; the remainder is paid to the tutor.</li>
+        <li>{region.brandName} retains a platform fee from each completed session; the remainder is paid to the tutor.</li>
         <li>See our <a href="/legal/cancellation-refund-policy">Cancellation &amp; Refund Policy</a> for cancellation terms.</li>
       </ul>
 
       <h2>4. Tutor status</h2>
       <p>
-        Tutors on Channel Tutoring are independent contractors, not
-        employees, workers or agents of Channel Tutoring. Full terms for
+        Tutors on {region.brandName} are independent contractors, not
+        employees, workers or agents of {region.brandName}. Full terms for
         tutors are set out in our{" "}
         <a href="/legal/tutor-agreement">Tutor Agreement</a>.
       </p>
@@ -55,7 +56,7 @@ export default function TermsPage() {
 
       <h2>6. Limitation of liability</h2>
       <p>
-        Channel Tutoring provides a platform to connect clients and tutors.
+        {region.brandName} provides a platform to connect clients and tutors.
         While we vet tutors before their profile goes live, we cannot
         guarantee academic outcomes. To the maximum extent permitted by
         law, our liability is limited to the fees paid for the specific
@@ -71,12 +72,12 @@ export default function TermsPage() {
       </p>
 
       <h2>8. Governing law</h2>
-      <p>These terms are governed by the laws of Guernsey.</p>
+      <p>These terms are governed by {region.governingLawLine}.</p>
 
       <h2>9. Contact</h2>
       <p>
         Questions about these terms? Email{" "}
-        <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>.
+        <a href={`mailto:${region.supportEmail}`}>{region.supportEmail}</a>.
       </p>
     </LegalPage>
   );

@@ -6,6 +6,7 @@ import { formatTime, formatDate } from "@/lib/utils";
 import { sendMessage, markConversationRead } from "@/lib/actions/messages";
 import { MAX_ATTACHMENT_SIZE_BYTES, ALLOWED_ATTACHMENT_TYPES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
+import { region } from "@/lib/region";
 
 function formatFileSize(bytes: number) {
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
@@ -244,7 +245,7 @@ export function MessageThread({
           </div>
           <p className="mt-1.5 text-[11px] text-navy/40">
             For everyone&apos;s safety, please keep contact details and
-            arrangements within Channel Tutoring — messages are monitored.
+            arrangements within {region.brandName} — messages are monitored.
           </p>
         </form>
       )}

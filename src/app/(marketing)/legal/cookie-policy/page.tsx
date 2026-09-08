@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/legal-page";
+import { region } from "@/lib/region";
 
 export const metadata: Metadata = { title: "Cookie Policy" };
 
@@ -7,7 +8,7 @@ export default function CookiePolicyPage() {
   return (
     <LegalPage title="Cookie Policy" lastUpdated="21 August 2026">
       <p>
-        This policy explains how Channel Tutoring uses cookies and similar
+        This policy explains how {region.brandName} uses cookies and similar
         technologies on our website.
       </p>
 
@@ -48,7 +49,7 @@ export default function CookiePolicyPage() {
       <h2>Contact</h2>
       <p>
         Questions about our use of cookies? Email{" "}
-        <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>.
+        <a href={`mailto:${region.supportEmail}`}>{region.supportEmail}</a>.
       </p>
     </LegalPage>
   );

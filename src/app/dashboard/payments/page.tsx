@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrencyGBP, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Payments & Receipts" };
 export const dynamic = "force-dynamic";
@@ -60,7 +60,7 @@ export default async function ClientPaymentsPage() {
                   </Badge>
                 </td>
                 <td className="py-2.5 text-right font-medium text-navy">
-                  {formatCurrencyGBP(payment.amountPence)}
+                  {formatCurrency(payment.amountPence)}
                 </td>
               </tr>
             ))}

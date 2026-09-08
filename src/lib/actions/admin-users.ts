@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
+import { region } from "@/lib/region";
 
 const addAdminSchema = z.object({
   name: z.string().trim().min(1, "Enter a name").max(100),
@@ -45,10 +46,10 @@ export async function adminCreateAdmin(
 
     await sendEmail({
       to: existing.email,
-      subject: "You've been made an admin on Channel Tutoring",
+      subject: `You've been made an admin on ${region.brandName}`,
       html: baseEmailLayout(`
         <p>Hi ${existing.name},</p>
-        <p>Your Channel Tutoring account (${existing.email}) now has admin
+        <p>Your ${region.brandName} account (${existing.email}) now has admin
         access. Log in as usual with your existing password to get
         started.</p>
       `),
@@ -84,10 +85,10 @@ export async function adminCreateAdmin(
   const setPasswordUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
   await sendEmail({
     to: user.email,
-    subject: "You've been added as a Channel Tutoring admin",
+    subject: `You've been added as a ${region.brandName} admin`,
     html: baseEmailLayout(`
       <p>Hi ${user.name},</p>
-      <p>You've been given admin access to Channel Tutoring. Set your
+      <p>You've been given admin access to ${region.brandName}. Set your
       password to get started:</p>
       <p><a href="${setPasswordUrl}" style="color:#C9A227;font-weight:bold;">Set your password</a></p>
       <p>This link expires in 7 days.</p>
@@ -169,7 +170,7 @@ export async function resendTutorSetupEmail(
   const setPasswordUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
   await sendEmail({
     to: user.email,
-    subject: "Set up your Channel Tutoring account",
+    subject: `Set up your ${region.brandName} account`,
     html: baseEmailLayout(`
       <p>Hi ${user.name},</p>
       <p>Here's a fresh link to set a password and access your tutor

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
-import { formatCurrencyGBP, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Revenue" };
 export const dynamic = "force-dynamic";
@@ -46,7 +46,7 @@ export default async function AdminRevenuePage() {
           <CardContent>
             <p className="text-sm text-navy/60">Total platform fees collected</p>
             <p className="mt-2 font-heading text-3xl font-bold text-navy">
-              {formatCurrencyGBP(totals._sum.platformFeePence ?? 0)}
+              {formatCurrency(totals._sum.platformFeePence ?? 0)}
             </p>
             <p className="mt-1 text-xs text-navy/40">{totals._count} completed sessions</p>
           </CardContent>
@@ -55,7 +55,7 @@ export default async function AdminRevenuePage() {
           <CardContent>
             <p className="text-sm text-navy/60">Total paid to tutors</p>
             <p className="mt-2 font-heading text-3xl font-bold text-navy">
-              {formatCurrencyGBP(totals._sum.tutorAmountPence ?? 0)}
+              {formatCurrency(totals._sum.tutorAmountPence ?? 0)}
             </p>
           </CardContent>
         </Card>
@@ -63,10 +63,10 @@ export default async function AdminRevenuePage() {
           <CardContent>
             <p className="text-sm text-navy/60">Total processed volume</p>
             <p className="mt-2 font-heading text-3xl font-bold text-navy">
-              {formatCurrencyGBP(totals._sum.amountPence ?? 0)}
+              {formatCurrency(totals._sum.amountPence ?? 0)}
             </p>
             <p className="mt-1 text-xs text-navy/40">
-              {formatCurrencyGBP(payoutsAgg._sum.amountPence ?? 0)} withdrawn by tutors
+              {formatCurrency(payoutsAgg._sum.amountPence ?? 0)} withdrawn by tutors
             </p>
           </CardContent>
         </Card>
@@ -95,13 +95,13 @@ export default async function AdminRevenuePage() {
                   <td className="py-2.5 text-navy">{p.booking.client.name}</td>
                   <td className="py-2.5 text-navy">{p.booking.tutor.user.name}</td>
                   <td className="py-2.5 text-right text-navy">
-                    {formatCurrencyGBP(p.amountPence)}
+                    {formatCurrency(p.amountPence)}
                   </td>
                   <td className="py-2.5 text-right text-gold-dark">
-                    {formatCurrencyGBP(p.platformFeePence)}
+                    {formatCurrency(p.platformFeePence)}
                   </td>
                   <td className="py-2.5 text-right text-navy">
-                    {formatCurrencyGBP(p.tutorAmountPence)}
+                    {formatCurrency(p.tutorAmountPence)}
                   </td>
                 </tr>
               ))}

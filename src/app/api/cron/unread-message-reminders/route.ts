@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
 import { escapeHtml } from "@/lib/utils";
+import { region } from "@/lib/region";
 
 const HOUR_MS = 60 * 60 * 1000;
 const UNREAD_THRESHOLD_MS = 10 * HOUR_MS;
@@ -96,11 +97,11 @@ export async function GET(request: Request) {
 
       await sendEmail({
         to: group.recipient.email,
-        subject: "You have an unread message on Channel Tutoring",
+        subject: `You have an unread message on ${region.brandName}`,
         html: baseEmailLayout(`
           <p>Hi ${escapeHtml(group.recipient.name)},</p>
           <p>${escapeHtml(group.senderName)} sent you ${claimed.count > 1 ? `${claimed.count} messages` : "a message"}
-          on Channel Tutoring over 10 hours ago that you haven't opened yet.</p>
+          on ${region.brandName} over 10 hours ago that you haven't opened yet.</p>
           <p><a href="${link}">View your messages</a></p>
         `),
       });

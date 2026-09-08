@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/current-user";
 import { logAudit } from "@/lib/audit";
 import { formatLevel } from "@/lib/utils";
 import { reserveTokensForUnpaidBookings } from "@/lib/actions/token-reservation";
+import { region } from "@/lib/region";
 
 const grantTokensSchema = z.object({
   clientUserId: z.string().min(1),
@@ -29,8 +30,8 @@ export async function adminGrantTokens(
   if (!client || client.role !== "CLIENT") return { error: "Client not found." };
 
   const description = note
-    ? `${quantity} ${formatLevel(level)} token${quantity === 1 ? "" : "s"} added by Channel Tutoring — ${note}`
-    : `${quantity} ${formatLevel(level)} token${quantity === 1 ? "" : "s"} added by Channel Tutoring`;
+    ? `${quantity} ${formatLevel(level)} token${quantity === 1 ? "" : "s"} added by ${region.brandName} — ${note}`
+    : `${quantity} ${formatLevel(level)} token${quantity === 1 ? "" : "s"} added by ${region.brandName}`;
 
   await prisma.$transaction(async (tx) => {
     await tx.tokenBalance.upsert({

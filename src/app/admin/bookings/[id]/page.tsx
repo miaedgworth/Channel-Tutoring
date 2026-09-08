@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { EditScheduledSessionForm } from "@/components/admin/edit-scheduled-session-form";
-import { formatCurrencyGBP, formatDate, formatDateTime, formatLevel, formatTokenQuantity } from "@/lib/utils";
+import { formatCurrency, formatDate, formatDateTime, formatLevel, formatTokenQuantity } from "@/lib/utils";
 import { SESSION_MODE_LABELS, formatSessionDuration } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Session Details" };
@@ -80,11 +80,11 @@ export default async function AdminBookingDetailPage({
             </div>
             <div>
               <dt className="text-navy/50">Price</dt>
-              <dd className="font-medium text-navy">{formatCurrencyGBP(booking.pricePence)}</dd>
+              <dd className="font-medium text-navy">{formatCurrency(booking.pricePence)}</dd>
             </div>
             <div>
               <dt className="text-navy/50">Tutor payout</dt>
-              <dd className="font-medium text-navy">{formatCurrencyGBP(booking.tutorPayoutPence)}</dd>
+              <dd className="font-medium text-navy">{formatCurrency(booking.tutorPayoutPence)}</dd>
             </div>
           </dl>
 

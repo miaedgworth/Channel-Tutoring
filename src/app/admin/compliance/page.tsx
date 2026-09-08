@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PromptAgreementResignButton } from "@/components/admin/prompt-agreement-resign-button";
+import { region } from "@/lib/region";
 
 export const metadata: Metadata = { title: "Compliance" };
 export const dynamic = "force-dynamic";
@@ -32,7 +33,7 @@ export default async function AdminCompliancePage() {
               <th className="pb-2 font-medium">Tutor</th>
               <th className="pb-2 font-medium">Agreement</th>
               <th className="pb-2 font-medium"></th>
-              <th className="pb-2 font-medium">DBS check</th>
+              <th className="pb-2 font-medium">{region.criminalRecordCheckLabel}</th>
             </tr>
           </thead>
           <tbody>

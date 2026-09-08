@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { region } from "@/lib/region";
 
 let client: Resend | null = null;
 
@@ -10,4 +11,4 @@ export function getResend(): Resend | null {
 }
 
 export const FROM_EMAIL =
-  process.env.RESEND_FROM_EMAIL ?? "Channel Tutoring <info@channeltutoring.com>";
+  process.env.RESEND_FROM_EMAIL ?? `${region.brandName} <${region.supportEmail}>`;

@@ -9,7 +9,7 @@ import { CancelBookingButton } from "@/components/cancel-booking-button";
 import { MarkSessionCompleteButton } from "@/components/tutor-dashboard/mark-session-complete-button";
 import { CancelUpcomingSessionButton } from "@/components/tutor-dashboard/cancel-upcoming-session-button";
 import { EditScheduledSessionForm } from "@/components/tutor-dashboard/edit-scheduled-session-form";
-import { formatCurrencyGBP, formatDate, formatDateTime, formatLevel, formatTokenQuantity } from "@/lib/utils";
+import { formatCurrency, formatDate, formatDateTime, formatLevel, formatTokenQuantity } from "@/lib/utils";
 import { SESSION_MODE_LABELS, LESSON_LOG_UNDO_WINDOW_MS, formatSessionDuration } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Booking Details" };
@@ -85,7 +85,7 @@ export default async function TutorBookingDetailPage({
                 {booking.status === "CONFIRMED" ? "Your payout (once complete)" : "Your payout"}
               </dt>
               <dd className="font-medium text-navy">
-                {formatCurrencyGBP(booking.tutorPayoutPence)}
+                {formatCurrency(booking.tutorPayoutPence)}
               </dd>
             </div>
             <div>

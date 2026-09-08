@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { tutorApplicationSchema } from "@/lib/validations/tutor-application";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
+import { region } from "@/lib/region";
 
 export async function POST(request: Request) {
   const ip = getClientIp(request.headers);
@@ -47,10 +48,10 @@ export async function POST(request: Request) {
 
   await sendEmail({
     to: data.email,
-    subject: "We've received your Channel Tutoring application",
+    subject: `We've received your ${region.brandName} application`,
     html: baseEmailLayout(`
       <p>Hi ${data.name},</p>
-      <p>Thanks for applying to tutor with Channel Tutoring. Our team will review
+      <p>Thanks for applying to tutor with ${region.brandName}. Our team will review
       your application and get back to you as soon as possible.</p>
       <p>If you have a CV or references to share, please reply to this email
       and attach them.</p>

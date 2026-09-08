@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
-import { formatCurrencyGBP, formatDate, formatDateTime, formatLevel, formatTokenQuantity } from "@/lib/utils";
+import { formatCurrency, formatDate, formatDateTime, formatLevel, formatTokenQuantity } from "@/lib/utils";
 import { SESSION_MODE_LABELS, formatSessionDuration } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Booking Details" };
@@ -78,7 +78,7 @@ export default async function ClientBookingDetailPage({
                 {booking.tokensReserved ? "Tokens used" : "Tokens needed"}
               </dt>
               <dd className="font-medium text-navy">
-                {formatTokenQuantity(booking.tokensUsed)} ({formatCurrencyGBP(booking.pricePence)})
+                {formatTokenQuantity(booking.tokensUsed)} ({formatCurrency(booking.pricePence)})
               </dd>
             </div>
           </dl>

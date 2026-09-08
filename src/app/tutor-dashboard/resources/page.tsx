@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
+import { region } from "@/lib/region";
 
 export const metadata: Metadata = { title: "Resources" };
 export const dynamic = "force-dynamic";
@@ -29,7 +30,7 @@ function ResourceCard({
         {username && password ? (
           <div className="mt-4 space-y-2 rounded-md bg-navy/[0.03] px-4 py-3 text-sm">
             <p className="text-navy/70">
-              Use the shared Channel Tutoring account below to log in:
+              Use the shared {region.brandName} account below to log in:
             </p>
             <p className="text-navy">
               <span className="text-navy/50">Username:</span>{" "}
@@ -56,7 +57,7 @@ function ResourceCard({
         </a>
 
         <p className="mt-3 text-xs text-navy/40">
-          This is a shared account for Channel Tutoring tutors — please
+          This is a shared account for {region.brandName} tutors — please
           don&apos;t share these details outside the platform.
         </p>
       </CardContent>

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { isStripeConfigured } from "@/lib/stripe";
 import { listRecentStripePayouts, getPayoutReconciliation } from "@/lib/stripe-payout-reconciliation";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatCurrencyGBP, formatDate, formatLevel, cn } from "@/lib/utils";
+import { formatCurrency, formatDate, formatLevel, cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Stripe Payouts" };
 export const dynamic = "force-dynamic";
@@ -86,7 +86,7 @@ export default async function AdminStripePayoutsPage({
                       : "border-navy/20 text-navy/70 hover:border-navy/40",
                   )}
                 >
-                  {formatDate(p.arrivalDate)} &middot; {formatCurrencyGBP(p.amountPence)}
+                  {formatDate(p.arrivalDate)} &middot; {formatCurrency(p.amountPence)}
                   {p.status !== "paid" ? ` (${p.status})` : ""}
                 </Link>
               ))}
@@ -112,7 +112,7 @@ export default async function AdminStripePayoutsPage({
               <CardContent>
                 <p className="text-sm text-navy/60">Total payout</p>
                 <p className="mt-2 font-heading text-3xl font-bold text-navy">
-                  {formatCurrencyGBP(reconciliation.amountPence)}
+                  {formatCurrency(reconciliation.amountPence)}
                 </p>
                 <p className="mt-1 text-xs text-navy/40">
                   Arriving {formatDate(reconciliation.arrivalDate)} &middot;{" "}
@@ -126,7 +126,7 @@ export default async function AdminStripePayoutsPage({
                   Set aside for tutor wages
                 </p>
                 <p className="mt-2 font-heading text-3xl font-bold text-navy">
-                  {formatCurrencyGBP(reconciliation.totals.tutorOwedPence)}
+                  {formatCurrency(reconciliation.totals.tutorOwedPence)}
                 </p>
               </CardContent>
             </Card>
@@ -136,7 +136,7 @@ export default async function AdminStripePayoutsPage({
                   Yours to keep (platform fee)
                 </p>
                 <p className="mt-2 font-heading text-3xl font-bold text-gold-dark">
-                  {formatCurrencyGBP(reconciliation.totals.platformCutPence)}
+                  {formatCurrency(reconciliation.totals.platformCutPence)}
                 </p>
               </CardContent>
             </Card>
@@ -159,7 +159,7 @@ export default async function AdminStripePayoutsPage({
                         included in the split above
                       </span>
                       <span className="font-medium">
-                        {formatCurrencyGBP(reconciliation.totals.unmatchedPence)}
+                        {formatCurrency(reconciliation.totals.unmatchedPence)}
                       </span>
                     </li>
                   )}
@@ -167,7 +167,7 @@ export default async function AdminStripePayoutsPage({
                     <li className="flex items-center justify-between rounded-md bg-red/10 px-3 py-2 text-red">
                       <span>Refunds included in this payout</span>
                       <span className="font-medium">
-                        {formatCurrencyGBP(reconciliation.totals.refundPence)}
+                        {formatCurrency(reconciliation.totals.refundPence)}
                       </span>
                     </li>
                   )}
@@ -180,7 +180,7 @@ export default async function AdminStripePayoutsPage({
                         {l.type}
                         {l.description ? ` — ${l.description}` : ""}
                       </span>
-                      <span className="font-medium">{formatCurrencyGBP(l.amountPence)}</span>
+                      <span className="font-medium">{formatCurrency(l.amountPence)}</span>
                     </li>
                   ))}
                 </ul>
@@ -209,13 +209,13 @@ export default async function AdminStripePayoutsPage({
                       <td className="py-2.5 text-navy">{formatLevel(l.level!)}</td>
                       <td className="py-2.5 text-right text-navy">{l.quantity}</td>
                       <td className="py-2.5 text-right text-navy">
-                        {formatCurrencyGBP(l.netPence)}
+                        {formatCurrency(l.netPence)}
                       </td>
                       <td className="py-2.5 text-right text-navy">
-                        {formatCurrencyGBP(l.tutorOwedPence!)}
+                        {formatCurrency(l.tutorOwedPence!)}
                       </td>
                       <td className="py-2.5 text-right text-gold-dark">
-                        {formatCurrencyGBP(l.platformCutPence!)}
+                        {formatCurrency(l.platformCutPence!)}
                       </td>
                     </tr>
                   ))}

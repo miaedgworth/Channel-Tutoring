@@ -1,15 +1,23 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/legal-page";
+import { region, REGION } from "@/lib/region";
 
 export const metadata: Metadata = { title: "Privacy Policy" };
 
 export default function PrivacyPolicyPage() {
   return (
     <LegalPage title="Privacy Policy" lastUpdated="29 April 2026">
+      {REGION === "CH" && (
+        <div className="not-prose mb-6 rounded-lg border border-amber-600/20 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          This page is a placeholder adapted from the Guernsey version for
+          Swiss data protection law (FADP). It has not yet been reviewed by
+          a Swiss lawyer — do not treat it as compliant until it has been.
+        </div>
+      )}
       <p>
         This is the Data Processing Notice (also known as a Privacy Policy)
-        of Channel Tutoring. It is issued in compliance with the Data
-        Protection (Bailiwick of Guernsey) Law, 2017 &ldquo;the Law&rdquo;.
+        of {region.brandName}. It is issued in compliance with{" "}
+        {region.dataProtectionLine}, &ldquo;the Law&rdquo;.
       </p>
       <p>
         We are committed to protecting and respecting your personal data and
@@ -27,11 +35,13 @@ export default function PrivacyPolicyPage() {
       </p>
 
       <h2>Who are we?</h2>
-      <p>We are Channel Tutoring. We are registered with the Guernsey Revenue Service.</p>
+      <p>
+        We are {region.brandName}, registered in {region.country}.
+      </p>
 
       <h2>What do we do?</h2>
       <p>
-        Channel Tutoring is a tutoring service dedicated to providing
+        {region.brandName} is a tutoring service dedicated to providing
         high-quality academic support across a wide range of subjects and
         levels. From KS3 through GCSEs, A-Levels, and university
         admissions, we help students build confidence, strengthen their
@@ -110,9 +120,9 @@ export default function PrivacyPolicyPage() {
 
       <h2>Transfer of data</h2>
       <p>
-        We may transfer personal data to the United Kingdom for the
-        purpose of virtual tutoring. This data may be transferred via
-        email to relevant tutors as required.
+        We may transfer personal data to tutors located outside{" "}
+        {region.country} for the purpose of virtual tutoring. This data may
+        be transferred via email to relevant tutors as required.
       </p>
 
       <h2>Direct marketing</h2>
@@ -142,7 +152,7 @@ export default function PrivacyPolicyPage() {
       <h2>Social media</h2>
       <p>
         This notice does not cover any third-party websites or social
-        media sites used in conjunction with Channel Tutoring. We are not
+        media sites used in conjunction with {region.brandName}. We are not
         responsible for the actions or activities of third-party
         website/social media outlets. You are advised to read the data
         collection and privacy statements on other websites and social
@@ -151,46 +161,75 @@ export default function PrivacyPolicyPage() {
 
       <h2>Contacting us</h2>
       <p>
-        We are defined as a Controller according to the Law. If you have
-        any questions or queries regarding how your personal data is being
-        managed, please contact us by writing to Mia Edgworth or by
-        emailing{" "}
-        <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>.
+        If you have any questions or queries regarding how your personal
+        data is being managed, please contact us by emailing{" "}
+        <a href={`mailto:${region.supportEmail}`}>{region.supportEmail}</a>.
       </p>
 
       <h2>Contacting the regulator</h2>
-      <p>
-        If you feel that your personal data has been handled incorrectly
-        or you are unhappy with our response to any requests you have made
-        to us regarding the use of your personal data, you have the right
-        to lodge a complaint with the data protection regulator &mdash;
-        The Office of the Data Protection Authority (ODPA). You can
-        contact them for advice by writing to:
-      </p>
-      <p>
-        The Office of the Data Protection Authority
-        <br />
-        Block A
-        <br />
-        Lefebvre Court
-        <br />
-        Lefebvre Street
-        <br />
-        St. Peter Port
-        <br />
-        Guernsey
-        <br />
-        GY1 2JP
-      </p>
-      <p>
-        by telephoning (01481) 742074, by email to{" "}
-        <a href="mailto:info@opda.gg">info@opda.gg</a>, or you can submit a
-        complaint online at{" "}
-        <a href="https://www.odpa.gg" target="_blank" rel="noreferrer">
-          www.odpa.gg
-        </a>{" "}
-        and complete the &lsquo;make a complaint&rsquo; section.
-      </p>
+      {REGION === "CH" ? (
+        <>
+          <p>
+            If you feel that your personal data has been handled incorrectly
+            or you are unhappy with our response to any requests you have
+            made to us regarding the use of your personal data, you have the
+            right to lodge a complaint with the Swiss data protection
+            regulator &mdash; the Federal Data Protection and Information
+            Commissioner (FDPIC).
+          </p>
+          <p>
+            Federal Data Protection and Information Commissioner (FDPIC)
+            <br />
+            Feldeggweg 1
+            <br />
+            CH-3003 Bern
+            <br />
+            Switzerland
+          </p>
+          <p>
+            or online at{" "}
+            <a href="https://www.edoeb.admin.ch" target="_blank" rel="noreferrer">
+              www.edoeb.admin.ch
+            </a>
+            .
+          </p>
+        </>
+      ) : (
+        <>
+          <p>
+            If you feel that your personal data has been handled incorrectly
+            or you are unhappy with our response to any requests you have made
+            to us regarding the use of your personal data, you have the right
+            to lodge a complaint with the data protection regulator &mdash;
+            The Office of the Data Protection Authority (ODPA). You can
+            contact them for advice by writing to:
+          </p>
+          <p>
+            The Office of the Data Protection Authority
+            <br />
+            Block A
+            <br />
+            Lefebvre Court
+            <br />
+            Lefebvre Street
+            <br />
+            St. Peter Port
+            <br />
+            Guernsey
+            <br />
+            GY1 2JP
+          </p>
+          <p>
+            by telephoning (01481) 742074, by email to{" "}
+            <a href="mailto:info@opda.gg">info@opda.gg</a>, or you can submit a
+            complaint online at{" "}
+            <a href="https://www.odpa.gg" target="_blank" rel="noreferrer">
+              www.odpa.gg
+            </a>{" "}
+            and complete the &lsquo;make a complaint&rsquo; section.
+          </p>
+        </>
+      )}
     </LegalPage>
   );
 }

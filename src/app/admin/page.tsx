@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatCurrencyGBP } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Admin Overview" };
 export const dynamic = "force-dynamic";
@@ -49,7 +49,7 @@ export default async function AdminOverviewPage() {
     },
     {
       label: "Total platform revenue",
-      value: formatCurrencyGBP(revenueAgg._sum.platformFeePence ?? 0),
+      value: formatCurrency(revenueAgg._sum.platformFeePence ?? 0),
       href: "/admin/revenue",
     },
   ];

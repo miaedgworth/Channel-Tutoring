@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/current-user";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
 import { escapeHtml } from "@/lib/utils";
+import { region } from "@/lib/region";
 
 const startConversationSchema = z.object({
   clientId: z.string().min(1),
@@ -60,12 +61,12 @@ export async function adminStartConversation(
 
   await sendEmail({
     to: profile.user.email,
-    subject: `Please reach out to ${client.name} on Channel Tutoring`,
+    subject: `Please reach out to ${client.name} on ${region.brandName}`,
     html: baseEmailLayout(`
       <p>Hi ${escapeHtml(profile.user.name)},</p>
-      <p>Channel Tutoring has connected you with a client, ${escapeHtml(client.name)}
+      <p>${region.brandName} has connected you with a client, ${escapeHtml(client.name)}
       — please send them a message to get things started.</p>
-      ${note ? `<p><strong>Note from Channel Tutoring:</strong><br />${escapeHtml(note).replace(/\n/g, "<br />")}</p>` : ""}
+      ${note ? `<p><strong>Note from ${region.brandName}:</strong><br />${escapeHtml(note).replace(/\n/g, "<br />")}</p>` : ""}
       <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/tutor-dashboard/messages/${conversation.id}">Message ${escapeHtml(client.name)}</a></p>
     `),
   }).catch(() => {});

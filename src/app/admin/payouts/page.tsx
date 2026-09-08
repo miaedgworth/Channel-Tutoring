@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MarkPayoutPaidButton } from "@/components/admin/mark-payout-paid-button";
-import { formatCurrencyGBP, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Tutor Payouts" };
 export const dynamic = "force-dynamic";
@@ -65,7 +65,7 @@ export default async function AdminPayoutsPage() {
                         </p>
                       </td>
                       <td className="py-2.5 text-right font-medium text-navy">
-                        {formatCurrencyGBP(payout.amountPence)}
+                        {formatCurrency(payout.amountPence)}
                       </td>
                       <td className="py-2.5 text-right">
                         <MarkPayoutPaidButton payoutId={payout.id} />
@@ -107,7 +107,7 @@ export default async function AdminPayoutsPage() {
                         {payout.paidAt ? formatDate(payout.paidAt) : "—"}
                       </td>
                       <td className="py-2.5 text-right text-navy/70">
-                        {formatCurrencyGBP(payout.amountPence)}
+                        {formatCurrency(payout.amountPence)}
                       </td>
                       <td className="py-2.5 text-right">
                         <Badge variant="success">Paid</Badge>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { requireUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { region } from "@/lib/region";
 
 export const metadata: Metadata = { title: "Resources" };
 export const dynamic = "force-dynamic";
@@ -24,7 +25,7 @@ export default async function ClientResourcesPage() {
             through mock interviews and personal statement reviews.
           </p>
           <p className="mt-3 text-sm text-navy/70">
-            Channel Tutoring students get{" "}
+            {region.brandName} students get{" "}
             <span className="font-semibold text-navy">20% off</span> with
             the code{" "}
             <span className="rounded bg-navy/5 px-1.5 py-0.5 font-mono text-xs font-semibold text-navy">

@@ -6,11 +6,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
+import { region } from "@/lib/region";
 
 export const metadata: Metadata = {
   title: "Courses",
-  description:
-    "Holiday courses and summer schools from Channel Tutoring, in Guernsey.",
+  description: `Holiday courses and summer schools from ${region.brandName}, in ${region.country}.`,
 };
 export const dynamic = "force-dynamic";
 

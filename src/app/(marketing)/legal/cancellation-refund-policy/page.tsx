@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/legal-page";
+import { region } from "@/lib/region";
 
 export const metadata: Metadata = { title: "Cancellation & Refund Policy" };
 
@@ -25,7 +26,7 @@ export default function CancellationRefundPolicyPage() {
       <h2>Changing or cancelling a scheduled session</h2>
       <p>
         If you need to change or cancel a session that&apos;s been
-        scheduled, message your tutor through Channel Tutoring as soon as
+        scheduled, message your tutor through {region.brandName} as soon as
         you can. If the session won&apos;t be going ahead, your tutor
         cancels it on the platform and your reserved tokens are refunded
         to your balance in full, automatically.
@@ -37,7 +38,7 @@ export default function CancellationRefundPolicyPage() {
         by mistake, they can undo it within 24 hours. This refunds the
         exact number of tokens used and reverses their payout. If
         it&apos;s outside that 24-hour window, contact us at{" "}
-        <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>{" "}
+        <a href={`mailto:${region.supportEmail}`}>{region.supportEmail}</a>{" "}
         and we&apos;ll sort it out.
       </p>
 
@@ -55,14 +56,14 @@ export default function CancellationRefundPolicyPage() {
         If a card payment for tokens fails, no tokens are added to your
         account. If you believe you were charged in error, or want to
         request a refund for tokens you haven&apos;t used, contact us at{" "}
-        <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>{" "}
+        <a href={`mailto:${region.supportEmail}`}>{region.supportEmail}</a>{" "}
         and we&apos;ll review it. Unused tokens don&apos;t expire.
       </p>
 
       <h2>Contact</h2>
       <p>
         Questions about a specific booking? Email{" "}
-        <a href="mailto:info@channeltutoring.com">info@channeltutoring.com</a>{" "}
+        <a href={`mailto:${region.supportEmail}`}>{region.supportEmail}</a>{" "}
         with your booking details.
       </p>
     </LegalPage>

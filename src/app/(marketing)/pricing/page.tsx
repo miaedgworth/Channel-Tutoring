@@ -3,8 +3,9 @@ import { redirect } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatCurrencyGBP } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { auth } from "@/lib/auth";
+import { region } from "@/lib/region";
 import {
   LEVELS,
   LEVEL_PRICE_PENCE,
@@ -15,7 +16,7 @@ import {
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "How pricing works on Channel Tutoring.",
+  description: `How pricing works on ${region.brandName}.`,
 };
 
 export default async function PricingPage() {
@@ -48,7 +49,7 @@ export default async function PricingPage() {
                     <tr key={l.value} className="border-b border-navy/5 last:border-0">
                       <td className="px-5 py-3 text-navy/80">{l.label}</td>
                       <td className="px-5 py-3 font-semibold text-navy">
-                        {formatCurrencyGBP(LEVEL_PRICE_PENCE[l.value])}/hour
+                        {formatCurrency(LEVEL_PRICE_PENCE[l.value])}/hour
                       </td>
                     </tr>
                   ))}
@@ -79,7 +80,7 @@ export default async function PricingPage() {
             </h2>
             <p className="mt-2 text-sm text-navy/70">
               For lessons with more than one student, add{" "}
-              {formatCurrencyGBP(ADDITIONAL_STUDENT_SURCHARGE_PENCE)}/hour
+              {formatCurrency(ADDITIONAL_STUDENT_SURCHARGE_PENCE)}/hour
               per additional student. Message your tutor to arrange this.
             </p>
           </div>

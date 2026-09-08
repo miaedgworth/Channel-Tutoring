@@ -6,12 +6,13 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
+import { region } from "@/lib/region";
 import {
   formatDate,
   formatDateTime,
   formatWeekday,
   formatTime,
-  formatCurrencyGBP,
+  formatCurrency,
   formatLevel,
   formatTokenQuantity,
   escapeHtml,
@@ -200,7 +201,7 @@ export async function scheduleSession(
     <p>${clientIntro}</p>
     ${clientPaymentStatus}
     <p>If this doesn't look right, reply to your tutor or
-    <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
+    <a href="mailto:${region.supportEmail}">contact us</a>.</p>
   `;
 
   const tutorIntro = isRecurring
@@ -234,8 +235,8 @@ export async function scheduleSession(
     sendEmail({
       to: conversation.client.email,
       subject: isRecurring
-        ? "Your weekly sessions have been scheduled on Channel Tutoring"
-        : "A session has been scheduled on Channel Tutoring",
+        ? `Your weekly sessions have been scheduled on ${region.brandName}`
+        : `A session has been scheduled on ${region.brandName}`,
       html: baseEmailLayout(clientEmailBody),
     }),
     sendEmail({
@@ -325,7 +326,7 @@ export async function markSessionComplete(
         <p>Hi ${escapeHtml(user.name)},</p>
         <p>Your ${escapeHtml(booking.subject)} session with ${escapeHtml(booking.client.name)} on
         ${formatDate(booking.startsAt)} has been marked complete &mdash;
-        payout ${formatCurrencyGBP(booking.tutorPayoutPence)}.</p>
+        payout ${formatCurrency(booking.tutorPayoutPence)}.</p>
       `),
     }),
   ]).catch(() => {});
@@ -614,7 +615,7 @@ export async function updateScheduledSession(
           : ""
       }
       <p>If this doesn't look right, reply to your tutor or
-      <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
+      <a href="mailto:${region.supportEmail}">contact us</a>.</p>
     `),
   }).catch(() => {});
 
@@ -753,7 +754,7 @@ export async function logCompletedLesson(
   await Promise.all([
     sendEmail({
       to: conversation.client.email,
-      subject: "A lesson has been logged on Channel Tutoring",
+      subject: `A lesson has been logged on ${region.brandName}`,
       html: baseEmailLayout(`
         <p>Hi ${escapeHtml(conversation.client.name)},</p>
         <p>${escapeHtml(profile.user.name)} logged your ${formatSessionDuration(durationMinutes)}
@@ -761,7 +762,7 @@ export async function logCompletedLesson(
         ${formatTokenQuantity(tokensUsed)} of your
         ${formatLevel(level)} tokens.</p>
         <p>If this doesn't look right, reply to your tutor or
-        <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
+        <a href="mailto:${region.supportEmail}">contact us</a>.</p>
       `),
     }),
     sendEmail({
@@ -771,7 +772,7 @@ export async function logCompletedLesson(
         <p>Hi ${escapeHtml(profile.user.name)},</p>
         <p>Your ${escapeHtml(subject)} lesson with ${escapeHtml(conversation.client.name)} on
         ${formatDate(startsAt)} has been logged &mdash; payout
-        ${formatCurrencyGBP(tutorPayoutPence)}.</p>
+        ${formatCurrency(tutorPayoutPence)}.</p>
       `),
     }),
   ]).catch(() => {});
@@ -877,7 +878,7 @@ export async function cancelBooking(
     subject: "A logged lesson was undone",
     html: baseEmailLayout(`
       <p>Hi ${escapeHtml(booking.client.name)},</p>
-      <p>${booking.tutor.userId === user.id ? "Your tutor" : "Channel Tutoring"}
+      <p>${booking.tutor.userId === user.id ? "Your tutor" : region.brandName}
       undid the ${escapeHtml(booking.subject)} lesson logged for
       ${formatDate(booking.startsAt)} &mdash; your token has been refunded.</p>
       ${reason ? `<p>Reason: ${escapeHtml(reason)}</p>` : ""}

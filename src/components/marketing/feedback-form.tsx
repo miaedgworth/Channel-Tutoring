@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { region } from "@/lib/region";
 
 const inputClass =
   "mt-1.5 block w-full rounded-md border border-navy/20 px-3 py-2.5 text-sm focus:border-gold-dark focus:outline-none focus:ring-1 focus:ring-gold-dark";
@@ -189,7 +190,7 @@ export function FeedbackForm() {
         />
         <span>
           I&apos;m happy for this feedback to be shared anonymously on
-          Channel Tutoring&apos;s social media and website.
+          {region.brandName}&apos;s social media and website.
         </span>
       </label>
 
