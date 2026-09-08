@@ -85,11 +85,6 @@ export async function adminScheduleSession(
       const created = [];
       for (const occ of occurrences) {
         const claimed = await tryClaimTokens(tx, clientId, level, tokensUsed);
-        if (!claimed && !isRecurring) {
-          throw new Error(
-            `${client.name} doesn't have enough ${formatLevel(level)} tokens for a ${formatSessionDuration(durationMinutes)} session. Grant them tokens first, or reduce the session length.`,
-          );
-        }
         if (claimed) {
           await tx.tokenTransaction.create({
             data: {
@@ -154,57 +149,65 @@ export async function adminScheduleSession(
     metadata: { clientId, tutorProfileId, level, tokensUsed, repeatWeeks, seriesId, unpaidCount },
   });
 
-  const clientEmailBody = isRecurring
-    ? `
-        <p>Hi ${escapeHtml(client.name)},</p>
-        <p>Channel Tutoring has scheduled ${bookings.length} weekly
-        ${escapeHtml(subject)} sessions for you with ${escapeHtml(profile.user.name)}, every
-        ${formatWeekday(date)} at ${formatTime(date)}, starting ${formatDate(date)}. You'll
-        see these under Upcoming Sessions on your dashboard.</p>
-        ${
-          unpaidCount > 0
-            ? `<p>${unpaidCount} of these ${unpaidCount === 1 ? "session isn't" : "sessions aren't"}
-               paid for yet — please add ${formatLevel(level)} tokens to your account before
-               each session's date, or we'll remind you on the day.
-               <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/tokens">Buy tokens</a></p>`
-            : `<p>${formatTokenQuantity(bookings.length * tokensUsed)} of your ${formatLevel(level)}
-               tokens have been used to cover this series.</p>`
-        }
-        <p>If this doesn't look right, reply to this email or
-        <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
-      `
-    : `
-        <p>Hi ${escapeHtml(client.name)},</p>
-        <p>Channel Tutoring has scheduled a ${formatSessionDuration(durationMinutes)}
-        ${escapeHtml(subject)} session for you with ${escapeHtml(profile.user.name)} on
-        ${formatDate(date)}, using ${formatTokenQuantity(tokensUsed)}
-        of your ${formatLevel(level)} tokens. You'll see this under
-        Upcoming Sessions on your dashboard.</p>
-        <p>If this doesn't look right, reply to this email or
-        <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
-      `;
+  const sessionWord = bookings.length === 1 ? "session" : "sessions";
+  const clientIntro = isRecurring
+    ? `Channel Tutoring has scheduled ${bookings.length} weekly
+       ${escapeHtml(subject)} sessions for you with ${escapeHtml(profile.user.name)}, every
+       ${formatWeekday(date)} at ${formatTime(date)}, starting ${formatDate(date)}. You'll
+       see these under Upcoming Sessions on your dashboard.`
+    : `Channel Tutoring has scheduled a ${formatSessionDuration(durationMinutes)}
+       ${escapeHtml(subject)} session for you with ${escapeHtml(profile.user.name)} on
+       ${formatDate(date)}. You'll see this under Upcoming Sessions on your dashboard.`;
 
-  const tutorEmailBody = isRecurring
-    ? `
-        <p>Hi ${escapeHtml(profile.user.name)},</p>
-        <p>Channel Tutoring has scheduled ${bookings.length} weekly ${escapeHtml(subject)}
-        sessions for you with ${escapeHtml(client.name)}, every ${formatWeekday(date)} at
-        ${formatTime(date)}, starting ${formatDate(date)}.</p>
-        ${
-          unpaidCount > 0
-            ? `<p>${unpaidCount} of these ${unpaidCount === 1 ? "isn't" : "aren't"} paid for
-               yet — they'll show as awaiting payment until ${client.name} tops up their
-               tokens.</p>`
-            : ""
-        }
-        <p>Mark each one as complete once you've taught it to get paid.</p>
-      `
-    : `
-        <p>Hi ${escapeHtml(profile.user.name)},</p>
-        <p>Channel Tutoring has scheduled a ${escapeHtml(subject)} session for you
-        with ${escapeHtml(client.name)} on ${formatDate(date)}. Once you've
-        taught it, mark it as complete in your dashboard to get paid.</p>
-      `;
+  let clientPaymentStatus: string;
+  if (unpaidCount === 0) {
+    clientPaymentStatus = `<p>${formatTokenQuantity(bookings.length * tokensUsed)} of your
+      ${formatLevel(level)} tokens have covered this ${sessionWord}.</p>`;
+  } else if (bookings.length === 1) {
+    clientPaymentStatus = `<p>This session isn't paid for yet — please add ${formatLevel(level)}
+      tokens to your account before the date above, or we'll remind you on the day.
+      <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/tokens">Buy tokens</a></p>`;
+  } else {
+    clientPaymentStatus = `<p>${unpaidCount} of these ${unpaidCount === 1 ? "session isn't" : "sessions aren't"}
+      paid for yet — please add ${formatLevel(level)} tokens to your account before each
+      session's date, or we'll remind you on the day.
+      <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/tokens">Buy tokens</a></p>`;
+  }
+
+  const clientEmailBody = `
+    <p>Hi ${escapeHtml(client.name)},</p>
+    <p>${clientIntro}</p>
+    ${clientPaymentStatus}
+    <p>If this doesn't look right, reply to this email or
+    <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
+  `;
+
+  const tutorIntro = isRecurring
+    ? `Channel Tutoring has scheduled ${bookings.length} weekly ${escapeHtml(subject)}
+       sessions for you with ${escapeHtml(client.name)}, every ${formatWeekday(date)} at
+       ${formatTime(date)}, starting ${formatDate(date)}.`
+    : `Channel Tutoring has scheduled a ${escapeHtml(subject)} session for you
+       with ${escapeHtml(client.name)} on ${formatDate(date)}.`;
+
+  let tutorPaymentStatus: string;
+  if (unpaidCount === 0) {
+    tutorPaymentStatus = `<p>${escapeHtml(client.name)}'s tokens have been reserved.</p>`;
+  } else if (bookings.length === 1) {
+    tutorPaymentStatus = `<p>It isn't paid for yet — it'll show as awaiting payment until
+      ${escapeHtml(client.name)} tops up their tokens. We'll remind them if it's still unpaid
+      on the day.</p>`;
+  } else {
+    tutorPaymentStatus = `<p>${unpaidCount} of these ${unpaidCount === 1 ? "isn't" : "aren't"}
+      paid for yet — they'll show as awaiting payment until ${escapeHtml(client.name)} tops
+      up their tokens. We'll remind them if a session's date arrives unpaid.</p>`;
+  }
+
+  const tutorEmailBody = `
+    <p>Hi ${escapeHtml(profile.user.name)},</p>
+    <p>${tutorIntro}</p>
+    ${tutorPaymentStatus}
+    <p>${bookings.length === 1 ? "Once you've taught it, mark it as complete in your dashboard to get paid." : "Mark each one as complete once you've taught it to get paid."}</p>
+  `;
 
   await Promise.all([
     sendEmail({
@@ -284,51 +287,53 @@ export async function adminUpdateScheduledSession(
     return { error: `${profile.user.name} already has a session scheduled that overlaps with this time.` };
   }
 
+  let finalTokensReserved = booking.tokensReserved;
   try {
     await prisma.$transaction(async (tx) => {
       let tokensReserved = booking.tokensReserved;
 
-      if (booking.tokensReserved && tokensChanged) {
-        // Was already paid — release the old reservation, then make a
-        // fresh one for the new level/length, the same way a
-        // cancel-and-reschedule would. Fails loudly if the client can't
-        // cover the new config, same as today.
-        await tx.tokenBalance.upsert({
-          where: { userId_level: { userId: booking.clientId, level: oldLevel } },
-          create: { userId: booking.clientId, level: oldLevel, balance: oldTokensUsed },
-          update: { balance: { increment: oldTokensUsed } },
-        });
-        await tx.tokenTransaction.create({
-          data: {
-            userId: booking.clientId,
-            level: oldLevel,
-            type: "REFUND",
-            quantity: oldTokensUsed,
-            bookingId: booking.id,
-            description: `${formatTokenQuantity(oldTokensUsed)} token(s) released — ${booking.subject} session on ${formatDate(booking.startsAt)} was edited by Channel Tutoring`,
-          },
-        });
-
-        const claimed = await tryClaimTokens(tx, booking.clientId, level, newTokensUsed);
-        if (!claimed) {
-          throw new Error(
-            `${booking.client.name} doesn't have enough ${formatLevel(level)} tokens for a ${formatSessionDuration(durationMinutes)} session. Grant them tokens first, or choose a shorter length.`,
-          );
+      if (tokensChanged) {
+        if (booking.tokensReserved) {
+          // Release the old reservation first — it's for a config this
+          // booking no longer needs.
+          await tx.tokenBalance.upsert({
+            where: { userId_level: { userId: booking.clientId, level: oldLevel } },
+            create: { userId: booking.clientId, level: oldLevel, balance: oldTokensUsed },
+            update: { balance: { increment: oldTokensUsed } },
+          });
+          await tx.tokenTransaction.create({
+            data: {
+              userId: booking.clientId,
+              level: oldLevel,
+              type: "REFUND",
+              quantity: oldTokensUsed,
+              bookingId: booking.id,
+              description: `${formatTokenQuantity(oldTokensUsed)} token(s) released — ${booking.subject} session on ${formatDate(booking.startsAt)} was edited by Channel Tutoring`,
+            },
+          });
+          tokensReserved = false;
         }
-        await tx.tokenTransaction.create({
-          data: {
-            userId: booking.clientId,
-            level,
-            type: "REDEEM",
-            quantity: -newTokensUsed,
-            bookingId: booking.id,
-            description: `${subject} session (${formatSessionDuration(durationMinutes)}) rescheduled for ${formatDate(startsAt)} by Channel Tutoring`,
-          },
-        });
+
+        // Try to claim for the new level/length. Never blocks the edit if
+        // it can't be afforded right now — the session just goes ahead (or
+        // stays) marked as awaiting payment, same as scheduling one fresh.
+        const claimed = await tryClaimTokens(tx, booking.clientId, level, newTokensUsed);
+        if (claimed) {
+          tokensReserved = true;
+          await tx.tokenTransaction.create({
+            data: {
+              userId: booking.clientId,
+              level,
+              type: "REDEEM",
+              quantity: -newTokensUsed,
+              bookingId: booking.id,
+              description: `${subject} session (${formatSessionDuration(durationMinutes)}) rescheduled for ${formatDate(startsAt)} by Channel Tutoring`,
+            },
+          });
+        }
       } else if (!booking.tokensReserved) {
-        // Wasn't paid yet (a still-unpaid recurring occurrence) — try to
-        // claim a token for the (possibly just-changed) level/length now.
-        // No error if it still can't be afforded; it just stays unpaid.
+        // Level/length unchanged but still unpaid — try again in case
+        // tokens are now available.
         const claimed = await tryClaimTokens(tx, booking.clientId, level, newTokensUsed);
         if (claimed) {
           tokensReserved = true;
@@ -363,12 +368,12 @@ export async function adminUpdateScheduledSession(
         },
       });
 
-      if (booking.tokensReserved && tokensChanged && booking.payment) {
+      if (tokensReserved && booking.payment) {
         await tx.payment.update({
           where: { id: booking.payment.id },
           data: { amountPence: pricePence, platformFeePence, tutorAmountPence: tutorPayoutPence },
         });
-      } else if (!booking.tokensReserved && tokensReserved) {
+      } else if (tokensReserved && !booking.payment) {
         await tx.payment.create({
           data: {
             bookingId: booking.id,
@@ -378,7 +383,14 @@ export async function adminUpdateScheduledSession(
             status: "PENDING",
           },
         });
+      } else if (!tokensReserved && booking.payment) {
+        // Went from paid to unpaid (the new config couldn't be claimed) —
+        // remove the now-stale Payment row so a future successful claim
+        // can create a fresh one instead of hitting a duplicate booking.
+        await tx.payment.delete({ where: { id: booking.payment.id } });
       }
+
+      finalTokensReserved = tokensReserved;
     });
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Something went wrong." };
@@ -401,6 +413,13 @@ export async function adminUpdateScheduledSession(
         <p>Channel Tutoring updated your ${escapeHtml(subject)} session with
         ${escapeHtml(profile.user.name)} — it's now ${formatSessionDuration(durationMinutes)}
         on ${formatDate(startsAt)}.</p>
+        ${
+          !finalTokensReserved
+            ? `<p>This session isn't paid for yet — please add ${formatLevel(level)} tokens to
+               your account before the date above, or we'll remind you on the day.
+               <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/tokens">Buy tokens</a></p>`
+            : ""
+        }
         <p>If this doesn't look right, reply to this email or
         <a href="mailto:info@channeltutoring.com">contact us</a>.</p>
       `),

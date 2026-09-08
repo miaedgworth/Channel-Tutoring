@@ -299,12 +299,6 @@ export function AdminScheduleSessionForm({
               onChange={(e) => setRepeatWeeks(Number(e.target.value))}
               className={`${inputClass} max-w-[8rem]`}
             />
-            <p className="mt-1.5 text-xs text-navy/40">
-              The client doesn&apos;t need enough tokens for every week up
-              front — each week&apos;s token is reserved as soon as they
-              have one, and they&apos;ll get a reminder if a session&apos;s
-              date arrives still unpaid.
-            </p>
           </div>
         )}
       </div>
@@ -314,8 +308,8 @@ export function AdminScheduleSessionForm({
       </Button>
       <p className="text-xs text-navy/40">
         {repeatWeekly
-          ? `This schedules ${repeatWeeks} weekly sessions, reserving the client's ${formatLevel(level)} token as it's available. The tutor is paid once they mark each one as complete.`
-          : `This reserves ${formatTokenQuantity(durationMinutes / 60)} of the client's ${formatLevel(level)} tokens now. The tutor is paid once they mark the session as complete.`}
+          ? `This schedules ${repeatWeeks} weekly sessions. If the client doesn't have enough ${formatLevel(level)} tokens yet, a session still goes ahead marked as awaiting payment until they top up — they'll get a reminder if a session's date arrives unpaid. The tutor is paid once they mark each one as complete.`
+          : `This reserves ${formatTokenQuantity(durationMinutes / 60)} of the client's ${formatLevel(level)} tokens now if they have enough — if not, it's still scheduled as awaiting payment, and they'll get a reminder if the date arrives unpaid. The tutor is paid once they mark the session as complete.`}
       </p>
     </form>
   );
