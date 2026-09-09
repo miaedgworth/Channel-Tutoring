@@ -13,6 +13,11 @@ export function RegisterForm() {
   const [password, setPassword] = useState("");
   const [newsletterOptIn, setNewsletterOptIn] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [hasInPersonSessions, setHasInPersonSessions] = useState(false);
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [addressTown, setAddressTown] = useState("");
+  const [addressPostcode, setAddressPostcode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -24,13 +29,28 @@ export function RegisterForm() {
       setError("Please confirm you agree to the Registration Agreement to continue.");
       return;
     }
+    if (hasInPersonSessions && (!addressLine1.trim() || !addressTown.trim() || !addressPostcode.trim())) {
+      setError("Please enter your address for in-person sessions.");
+      return;
+    }
 
     setLoading(true);
 
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, newsletterOptIn, agreedToTerms }),
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+        newsletterOptIn,
+        agreedToTerms,
+        hasInPersonSessions,
+        addressLine1,
+        addressLine2,
+        addressTown,
+        addressPostcode,
+      }),
     });
     const data = await res.json();
 
@@ -111,6 +131,94 @@ export function RegisterForm() {
         />
         <p className="mt-1 text-xs text-navy/50">At least 8 characters.</p>
       </div>
+
+      <div>
+        <span className="block text-sm font-medium text-navy">
+          Will you be having in-person sessions?
+        </span>
+        <div className="mt-1.5 flex gap-4">
+          <label className="flex items-center gap-2 text-sm text-navy/80">
+            <input
+              type="radio"
+              name="hasInPersonSessions"
+              checked={!hasInPersonSessions}
+              onChange={() => setHasInPersonSessions(false)}
+            />
+            No, online only
+          </label>
+          <label className="flex items-center gap-2 text-sm text-navy/80">
+            <input
+              type="radio"
+              name="hasInPersonSessions"
+              checked={hasInPersonSessions}
+              onChange={() => setHasInPersonSessions(true)}
+            />
+            Yes
+          </label>
+        </div>
+      </div>
+
+      {hasInPersonSessions && (
+        <div className="space-y-4 rounded-md border border-navy/10 bg-navy/[0.03] p-4">
+          <p className="text-xs text-navy/60">
+            We&apos;ll only share your address with a tutor once an
+            in-person session with them is confirmed.
+          </p>
+          <div>
+            <label htmlFor="addressLine1" className="block text-sm font-medium text-navy">
+              Address
+            </label>
+            <input
+              id="addressLine1"
+              type="text"
+              required={hasInPersonSessions}
+              autoComplete="address-line1"
+              value={addressLine1}
+              onChange={(e) => setAddressLine1(e.target.value)}
+              className="mt-1.5 block w-full rounded-md border border-navy/20 px-3 py-2.5 text-sm focus:border-gold-dark focus:outline-none focus:ring-1 focus:ring-gold-dark"
+            />
+            <input
+              id="addressLine2"
+              type="text"
+              autoComplete="address-line2"
+              placeholder="Address line 2 (optional)"
+              value={addressLine2}
+              onChange={(e) => setAddressLine2(e.target.value)}
+              className="mt-2 block w-full rounded-md border border-navy/20 px-3 py-2.5 text-sm focus:border-gold-dark focus:outline-none focus:ring-1 focus:ring-gold-dark"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="addressTown" className="block text-sm font-medium text-navy">
+                Town
+              </label>
+              <input
+                id="addressTown"
+                type="text"
+                required={hasInPersonSessions}
+                autoComplete="address-level2"
+                value={addressTown}
+                onChange={(e) => setAddressTown(e.target.value)}
+                className="mt-1.5 block w-full rounded-md border border-navy/20 px-3 py-2.5 text-sm focus:border-gold-dark focus:outline-none focus:ring-1 focus:ring-gold-dark"
+              />
+            </div>
+            <div>
+              <label htmlFor="addressPostcode" className="block text-sm font-medium text-navy">
+                Postcode
+              </label>
+              <input
+                id="addressPostcode"
+                type="text"
+                required={hasInPersonSessions}
+                autoComplete="postal-code"
+                value={addressPostcode}
+                onChange={(e) => setAddressPostcode(e.target.value)}
+                className="mt-1.5 block w-full rounded-md border border-navy/20 px-3 py-2.5 text-sm focus:border-gold-dark focus:outline-none focus:ring-1 focus:ring-gold-dark"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-start gap-3 rounded-md border border-navy/10 bg-navy/[0.03] p-3">
         <input

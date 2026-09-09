@@ -28,7 +28,18 @@ export async function POST(request: Request) {
     );
   }
 
-  const { name, email, password, newsletterOptIn, agreedToTerms } = parsed.data;
+  const {
+    name,
+    email,
+    password,
+    newsletterOptIn,
+    agreedToTerms,
+    hasInPersonSessions,
+    addressLine1,
+    addressLine2,
+    addressTown,
+    addressPostcode,
+  } = parsed.data;
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
@@ -50,6 +61,14 @@ export async function POST(request: Request) {
         role: "CLIENT",
         newsletterOptIn,
         agreedToTermsAt: agreedToTerms ? new Date() : null,
+        ...(hasInPersonSessions
+          ? {
+              addressLine1: addressLine1 || null,
+              addressLine2: addressLine2 || null,
+              addressTown: addressTown || null,
+              addressPostcode: addressPostcode || null,
+            }
+          : {}),
       },
     });
   } catch (err) {

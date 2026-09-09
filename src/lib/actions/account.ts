@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { logAudit } from "@/lib/audit";
-import { updateAccountSchema, changePasswordSchema } from "@/lib/validations/account";
+import { updateAccountSchema, changePasswordSchema, updateAddressSchema } from "@/lib/validations/account";
 import { subscribeEmail, unsubscribeEmailForUser } from "@/lib/newsletter";
 
 export async function updateAccount(input: {
@@ -35,6 +35,30 @@ export async function updateAccount(input: {
   revalidatePath("/dashboard/settings");
   revalidatePath("/tutor-dashboard/settings");
   revalidatePath("/admin/settings");
+
+  return {};
+}
+
+export async function updateOwnAddress(input: {
+  addressLine1: string;
+  addressLine2: string;
+  addressTown: string;
+  addressPostcode: string;
+}): Promise<{ error: string } | { error?: undefined }> {
+  const user = await requireUser("CLIENT");
+  const parsed = updateAddressSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+  const { addressLine1, addressLine2, addressTown, addressPostcode } = parsed.data;
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { addressLine1, addressLine2: addressLine2 || null, addressTown, addressPostcode },
+  });
+
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/admin/clients");
 
   return {};
 }

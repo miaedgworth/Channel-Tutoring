@@ -8,6 +8,15 @@ export const updateAccountSchema = z.object({
 
 export type UpdateAccountInput = z.infer<typeof updateAccountSchema>;
 
+export const updateAddressSchema = z.object({
+  addressLine1: z.string().trim().min(1, "Enter your address").max(200),
+  addressLine2: z.string().trim().max(200).optional().or(z.literal("")),
+  addressTown: z.string().trim().min(1, "Enter your town").max(100),
+  addressPostcode: z.string().trim().min(1, "Enter your postcode").max(20),
+});
+
+export type UpdateAddressInput = z.infer<typeof updateAddressSchema>;
+
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, "Enter your current password"),

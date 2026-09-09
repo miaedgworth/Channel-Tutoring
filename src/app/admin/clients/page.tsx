@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserStatusToggle } from "@/components/admin/user-status-toggle";
 import { GrantTokensControl } from "@/components/admin/grant-tokens-control";
+import { AdminClientAddressControl } from "@/components/admin/admin-client-address-control";
 import { formatDate, formatTokenQuantity, formatLevel } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Clients" };
@@ -75,6 +76,7 @@ export default async function AdminClientsPage() {
               <th className="pb-2 font-medium">Tokens (purchased &rarr; remaining)</th>
               <th className="pb-2 font-medium">Newsletter</th>
               <th className="pb-2 font-medium">Status</th>
+              <th className="pb-2 font-medium">Address</th>
               <th className="pb-2 font-medium"></th>
               <th className="pb-2 font-medium"></th>
             </tr>
@@ -114,6 +116,30 @@ export default async function AdminClientsPage() {
                   <Badge variant={client.status === "ACTIVE" ? "success" : "danger"}>
                     {client.status}
                   </Badge>
+                </td>
+                <td className="py-2.5 text-navy/60">
+                  {client.addressLine1 ? (
+                    <>
+                      <p>{client.addressLine1}</p>
+                      {client.addressLine2 && <p>{client.addressLine2}</p>}
+                      <p>
+                        {client.addressTown}, {client.addressPostcode}
+                      </p>
+                    </>
+                  ) : client.addressRequestedAt ? (
+                    <Badge variant="warning">Requested</Badge>
+                  ) : (
+                    <span>&mdash;</span>
+                  )}
+                </td>
+                <td className="py-2.5 text-right">
+                  <AdminClientAddressControl
+                    clientUserId={client.id}
+                    addressLine1={client.addressLine1}
+                    addressLine2={client.addressLine2}
+                    addressTown={client.addressTown}
+                    addressPostcode={client.addressPostcode}
+                  />
                 </td>
                 <td className="py-2.5 text-right">
                   <GrantTokensControl clientUserId={client.id} />

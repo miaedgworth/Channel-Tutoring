@@ -25,10 +25,27 @@ export default async function TutorBookingDetailPage({
     where: { id },
     include: {
       tutor: true,
-      client: { select: { name: true, email: true } },
+      client: {
+        select: {
+          name: true,
+          email: true,
+          addressLine1: true,
+          addressLine2: true,
+          addressTown: true,
+          addressPostcode: true,
+        },
+      },
     },
   });
   if (!booking || booking.tutor.userId !== user.id) notFound();
+
+  // Only ever shown once the tutor is actually going to meet the client in
+  // person for this specific session — not before it's confirmed, and
+  // never for an online session.
+  const showAddress =
+    booking.sessionMode === "IN_PERSON" &&
+    (booking.status === "CONFIRMED" || booking.status === "COMPLETED") &&
+    !!booking.client.addressLine1;
 
   const canUndo =
     booking.status === "COMPLETED" &&
@@ -92,6 +109,16 @@ export default async function TutorBookingDetailPage({
               <dt className="text-navy/50">Client email</dt>
               <dd className="font-medium text-navy">{booking.client.email}</dd>
             </div>
+            {showAddress && (
+              <div className="col-span-2">
+                <dt className="text-navy/50">Client address</dt>
+                <dd className="font-medium text-navy">
+                  {booking.client.addressLine1}
+                  {booking.client.addressLine2 ? `, ${booking.client.addressLine2}` : ""}
+                  , {booking.client.addressTown}, {booking.client.addressPostcode}
+                </dd>
+              </div>
+            )}
           </dl>
 
           {booking.notes && (

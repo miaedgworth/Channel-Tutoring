@@ -133,6 +133,18 @@ model User {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
+  // A client's home address, collected for in-person sessions only.
+  // Set either by the client themselves (at signup, or later in their
+  // dashboard) or by admin directly (e.g. entering an address Mia already
+  // has on file). addressRequestedAt is stamped when admin asks a client
+  // to (re-)submit their address — it's informational for the admin UI
+  // only, nothing is gated on it.
+  addressLine1       String?
+  addressLine2       String?
+  addressTown        String?
+  addressPostcode    String?
+  addressRequestedAt DateTime?
+
   tutorProfile          TutorProfile?
   tutorApplication      TutorApplication?
   bookingsAsClient      Booking[]            @relation("ClientBookings")
