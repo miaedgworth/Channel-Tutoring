@@ -5,6 +5,7 @@ export const SUBJECTS = [
   "Further Maths",
   "English Language",
   "English Literature",
+  "Essay Writing",
   "Biology",
   "Chemistry",
   "Physics",
@@ -25,6 +26,7 @@ export const SUBJECTS = [
   "Religious Studies",
   "Art & Design",
   "Music",
+  "Theatre Studies",
   "Politics",
   "Law",
 ] as const;
