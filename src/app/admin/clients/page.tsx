@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserStatusToggle } from "@/components/admin/user-status-toggle";
-import { GrantTokensControl } from "@/components/admin/grant-tokens-control";
+import { ManageTokensControl } from "@/components/admin/manage-tokens-control";
 import { AdminClientAddressControl } from "@/components/admin/admin-client-address-control";
 import { formatDate, formatTokenQuantity, formatLevel } from "@/lib/utils";
 
@@ -142,7 +142,15 @@ export default async function AdminClientsPage() {
                   />
                 </td>
                 <td className="py-2.5 text-right">
-                  <GrantTokensControl clientUserId={client.id} />
+                  <ManageTokensControl
+                    clientUserId={client.id}
+                    balanceByLevel={Object.fromEntries(
+                      (levelsByUser.get(client.id) ?? []).map((b) => [
+                        b.level,
+                        formatTokenQuantity(b.remaining),
+                      ]),
+                    )}
+                  />
                 </td>
                 <td className="py-2.5 text-right">
                   <UserStatusToggle userId={client.id} status={client.status} />

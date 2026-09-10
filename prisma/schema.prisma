@@ -54,6 +54,7 @@ enum TokenTransactionType {
   REDEEM
   REFUND
   ADMIN_GRANT
+  ADMIN_REMOVE
 }
 
 enum TutorApplicationStatus {
