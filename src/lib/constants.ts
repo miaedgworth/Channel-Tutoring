@@ -3,6 +3,7 @@ import { REGION, type RegionId } from "@/lib/region";
 export const SUBJECTS = [
   "Maths",
   "Further Maths",
+  "Statistics",
   "English Language",
   "English Literature",
   "Essay Writing",
