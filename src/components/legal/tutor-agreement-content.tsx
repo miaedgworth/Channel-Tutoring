@@ -62,7 +62,7 @@ export function TutorAgreementContent() {
       <h2>4. Payments and payouts</h2>
       <ul>
         <li>You must add your {region.bankAccountLine} details in your tutor dashboard to receive payouts.</li>
-        <li>You can request a withdrawal of your available balance at any time. Withdrawals are paid by bank transfer every Monday.</li>
+        <li>Your balance is paid out automatically by bank transfer every Monday — you can also request an early withdrawal at any time if you don&apos;t want to wait.</li>
         <li>You can view a full ledger of your sessions, fees and payouts in your tutor dashboard.</li>
       </ul>
 

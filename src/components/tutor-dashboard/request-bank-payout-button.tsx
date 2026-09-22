@@ -37,13 +37,19 @@ export function RequestBankPayoutButton({
           Withdrawal requested — this will be paid on the next Monday payout run.
         </p>
       ) : (
-        <Button
-          variant="primary"
-          onClick={handleClick}
-          disabled={isPending || balancePence <= 0}
-        >
-          {isPending ? "Requesting..." : `Withdraw ${formatCurrency(balancePence)}`}
-        </Button>
+        <>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleClick}
+            disabled={isPending || balancePence <= 0}
+          >
+            {isPending ? "Requesting..." : `Request early withdrawal of ${formatCurrency(balancePence)}`}
+          </Button>
+          <p className="mt-2 text-xs text-navy/40">
+            Optional — your balance is paid automatically every Monday either way.
+          </p>
+        </>
       )}
     </div>
   );

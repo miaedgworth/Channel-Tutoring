@@ -27,7 +27,7 @@ const TUTOR_STEPS = [
   },
   {
     title: "5. Withdraw your earnings",
-    body: "Track everything in your earnings dashboard. Add your bank details and request a withdrawal whenever you have a balance — payouts are sent by bank transfer every Monday.",
+    body: "Track everything in your earnings dashboard. Add your bank details and you're paid automatically by bank transfer every Monday — no need to request it.",
   },
 ];
 

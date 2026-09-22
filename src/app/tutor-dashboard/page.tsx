@@ -173,9 +173,8 @@ export default async function TutorOverviewPage() {
             <Link href="/tutor-dashboard/earnings" className="underline">
               Earnings
             </Link>{" "}
-            page, then request a withdrawal whenever you have a balance.
-            Withdrawals are paid directly into your bank account by bank
-            transfer every Monday.
+            page and your balance is paid automatically by bank transfer
+            every Monday — no need to request it.
           </p>
         </CardContent>
       </Card>

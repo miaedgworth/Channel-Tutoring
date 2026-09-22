@@ -42,7 +42,8 @@ export default async function EarningsPage() {
   return (
     <div className="space-y-6">
       <div className="rounded-md border border-navy/10 bg-navy/[0.02] px-4 py-3 text-sm text-navy/60">
-        Withdrawals are paid out by bank transfer every Monday.
+        Your balance is paid out automatically by bank transfer every Monday
+        — there&apos;s no need to request it yourself.
       </div>
 
       {!hasBankDetails ? (
