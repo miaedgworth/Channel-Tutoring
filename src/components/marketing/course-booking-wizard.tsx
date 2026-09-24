@@ -23,10 +23,9 @@ export interface WizardDay {
   spotsLeft: number | null;
 }
 
-type Phase = "cta" | "authGate" | "days" | "details" | "terms";
+type Phase = "authGate" | "days" | "details" | "terms";
 
 const STEP_NUMBER: Record<Phase, number | null> = {
-  cta: null,
   authGate: null,
   days: 1,
   details: 2,
@@ -52,7 +51,7 @@ export function CourseBookingWizard({
   balanceDueDate: string | null;
   isLoggedInClient: boolean;
 }) {
-  const [phase, setPhase] = useState<Phase>("cta");
+  const [phase, setPhase] = useState<Phase>(isLoggedInClient ? "days" : "authGate");
   const [selectedDayIds, setSelectedDayIds] = useState<string[]>([]);
   const [childName, setChildName] = useState("");
   const [childAnswers, setChildAnswers] = useState<Record<string, string>>({});
@@ -93,10 +92,6 @@ export function CourseBookingWizard({
     );
   }
 
-  function handleStartBooking() {
-    setPhase(isLoggedInClient ? "days" : "authGate");
-  }
-
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -124,12 +119,6 @@ export function CourseBookingWizard({
         <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-navy/40">
           Step {stepNumber} of 3
         </p>
-      )}
-
-      {phase === "cta" && (
-        <Button type="button" size="lg" onClick={handleStartBooking}>
-          Book your place
-        </Button>
       )}
 
       {phase === "authGate" && (
@@ -223,9 +212,6 @@ export function CourseBookingWizard({
           )}
 
           <div className="flex gap-3">
-            <Button type="button" variant="ghost" onClick={() => setPhase("cta")}>
-              Back
-            </Button>
             <Button
               type="button"
               disabled={selectedDayIds.length === 0}

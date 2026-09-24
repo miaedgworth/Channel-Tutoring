@@ -4,6 +4,7 @@ import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/button";
 import { TutorCard } from "@/components/tutors/tutor-card";
 import { region, REGION } from "@/lib/region";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -47,13 +48,29 @@ const STEPS = [
   { step: "3", title: "Start learning", body: "Message your tutor and track every session in your dashboard." },
 ];
 
+function dateRange(startDate: Date | null, endDate: Date | null) {
+  if (!startDate) return "Dates to be confirmed";
+  if (!endDate || endDate.getTime() === startDate.getTime()) {
+    return formatDate(startDate);
+  }
+  return `${formatDate(startDate)} – ${formatDate(endDate)}`;
+}
+
 export default async function HomePage() {
-  const featuredTutors = await prisma.tutorProfile.findMany({
-    where: { isPublished: true },
-    orderBy: { ratingAverage: "desc" },
-    take: 3,
-    include: { user: { select: { name: true } } },
-  });
+  const [featuredTutors, featuredCourse] = await Promise.all([
+    prisma.tutorProfile.findMany({
+      where: { isPublished: true },
+      orderBy: { ratingAverage: "desc" },
+      take: 3,
+      include: { user: { select: { name: true } } },
+    }),
+    prisma.course.findFirst({
+      where: { status: "UPCOMING", days: { some: {} } },
+      orderBy: { startDate: "asc" },
+      include: { days: { orderBy: { pricePence: "asc" }, take: 1 } },
+    }),
+  ]);
+  const cheapestDayPrice = featuredCourse?.days[0]?.pricePence;
 
   return (
     <div>
@@ -84,6 +101,36 @@ export default async function HomePage() {
           </div>
         </Container>
       </section>
+
+      {featuredCourse && (
+        <section className="border-b border-navy/10 bg-gold/10 py-12">
+          <Container>
+            <div className="flex flex-col items-center gap-6 rounded-2xl border border-gold-dark/30 bg-white p-6 shadow-sm sm:flex-row sm:justify-between sm:p-8">
+              <div className="text-center sm:text-left">
+                <p className="text-xs font-semibold uppercase tracking-wide text-gold-dark">
+                  Now open for booking
+                </p>
+                <h2 className="mt-1 font-heading text-xl font-bold text-navy sm:text-2xl">
+                  {featuredCourse.title}
+                </h2>
+                <p className="mt-1.5 text-sm text-navy/60">
+                  {dateRange(featuredCourse.startDate, featuredCourse.endDate)}
+                  {featuredCourse.venue && ` · ${featuredCourse.venue}`}
+                  {cheapestDayPrice != null && ` · from ${formatCurrency(cheapestDayPrice)}/day`}
+                </p>
+              </div>
+              <LinkButton
+                href={`/courses/${featuredCourse.slug}`}
+                variant="gold"
+                size="lg"
+                className="shrink-0"
+              >
+                View &amp; Book
+              </LinkButton>
+            </div>
+          </Container>
+        </section>
+      )}
 
       <section className="py-14">
         <Container>
