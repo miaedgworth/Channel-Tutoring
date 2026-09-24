@@ -25,7 +25,7 @@ export async function CourseFullDetail({ course }: { course: Course & { days: Co
   const hasPaidDays = course.days.length > 0;
   const isUpcomingPaidCourse = course.status === "UPCOMING" && hasPaidDays;
 
-  const [session, availability, summerCourseTestimonials, tutorCount] = await Promise.all([
+  const [session, availability, summerCourseTestimonials] = await Promise.all([
     hasPaidDays ? auth() : Promise.resolve(null),
     getDaysAvailability(course.days.map((d) => ({ id: d.id, capacity: d.capacity }))),
     isUpcomingPaidCourse
@@ -34,9 +34,6 @@ export async function CourseFullDetail({ course }: { course: Course & { days: Co
           orderBy: { createdAt: "desc" },
         })
       : Promise.resolve([]),
-    isUpcomingPaidCourse
-      ? prisma.tutorProfile.count({ where: { isPublished: true } })
-      : Promise.resolve(0),
   ]);
   const isLoggedInClient = session?.user?.role === "CLIENT";
 
@@ -158,7 +155,6 @@ export async function CourseFullDetail({ course }: { course: Course & { days: Co
           quote: t.quote,
           rating: t.rating,
         }))}
-        tutorCount={tutorCount}
       />
 
       <CourseFaq depositPercent={depositPercent} balanceDueDate={course.balanceDueDate} />

@@ -55,11 +55,9 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 export function CourseTestimonialsSection({
   heading,
   testimonials,
-  tutorCount,
 }: {
   heading: string;
   testimonials: Testimonial[];
-  tutorCount?: number;
 }) {
   if (testimonials.length === 0) return null;
 
@@ -67,12 +65,6 @@ export function CourseTestimonialsSection({
     <section className="bg-navy py-12 sm:py-16">
       <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
         <h2 className="text-center font-heading text-2xl font-bold text-white">{heading}</h2>
-
-        {tutorCount != null && tutorCount > 0 && (
-          <p className="mt-3 text-center text-sm font-semibold text-gold">
-            {tutorCount} specialist tutors, reviewed before they go live
-          </p>
-        )}
 
         <div
           role="region"
