@@ -25,6 +25,12 @@ export function CourseForm({
     status: CourseStatus;
     startDate: string | null;
     endDate: string | null;
+    venue: string | null;
+    timeLabel: string | null;
+    bundlePricePence: number | null;
+    bundleLabel: string | null;
+    depositPercent: number | null;
+    balanceDueDate: string | null;
   };
 }) {
   const router = useRouter();
@@ -34,13 +40,35 @@ export function CourseForm({
   const [status, setStatus] = useState<CourseStatus>(course?.status ?? "UPCOMING");
   const [startDate, setStartDate] = useState(toDateInputValue(course?.startDate));
   const [endDate, setEndDate] = useState(toDateInputValue(course?.endDate));
+  const [venue, setVenue] = useState(course?.venue ?? "");
+  const [timeLabel, setTimeLabel] = useState(course?.timeLabel ?? "");
+  const [bundlePricePence, setBundlePricePence] = useState(
+    course?.bundlePricePence != null ? String(course.bundlePricePence) : "",
+  );
+  const [bundleLabel, setBundleLabel] = useState(course?.bundleLabel ?? "");
+  const [depositPercent, setDepositPercent] = useState(
+    course?.depositPercent != null ? String(course.depositPercent) : "",
+  );
+  const [balanceDueDate, setBalanceDueDate] = useState(toDateInputValue(course?.balanceDueDate));
   const [error, setError] = useState<string | null>(null);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      const input = { title, description, status, startDate, endDate };
+      const input = {
+        title,
+        description,
+        status,
+        startDate,
+        endDate,
+        venue,
+        timeLabel,
+        bundlePricePence,
+        bundleLabel,
+        depositPercent,
+        balanceDueDate,
+      };
       const result = course ? await updateCourse(course.id, input) : await createCourse(input);
       if (result.error) {
         setError(result.error);
@@ -138,6 +166,97 @@ export function CourseForm({
       <p className="text-xs text-navy/50">
         Leave dates blank while they&apos;re still to be confirmed.
       </p>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label htmlFor="venue" className="block text-sm font-medium text-navy">
+            Venue (optional)
+          </label>
+          <input
+            id="venue"
+            value={venue}
+            onChange={(e) => setVenue(e.target.value)}
+            className={inputClass}
+            placeholder="e.g. EC"
+          />
+        </div>
+        <div>
+          <label htmlFor="timeLabel" className="block text-sm font-medium text-navy">
+            Daily time (optional)
+          </label>
+          <input
+            id="timeLabel"
+            value={timeLabel}
+            onChange={(e) => setTimeLabel(e.target.value)}
+            className={inputClass}
+            placeholder="e.g. 9am – 3pm each day"
+          />
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-navy/10 p-4">
+        <p className="text-sm font-medium text-navy">Paid booking (optional)</p>
+        <p className="mt-1 text-xs text-navy/50">
+          Add days below to turn this into a paid booking with a deposit
+          and balance, instead of a plain &ldquo;register interest&rdquo;
+          course. Leave these blank for a lead-capture-only course.
+        </p>
+        <div className="mt-4 grid gap-5 sm:grid-cols-2">
+          <div>
+            <label htmlFor="depositPercent" className="block text-sm font-medium text-navy">
+              Deposit % (optional)
+            </label>
+            <input
+              id="depositPercent"
+              value={depositPercent}
+              onChange={(e) => setDepositPercent(e.target.value)}
+              className={inputClass}
+              placeholder="e.g. 25"
+            />
+          </div>
+          <div>
+            <label htmlFor="balanceDueDate" className="block text-sm font-medium text-navy">
+              Balance due date (optional)
+            </label>
+            <input
+              id="balanceDueDate"
+              type="date"
+              value={balanceDueDate}
+              onChange={(e) => setBalanceDueDate(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="bundlePricePence" className="block text-sm font-medium text-navy">
+              Bundle price in pence (optional)
+            </label>
+            <input
+              id="bundlePricePence"
+              value={bundlePricePence}
+              onChange={(e) => setBundlePricePence(e.target.value)}
+              className={inputClass}
+              placeholder="e.g. 30000 for £300"
+            />
+          </div>
+          <div>
+            <label htmlFor="bundleLabel" className="block text-sm font-medium text-navy">
+              Bundle label (optional)
+            </label>
+            <input
+              id="bundleLabel"
+              value={bundleLabel}
+              onChange={(e) => setBundleLabel(e.target.value)}
+              className={inputClass}
+              placeholder="e.g. All 3 Sciences + 1 Maths (4 days)"
+            />
+          </div>
+        </div>
+        <p className="mt-2 text-xs text-navy/50">
+          The bundle applies once a booking covers every &ldquo;Science&rdquo;
+          day plus at least one &ldquo;Maths&rdquo; day — set each day&apos;s
+          track when adding it below.
+        </p>
+      </div>
 
       <div className="flex items-center gap-3">
         <Button type="submit" variant="primary" disabled={isPending}>

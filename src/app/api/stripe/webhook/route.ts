@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
 import { logAudit } from "@/lib/audit";
-import { formatLevel } from "@/lib/utils";
+import { formatLevel, formatCurrency, formatDate } from "@/lib/utils";
 import { reserveTokensForUnpaidBookings } from "@/lib/actions/token-reservation";
 import { region } from "@/lib/region";
 
@@ -106,7 +106,125 @@ export async function POST(request: Request) {
         `),
       }).catch(() => {});
     }
+
+    if (session.metadata?.type === "course_deposit" && session.metadata.enrollmentId) {
+      if (session.payment_status !== "paid") {
+        return NextResponse.json({ received: true });
+      }
+      await handleCourseDepositPaid(session);
+    }
+
+    if (session.metadata?.type === "course_balance" && session.metadata.enrollmentId) {
+      if (session.payment_status !== "paid") {
+        return NextResponse.json({ received: true });
+      }
+      await handleCourseBalancePaid(session);
+    }
   }
 
   return NextResponse.json({ received: true });
+}
+
+async function handleCourseDepositPaid(session: Stripe.Checkout.Session) {
+  const enrollmentId = session.metadata!.enrollmentId!;
+
+  const enrollment = await prisma.courseEnrollment.findUnique({
+    where: { id: enrollmentId },
+    include: { course: true, client: true, days: { include: { day: true } } },
+  });
+  if (!enrollment) {
+    await logAudit({
+      action: "STRIPE_WEBHOOK_METADATA_INVALID",
+      targetType: "CheckoutSession",
+      targetId: session.id,
+      metadata: { rawMetadata: session.metadata },
+    });
+    return;
+  }
+  // Idempotent: a redelivered event, or the deposit already recorded via
+  // another route, should never be applied twice.
+  if (enrollment.depositStatus === "PAID") return;
+
+  try {
+    await prisma.courseEnrollment.update({
+      where: { id: enrollmentId, depositStatus: "PENDING" },
+      data: {
+        depositStatus: "PAID",
+        depositPaidAt: new Date(),
+        depositCheckoutSessionId: session.id,
+        status: "DEPOSIT_PAID",
+      },
+    });
+  } catch (err) {
+    // P2025 here means depositStatus was no longer PENDING when the update
+    // ran (a redelivered webhook racing an earlier one) — already handled.
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+      return;
+    }
+    throw err;
+  }
+
+  const dayLabels = enrollment.days.map((d) => d.day.label).join(", ");
+  await sendEmail({
+    to: enrollment.client.email,
+    subject: `Your place on ${enrollment.course.title} is booked`,
+    html: baseEmailLayout(`
+      <p>Hi ${enrollment.client.name},</p>
+      <p>Thanks — we've received the deposit of ${formatCurrency(enrollment.depositPence)}
+      for ${enrollment.childName}'s place on <strong>${enrollment.course.title}</strong>
+      (${dayLabels}).</p>
+      <p>The remaining balance of ${formatCurrency(enrollment.balancePence)} is due
+      ${enrollment.course.balanceDueDate ? `by ${formatDate(enrollment.course.balanceDueDate)}` : "shortly"}.
+      We'll email you a payment link nearer the time — you can also pay early any time
+      from your dashboard.</p>
+      <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/courses">View your booking</a></p>
+    `),
+  }).catch(() => {});
+}
+
+async function handleCourseBalancePaid(session: Stripe.Checkout.Session) {
+  const enrollmentId = session.metadata!.enrollmentId!;
+
+  const enrollment = await prisma.courseEnrollment.findUnique({
+    where: { id: enrollmentId },
+    include: { course: true, client: true },
+  });
+  if (!enrollment) {
+    await logAudit({
+      action: "STRIPE_WEBHOOK_METADATA_INVALID",
+      targetType: "CheckoutSession",
+      targetId: session.id,
+      metadata: { rawMetadata: session.metadata },
+    });
+    return;
+  }
+  if (enrollment.balanceStatus === "PAID") return;
+
+  try {
+    await prisma.courseEnrollment.update({
+      where: { id: enrollmentId, balanceStatus: "PENDING" },
+      data: {
+        balanceStatus: "PAID",
+        balancePaidAt: new Date(),
+        balanceCheckoutSessionId: session.id,
+        status: "PAID_IN_FULL",
+      },
+    });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+      return;
+    }
+    throw err;
+  }
+
+  await sendEmail({
+    to: enrollment.client.email,
+    subject: `Balance paid — ${enrollment.course.title}`,
+    html: baseEmailLayout(`
+      <p>Hi ${enrollment.client.name},</p>
+      <p>We've received the remaining balance of ${formatCurrency(enrollment.balancePence)}
+      for ${enrollment.childName}'s place on <strong>${enrollment.course.title}</strong>.
+      Everything's paid in full — see you there!</p>
+    `),
+  }).catch(() => {});
 }

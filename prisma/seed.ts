@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { upsertOctoberHalfTermCourse } from "./fixtures/october-half-term-course";
 
 const prisma = new PrismaClient();
 
@@ -75,19 +76,10 @@ async function main() {
     },
   });
 
-  await prisma.course.upsert({
-    where: { slug: "october-half-term-course" },
-    update: {},
-    create: {
-      title: "October Half Term Course",
-      slug: "october-half-term-course",
-      description:
-        "Full details are coming soon. Express your interest below and we'll be in touch as soon as booking opens.",
-      status: "UPCOMING",
-      startDate: null,
-      endDate: null,
-    },
-  });
+  // Real launch details — see scripts/launch-october-half-term-course.ts,
+  // which applies this same course to a production database without
+  // touching the dev/test users above.
+  await upsertOctoberHalfTermCourse(prisma);
 
   console.log("Seed complete.");
   console.log("Admin login:  admin@channeltutoring.gg / AdminPass123!");

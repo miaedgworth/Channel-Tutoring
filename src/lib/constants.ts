@@ -177,3 +177,41 @@ export const LESSON_LOG_UNDO_WINDOW_MS = 24 * 60 * 60 * 1000;
 // signature actually applied to. Bump this whenever the agreement's terms
 // change.
 export const TUTOR_AGREEMENT_VERSION = "26 August 2026";
+
+// Same pattern as TUTOR_AGREEMENT_VERSION, for the Course Terms &
+// Conditions signed at course-enrollment checkout. Bump whenever the terms
+// text in src/components/legal/course-terms-content.tsx changes.
+export const COURSE_TERMS_VERSION = "24 September 2026";
+
+// Used when a course doesn't set its own Course.depositPercent.
+export const DEFAULT_COURSE_DEPOSIT_PERCENT = 25;
+
+// Questions asked about the child at course-enrollment checkout, answered
+// into CourseEnrollment.childAnswers (keyed by id). PLACEHOLDER — Mia is
+// supplying the real question set; swap this array for it before this
+// flow goes live with real families.
+export interface CourseChildQuestion {
+  id: string;
+  label: string;
+  type: "text" | "textarea";
+  required: boolean;
+  placeholder?: string;
+}
+
+export const COURSE_CHILD_QUESTIONS: CourseChildQuestion[] = [
+  { id: "yearGroup", label: "Child's school year", type: "text", required: true },
+  { id: "school", label: "Child's current school", type: "text", required: true },
+  {
+    id: "medicalOrSen",
+    label: "Any medical conditions, allergies or SEN needs we should know about?",
+    type: "textarea",
+    required: false,
+    placeholder: "Leave blank if none",
+  },
+  {
+    id: "emergencyContact",
+    label: "Emergency contact name and phone number (if different from your own)",
+    type: "text",
+    required: false,
+  },
+];

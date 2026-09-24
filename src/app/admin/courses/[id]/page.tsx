@@ -2,11 +2,21 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { CourseForm } from "@/components/admin/course-form";
-import { formatDateTime } from "@/lib/utils";
+import { CourseDaysEditor } from "@/components/admin/course-days-editor";
+import { MarkCourseBalancePaidButton } from "@/components/admin/mark-course-balance-paid-button";
+import { formatDateTime, formatCurrency } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Edit Course" };
 export const dynamic = "force-dynamic";
+
+const STATUS_BADGE: Record<string, "success" | "warning" | "neutral"> = {
+  AWAITING_DEPOSIT: "warning",
+  DEPOSIT_PAID: "warning",
+  PAID_IN_FULL: "success",
+  CANCELLED: "neutral",
+};
 
 export default async function EditCoursePage({
   params,
@@ -14,7 +24,17 @@ export default async function EditCoursePage({
   const { id } = await params;
   const course = await prisma.course.findUnique({
     where: { id },
-    include: { interests: { orderBy: { createdAt: "desc" } } },
+    include: {
+      interests: { orderBy: { createdAt: "desc" } },
+      days: { orderBy: { sortOrder: "asc" } },
+      enrollments: {
+        orderBy: { createdAt: "desc" },
+        include: {
+          client: { select: { name: true, email: true } },
+          days: { include: { day: true }, orderBy: { day: { sortOrder: "asc" } } },
+        },
+      },
+    },
   });
   if (!course) notFound();
 
@@ -30,8 +50,89 @@ export default async function EditCoursePage({
               status: course.status,
               startDate: course.startDate?.toISOString() ?? null,
               endDate: course.endDate?.toISOString() ?? null,
+              venue: course.venue,
+              timeLabel: course.timeLabel,
+              bundlePricePence: course.bundlePricePence,
+              bundleLabel: course.bundleLabel,
+              depositPercent: course.depositPercent,
+              balanceDueDate: course.balanceDueDate?.toISOString() ?? null,
             }}
           />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent>
+          <h2 className="font-heading text-lg font-semibold text-navy">
+            Course days ({course.days.length})
+          </h2>
+          <p className="mt-1 text-sm text-navy/60">
+            Add a day for each bookable subject/date. Set the bundle price
+            and label above once days are added.
+          </p>
+          <div className="mt-4">
+            <CourseDaysEditor
+              courseId={course.id}
+              days={course.days.map((d) => ({
+                id: d.id,
+                date: d.date.toISOString(),
+                label: d.label,
+                track: d.track,
+                pricePence: d.pricePence,
+                sortOrder: d.sortOrder,
+              }))}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <h2 className="font-heading text-lg font-semibold text-navy">
+              Bookings ({course.enrollments.length})
+            </h2>
+            {course.enrollments.length > 0 && (
+              <a
+                href={`/api/admin/export/course-enrollments/${course.id}`}
+                className="text-sm font-medium text-navy underline"
+              >
+                Export CSV
+              </a>
+            )}
+          </div>
+
+          {course.enrollments.length === 0 ? (
+            <p className="mt-3 text-sm text-navy/60">No one has booked yet.</p>
+          ) : (
+            <div className="mt-4 space-y-3">
+              {course.enrollments.map((e) => (
+                <div key={e.id} className="rounded-lg border border-navy/10 p-3 text-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="font-medium text-navy">
+                        {e.childName} <span className="text-navy/40">— {e.client.name}</span>
+                      </p>
+                      <p className="text-xs text-navy/50">
+                        {e.client.email} &middot; {e.days.map((d) => d.day.label).join(", ")}
+                      </p>
+                    </div>
+                    <Badge variant={STATUS_BADGE[e.status] ?? "neutral"}>{e.status.replaceAll("_", " ")}</Badge>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-navy/70">
+                      Total {formatCurrency(e.totalPence)} &middot; Deposit{" "}
+                      {formatCurrency(e.depositPence)} ({e.depositStatus.toLowerCase()}) &middot; Balance{" "}
+                      {formatCurrency(e.balancePence)} ({e.balanceStatus.toLowerCase()})
+                    </p>
+                    {e.depositStatus === "PAID" && e.balanceStatus === "PENDING" && (
+                      <MarkCourseBalancePaidButton enrollmentId={e.id} />
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 

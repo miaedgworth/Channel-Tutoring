@@ -112,18 +112,44 @@ enum CourseStatus {
   PAST
 }
 
+// A CourseDay's "track" drives the bundle-discount pricing logic (see
+// src/lib/course-pricing.ts): the discount applies once a selection covers
+// every SCIENCE day plus at least one MATHS day. OTHER days never
+// participate in a bundle — they're always priced individually. Existing
+// Course rows (plain lead-capture courses with no days at all) are
+// unaffected; the paid enrollment flow only appears once a course has at
+// least one CourseDay.
+enum CourseDayTrack {
+  MATHS
+  SCIENCE
+  OTHER
+}
+
+enum CoursePaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+}
+
+enum CourseEnrollmentStatus {
+  AWAITING_DEPOSIT
+  DEPOSIT_PAID
+  PAID_IN_FULL
+  CANCELLED
+}
+
 // ---------- Core auth / users ----------
 
 model User {
-  id              String     @id @default(cuid())
-  email           String     @unique
-  passwordHash    String
-  name            String
-  phone           String?
-  role            Role       @default(CLIENT)
-  status          UserStatus @default(ACTIVE)
-  image           String?
-  newsletterOptIn Boolean    @default(false)
+  id                String     @id @default(cuid())
+  email             String     @unique
+  passwordHash      String
+  name              String
+  phone             String?
+  role              Role       @default(CLIENT)
+  status            UserStatus @default(ACTIVE)
+  image             String?
+  newsletterOptIn   Boolean    @default(false)
   agreedToTermsAt   DateTime?
   emailVerifiedAt   DateTime?
   // Set on every password change/reset. Compared against the value stashed
@@ -131,8 +157,8 @@ model User {
   // password invalidates any other session issued before that change,
   // instead of leaving them valid for up to the JWT's full lifetime.
   passwordChangedAt DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
 
   // A client's home address, collected for in-person sessions only.
   // Set either by the client themselves (at signup, or later in their
@@ -158,6 +184,7 @@ model User {
   contactMessages       ContactMessage[]
   tokenBalances         TokenBalance[]
   tokenTransactions     TokenTransaction[]
+  courseEnrollments     CourseEnrollment[]
 
   @@index([role])
 }
@@ -207,26 +234,26 @@ model TutorApplication {
 // ---------- Tutor profile ----------
 
 model TutorProfile {
-  id                       String    @id @default(cuid())
-  userId                   String    @unique
-  slug                     String    @unique
-  headline                 String
-  bio                      String
-  photoUrl                 String?
-  subjects                 String[]
-  levels                   Level[]
-  qualifications           String
-  sessionMode              SessionMode @default(BOTH)
-  isPublished              Boolean   @default(false)
-  bankAccountName          String?
-  bankSortCode             String?
-  bankAccountNumber        String?
-  ratingAverage            Float     @default(0)
-  ratingCount              Int       @default(0)
-  balancePence             Int       @default(0)
-  totalEarnedPence         Int       @default(0)
-  createdAt                DateTime  @default(now())
-  updatedAt                DateTime  @updatedAt
+  id                String      @id @default(cuid())
+  userId            String      @unique
+  slug              String      @unique
+  headline          String
+  bio               String
+  photoUrl          String?
+  subjects          String[]
+  levels            Level[]
+  qualifications    String
+  sessionMode       SessionMode @default(BOTH)
+  isPublished       Boolean     @default(false)
+  bankAccountName   String?
+  bankSortCode      String?
+  bankAccountNumber String?
+  ratingAverage     Float       @default(0)
+  ratingCount       Int         @default(0)
+  balancePence      Int         @default(0)
+  totalEarnedPence  Int         @default(0)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 
   // Electronic signature of the Tutor Agreement. agreementRequestedAt is
   // set automatically for every newly-created tutor (so signing is always
@@ -235,18 +262,18 @@ model TutorProfile {
   // this automatically. Signed once agreementSignedAt is newer than
   // agreementRequestedAt; re-requesting doesn't clear the old signature,
   // so admin can still see what was previously signed until it's replaced.
-  agreementRequestedAt     DateTime?
-  agreementSignedAt        DateTime?
-  agreementSignedName      String?
-  agreementVersion         String?
+  agreementRequestedAt DateTime?
+  agreementSignedAt    DateTime?
+  agreementSignedName  String?
+  agreementVersion     String?
 
   // A copy of the tutor's DBS (criminal record) check, uploaded by the
   // tutor and viewable by admin. Stored as a private Vercel Blob — access
   // is only ever through the authenticated download route, never a bare
   // public URL.
-  dbsCheckUrl              String?
-  dbsCheckFileName         String?
-  dbsCheckUploadedAt       DateTime?
+  dbsCheckUrl        String?
+  dbsCheckFileName   String?
+  dbsCheckUploadedAt DateTime?
 
   user           User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   availability   TutorAvailabilitySlot[]
@@ -261,11 +288,11 @@ model TutorProfile {
 }
 
 model TutorAvailabilitySlot {
-  id        String              @id @default(cuid())
+  id        String             @id @default(cuid())
   tutorId   String
   dayOfWeek DayOfWeek
   period    AvailabilityPeriod
-  createdAt DateTime            @default(now())
+  createdAt DateTime           @default(now())
 
   tutor TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
@@ -276,33 +303,33 @@ model TutorAvailabilitySlot {
 // ---------- Bookings ----------
 
 model Booking {
-  id                      String        @id @default(cuid())
-  clientId                String
-  tutorId                 String
-  subject                 String
-  level                   Level
-  examBoard               String?
-  sessionMode             SessionMode
-  startsAt                DateTime
-  endsAt                  DateTime
-  tokensUsed              Decimal       @default(1) @db.Decimal(6, 2)
-  pricePence              Int
-  discountPence           Int           @default(0)
-  platformFeePence        Int
-  tutorPayoutPence        Int
-  status                  BookingStatus @default(PENDING_PAYMENT)
-  notes                   String?
-  cancellationReason      String?
-  cancelledAt             DateTime?
-  completedAt             DateTime?
-  createdAt               DateTime      @default(now())
-  updatedAt               DateTime      @updatedAt
+  id                 String        @id @default(cuid())
+  clientId           String
+  tutorId            String
+  subject            String
+  level              Level
+  examBoard          String?
+  sessionMode        SessionMode
+  startsAt           DateTime
+  endsAt             DateTime
+  tokensUsed         Decimal       @default(1) @db.Decimal(6, 2)
+  pricePence         Int
+  discountPence      Int           @default(0)
+  platformFeePence   Int
+  tutorPayoutPence   Int
+  status             BookingStatus @default(PENDING_PAYMENT)
+  notes              String?
+  cancellationReason String?
+  cancelledAt        DateTime?
+  completedAt        DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 
   // Groups the occurrences of a recurring weekly series together (null for
   // a one-off booking). Not a foreign key to another table — there's no
   // separate "series" record, just a shared id across the individual
   // Booking rows the series creates.
-  seriesId                String?
+  seriesId              String?
   // False when this CONFIRMED booking was scheduled before the client had
   // enough tokens to cover it (only possible for recurring sessions — see
   // scheduleSession). No Payment or REDEEM TokenTransaction exists yet in
@@ -310,11 +337,11 @@ model Booking {
   // client's balance covers it (a purchase, an admin grant, or editing the
   // booking), and a reminder email goes out if it's still unpaid on the
   // day.
-  tokensReserved          Boolean       @default(true)
-  paymentReminderSentAt   DateTime?
+  tokensReserved        Boolean   @default(true)
+  paymentReminderSentAt DateTime?
 
-  client        User                @relation("ClientBookings", fields: [clientId], references: [id])
-  tutor         TutorProfile        @relation("TutorBookings", fields: [tutorId], references: [id])
+  client        User               @relation("ClientBookings", fields: [clientId], references: [id])
+  tutor         TutorProfile       @relation("TutorBookings", fields: [tutorId], references: [id])
   payment       Payment?
   review        Review?
   ledgerEntries TutorLedgerEntry[]
@@ -445,11 +472,11 @@ model Feedback {
 // ---------- Messaging ----------
 
 model Conversation {
-  id             String   @id @default(cuid())
-  clientId       String
-  tutorProfileId String
-  lastMessageAt  DateTime @default(now())
-  createdAt      DateTime @default(now())
+  id                           String    @id @default(cuid())
+  clientId                     String
+  tutorProfileId               String
+  lastMessageAt                DateTime  @default(now())
+  createdAt                    DateTime  @default(now())
   // Set the first time the tutor is emailed about a new client on this
   // conversation. An atomic conditional update on this column (only set
   // when null) is what guarantees that email is sent exactly once even if
@@ -524,7 +551,27 @@ model Course {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
-  interests CourseInterest[]
+  // Free-text venue and daily time shown on the course page and in
+  // confirmation emails, e.g. "EC" / "9am – 3pm each day". Both optional so
+  // a plain lead-capture course (no paid days) doesn't need them.
+  venue     String?
+  timeLabel String?
+
+  // Set only once this course has paid CourseDay rows — that's what turns
+  // on the enroll-and-pay flow on the course page instead of the plain
+  // "register interest" form. bundlePricePence/bundleLabel describe the
+  // one bundle discount this course offers (see src/lib/course-pricing.ts);
+  // leave both null for a course with no bundle, just individual days.
+  bundlePricePence Int?
+  bundleLabel      String?
+  // Flat percentage of the total price collected as a deposit at signup —
+  // the rest is due on balanceDueDate. 25 means 25%.
+  depositPercent   Int?
+  balanceDueDate   DateTime?
+
+  interests   CourseInterest[]
+  days        CourseDay[]
+  enrollments CourseEnrollment[]
 
   @@index([status])
 }
@@ -541,6 +588,93 @@ model CourseInterest {
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([courseId])
+}
+
+// One selectable day of a paid multi-day course, e.g. "Foundation Maths"
+// on 26 October. pricePence is what that single day costs on its own; see
+// src/lib/course-pricing.ts for how days combine with Course.bundlePricePence.
+model CourseDay {
+  id         String         @id @default(cuid())
+  courseId   String
+  date       DateTime
+  label      String
+  track      CourseDayTrack @default(OTHER)
+  pricePence Int
+  sortOrder  Int            @default(0)
+
+  course      Course                @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  enrollments CourseEnrollmentDay[]
+
+  @@index([courseId])
+}
+
+// A client's paid signup for one or more days of a course. Deposit and
+// balance are tracked separately since they're two distinct Stripe
+// Checkout Sessions paid at different times (see
+// src/lib/actions/course-enrollment.ts and the Stripe webhook) — the
+// deposit is paid immediately at signup, the balance via a payment link
+// emailed nearer Course.balanceDueDate (or paid early from the dashboard).
+model CourseEnrollment {
+  id       String @id @default(cuid())
+  courseId String
+  clientId String
+
+  // Answers to the "about your child" questions asked at signup — kept as
+  // JSON (rather than fixed columns) since the question set is defined in
+  // COURSE_CHILD_QUESTIONS and may change over time without a migration.
+  // childName is pulled out as its own column purely so admin tables/CSV
+  // exports don't need to reach into the JSON for the one field they
+  // always show.
+  childName    String
+  childAnswers Json
+
+  // Electronic signature of the course Terms & Conditions, same pattern as
+  // TutorProfile.agreementSigned* — a typed name plus timestamp, no IP.
+  termsSignedAt   DateTime
+  termsSignedName String
+  termsVersion    String
+
+  totalPence   Int
+  depositPence Int
+  balancePence Int
+
+  depositStatus            CoursePaymentStatus @default(PENDING)
+  depositCheckoutSessionId String?             @unique
+  depositPaidAt            DateTime?
+
+  balanceStatus             CoursePaymentStatus @default(PENDING)
+  balanceCheckoutSessionId  String?
+  balancePaidAt             DateTime?
+  // Set when the balance-due reminder email has gone out, so the daily
+  // cron doesn't email the same enrollment twice.
+  balanceReminderSentAt     DateTime?
+  // Set when admin marks the balance paid manually (e.g. paid by bank
+  // transfer instead of the payment link) rather than via Stripe.
+  balancePaidManuallyByName String?
+
+  status CourseEnrollmentStatus @default(AWAITING_DEPOSIT)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course Course                @relation(fields: [courseId], references: [id])
+  client User                  @relation(fields: [clientId], references: [id])
+  days   CourseEnrollmentDay[]
+
+  @@index([courseId])
+  @@index([clientId])
+}
+
+model CourseEnrollmentDay {
+  id           String @id @default(cuid())
+  enrollmentId String
+  dayId        String
+
+  enrollment CourseEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  day        CourseDay        @relation(fields: [dayId], references: [id])
+
+  @@unique([enrollmentId, dayId])
+  @@index([dayId])
 }
 
 // ---------- Newsletter & contact ----------

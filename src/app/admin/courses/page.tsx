@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminCoursesPage() {
   const courses = await prisma.course.findMany({
     orderBy: { createdAt: "desc" },
-    include: { _count: { select: { interests: true } } },
+    include: { _count: { select: { interests: true, enrollments: true } } },
   });
 
   return (
@@ -43,7 +43,9 @@ export default async function AdminCoursesPage() {
                       </Badge>
                     </div>
                     <p className="mt-1 text-sm text-navy/50">
-                      {course._count.interests} interested
+                      {course._count.enrollments > 0
+                        ? `${course._count.enrollments} booked`
+                        : `${course._count.interests} interested`}
                     </p>
                   </div>
                   <p className="shrink-0 text-xs text-navy/40">

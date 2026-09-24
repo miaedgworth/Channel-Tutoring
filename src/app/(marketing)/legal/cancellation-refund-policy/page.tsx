@@ -51,6 +51,18 @@ export default function CancellationRefundPolicyPage() {
         appropriate, cancel the session and refund your tokens.
       </p>
 
+      <h2>Course bookings</h2>
+      <p>
+        For a multi-day course booking, the deposit paid at checkout secures
+        your child&apos;s place and is non-refundable. If you cancel before
+        the balance due date shown at checkout, you won&apos;t be charged
+        the remaining balance. If you cancel after the balance has been
+        paid, contact us at{" "}
+        <a href={`mailto:${region.supportEmail}`}>{region.supportEmail}</a>{" "}
+        and we&apos;ll do our best to help, though refunds aren&apos;t
+        guaranteed close to the course start date.
+      </p>
+
       <h2>Failed or disputed token purchases</h2>
       <p>
         If a card payment for tokens fails, no tokens are added to your
