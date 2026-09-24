@@ -9,10 +9,10 @@ export async function upsertOctoberHalfTermCourse(prisma: PrismaClient) {
     where: { slug: "october-half-term-course" },
     update: {},
     create: {
-      title: "GCSE October Half Term Revision Camp",
+      title: "GCSE October Half Term Revision Course",
       slug: "october-half-term-course",
       description:
-        "Small-group GCSE revision over October half term: choose a single day at £99, or all 3 days for £300. A 25% deposit secures your child's place; the balance is due 12 October.",
+        "Small-group GCSE revision over October half term: choose a single day at £99, or all 3 Sciences plus a Maths tier of your choice (4 days) for £300. A 25% deposit secures your child's place; the balance is due 12 October.",
       status: "UPCOMING",
       startDate: new Date("2026-10-26"),
       endDate: new Date("2026-10-30"),

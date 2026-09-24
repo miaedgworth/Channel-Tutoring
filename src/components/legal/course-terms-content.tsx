@@ -1,7 +1,7 @@
 import { region } from "@/lib/region";
 
 // Sourced from the "Parent/Guardian Consent and Student Information Form"
-// for the GCSE October Half Term Revision Camp. Adapted to the site's
+// for the GCSE October Half Term Revision Course. Adapted to the site's
 // second-person voice and to a single online e-signature (typed name +
 // checkbox) in place of the paper form's separate parent/student
 // signature boxes.
@@ -10,7 +10,7 @@ export function CourseTermsContent() {
     <>
       <p>
         These terms apply to a booking on a {region.brandName} half term
-        revision camp. By selecting your day(s), paying the deposit and
+        revision course. By selecting your day(s), paying the deposit and
         signing below, you&apos;re agreeing to these terms on behalf of the
         student named on your booking, in addition to our general{" "}
         <a href="/legal/terms">Terms &amp; Conditions</a>.
@@ -55,7 +55,7 @@ export function CourseTermsContent() {
       <h2>4. Emergency medical consent</h2>
       <p>
         In the event of illness or injury where you can&apos;t be contacted
-        promptly, you authorise camp staff to obtain appropriate medical
+        promptly, you authorise course staff to obtain appropriate medical
         advice or emergency treatment for the student where considered
         necessary. Every reasonable effort will be made to contact you
         before any significant medical decision is taken.
@@ -63,7 +63,7 @@ export function CourseTermsContent() {
 
       <h2>5. The programme</h2>
       <p>
-        The camp consists of supervised educational sessions — GCSE
+        The course consists of supervised educational sessions — GCSE
         revision lessons, small-group teaching, independent study, lunch
         breaks, educational workshops and practice examinations. It does
         not include hazardous activities or overnight accommodation.

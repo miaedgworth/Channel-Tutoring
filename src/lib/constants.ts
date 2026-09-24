@@ -189,7 +189,7 @@ export const DEFAULT_COURSE_DEPOSIT_PERCENT = 25;
 // Questions asked about the child at course-enrollment checkout, answered
 // into CourseEnrollment.childAnswers (keyed by id). Mirrors the "Parent/
 // Guardian Consent and Student Information Form" used for the October
-// Half Term Camp. A question with showIfTrack only appears (and is only
+// Half Term Revision Course. A question with showIfTrack only appears (and is only
 // enforced as required) once the parent has selected a day of that track
 // — e.g. the Maths exam-board question only matters if they've booked
 // Foundation and/or Higher Maths.
