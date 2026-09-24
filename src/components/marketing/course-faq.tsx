@@ -10,7 +10,7 @@ export function CourseFaq({
   const items = [
     {
       q: "Who is this course for?",
-      a: "Any GCSE student preparing for their mocks or exams — whether they're aiming to secure a pass or push for the top grades, sessions are led by a specialist who supports them at every step.",
+      a: "Year 11 students preparing for their mocks or GCSE exams — whether they're aiming to secure a pass or push for the top grades, sessions are led by a specialist who supports them at every step.",
     },
     {
       q: "How big are the groups?",

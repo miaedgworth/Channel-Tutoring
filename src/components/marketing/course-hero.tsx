@@ -70,8 +70,8 @@ export function CourseHero({
         </h1>
 
         <p className="mx-auto mt-4 max-w-xl text-base text-white/80 sm:text-lg">
-          Small-group revision days at Elizabeth College to lift grades and rebuild confidence
-          before the mocks.
+          Small-group Year 11 revision days at Elizabeth College to lift grades and rebuild
+          confidence before the mocks.
         </p>
 
         <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium text-white/90">
