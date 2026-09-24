@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import { Container } from "@/components/ui/container";
 import { CourseFullDetail } from "@/components/marketing/course-full-detail";
 
 export const dynamic = "force-dynamic";
@@ -28,11 +27,5 @@ export default async function CourseDetailPage({
   });
   if (!course) notFound();
 
-  return (
-    <div className="py-16">
-      <Container className="max-w-3xl">
-        <CourseFullDetail course={course} />
-      </Container>
-    </div>
-  );
+  return <CourseFullDetail course={course} />;
 }

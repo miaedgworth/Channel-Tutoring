@@ -22,9 +22,12 @@ export async function createCourseTestimonial(
   await prisma.courseTestimonial.create({
     data: {
       studentName: data.studentName,
+      role: data.role || null,
+      subject: data.subject || null,
       quote: data.quote,
       rating: data.rating ? Number(data.rating) : null,
       courseId: data.courseId || null,
+      featured: data.featured,
     },
   });
 
@@ -49,9 +52,12 @@ export async function updateCourseTestimonial(
       where: { id: testimonialId },
       data: {
         studentName: data.studentName,
+        role: data.role || null,
+        subject: data.subject || null,
         quote: data.quote,
         rating: data.rating ? Number(data.rating) : null,
         courseId: data.courseId || null,
+        featured: data.featured,
       },
     });
   } catch (err) {

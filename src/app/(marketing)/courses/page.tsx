@@ -33,36 +33,31 @@ export default async function CoursesPage() {
   ]);
 
   return (
-    <div className="py-16">
-      <Container className="max-w-3xl">
-        <div className="text-center">
-          <h1 className="font-heading text-3xl font-bold text-navy sm:text-4xl">
-            Courses
-          </h1>
-          <p className="mx-auto mt-3 max-w-xl text-navy/70">
-            Holiday courses and summer schools alongside our regular
-            one-to-one tutoring.
+    <div>
+      <Container className="max-w-3xl py-16 pb-0 text-center">
+        <h1 className="font-heading text-3xl font-bold text-navy sm:text-4xl">Courses</h1>
+        <p className="mx-auto mt-3 max-w-xl text-navy/70">
+          Holiday courses and summer schools alongside our regular one-to-one tutoring.
+        </p>
+      </Container>
+
+      {upcoming.length === 0 ? (
+        <Container className="max-w-3xl py-12">
+          <h2 className="font-heading text-xl font-bold text-navy">Upcoming</h2>
+          <p className="mt-3 text-sm text-navy/50">
+            No upcoming courses announced right now — check back soon.
           </p>
+        </Container>
+      ) : (
+        <div className="mt-8 space-y-16">
+          {upcoming.map((course) => (
+            <CourseFullDetail key={course.id} course={course} />
+          ))}
         </div>
+      )}
 
-        <section className="mt-12">
-          {upcoming.length === 0 ? (
-            <>
-              <h2 className="font-heading text-xl font-bold text-navy">Upcoming</h2>
-              <p className="mt-3 text-sm text-navy/50">
-                No upcoming courses announced right now — check back soon.
-              </p>
-            </>
-          ) : (
-            <div className="space-y-16">
-              {upcoming.map((course) => (
-                <CourseFullDetail key={course.id} course={course} />
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="mt-16 border-t border-navy/10 pt-12">
+      <Container className="max-w-3xl py-12">
+        <section className="border-t border-navy/10 pt-12">
           <h2 className="font-heading text-xl font-bold text-navy">Past Courses</h2>
           {past.length === 0 ? (
             <p className="mt-3 text-sm text-navy/50">No past courses yet.</p>

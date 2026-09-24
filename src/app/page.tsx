@@ -49,7 +49,7 @@ const STEPS = [
 ];
 
 export default async function HomePage() {
-  const [featuredTutors, featuredCourse] = await Promise.all([
+  const [featuredTutors, featuredCourse, featuredTestimonial] = await Promise.all([
     prisma.tutorProfile.findMany({
       where: { isPublished: true },
       orderBy: { ratingAverage: "desc" },
@@ -60,6 +60,10 @@ export default async function HomePage() {
       where: { status: "UPCOMING", days: { some: {} } },
       orderBy: { startDate: "asc" },
       include: { days: { orderBy: { pricePence: "asc" }, take: 1 } },
+    }),
+    prisma.courseTestimonial.findFirst({
+      where: { course: { slug: "summer-school-2026" }, featured: true },
+      orderBy: { createdAt: "desc" },
     }),
   ]);
   const cheapestDayPrice = featuredCourse?.days[0]?.pricePence;
@@ -95,29 +99,62 @@ export default async function HomePage() {
       </section>
 
       {featuredCourse && (
-        <section className="border-b border-navy/10 bg-gold/10 py-12">
-          <Container>
-            <div className="flex flex-col items-center gap-6 rounded-2xl border border-gold-dark/30 bg-white p-6 shadow-sm sm:flex-row sm:justify-between sm:p-8">
-              <div className="text-center sm:text-left">
-                <p className="text-xs font-semibold uppercase tracking-wide text-gold-dark">
-                  Now open for booking
-                </p>
-                <h2 className="mt-1 font-heading text-xl font-bold text-navy sm:text-2xl">
-                  {featuredCourse.title}
-                </h2>
-                <p className="mt-1.5 text-sm font-semibold text-navy/80">
-                  Boost your child&apos;s confidence and grades ahead of their GCSEs.
-                </p>
-                <p className="mt-1 text-sm text-navy/60">
-                  {formatDateRange(featuredCourse.startDate, featuredCourse.endDate)}
-                  {featuredCourse.venue && ` · ${featuredCourse.venue}`}
-                  {cheapestDayPrice != null && ` · from ${formatCurrency(cheapestDayPrice)}/day`}
-                </p>
-              </div>
-              <LinkButton href="/courses" variant="gold" size="lg" className="shrink-0">
+        <section className="bg-navy py-14 sm:py-16">
+          <Container className="max-w-3xl text-center">
+            <span className="inline-flex items-center rounded-full bg-gold px-3 py-1 text-xs font-semibold text-navy-dark">
+              Now open for booking · Places strictly limited
+            </span>
+            <h2 className="mt-4 font-heading text-2xl font-bold text-white sm:text-3xl">
+              {featuredCourse.title}
+            </h2>
+            <p className="mt-2 text-base font-semibold text-gold sm:text-lg">
+              Boost your child&apos;s confidence and grades ahead of their GCSEs.
+            </p>
+
+            <ul className="mt-5 flex flex-wrap items-center justify-center gap-2">
+              {[
+                formatDateRange(featuredCourse.startDate, featuredCourse.endDate),
+                featuredCourse.venue,
+                featuredCourse.timeLabel,
+              ]
+                .filter(Boolean)
+                .map((fact) => (
+                  <li
+                    key={fact}
+                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white"
+                  >
+                    {fact}
+                  </li>
+                ))}
+            </ul>
+
+            {featuredCourse.bundleLabel && featuredCourse.bundlePricePence != null && (
+              <p className="mt-5 inline-block rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold text-white">
+                {featuredCourse.bundleLabel}: {formatCurrency(featuredCourse.bundlePricePence)} —
+                4 days for the price of 3
+              </p>
+            )}
+
+            <div className="mt-7">
+              <LinkButton href="/courses" variant="gold" size="lg">
                 View &amp; Book
+                {cheapestDayPrice != null && ` – from ${formatCurrency(cheapestDayPrice)}/day`}
               </LinkButton>
             </div>
+
+            {featuredTestimonial && (
+              <div className="mx-auto mt-10 max-w-md rounded-xl bg-white p-5 text-left shadow-lg">
+                <p className="font-heading text-sm italic leading-relaxed text-navy">
+                  &ldquo;{featuredTestimonial.quote}&rdquo;
+                </p>
+                <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-navy">
+                  {featuredTestimonial.studentName}
+                  {featuredTestimonial.role && (
+                    <span className="font-normal normal-case text-navy/50"> — {featuredTestimonial.role}</span>
+                  )}
+                </p>
+              </div>
+            )}
           </Container>
         </section>
       )}

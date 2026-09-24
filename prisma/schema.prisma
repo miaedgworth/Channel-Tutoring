@@ -585,8 +585,16 @@ model CourseTestimonial {
   id          String   @id @default(cuid())
   courseId    String?
   studentName String
+  // e.g. "Parent of Year 11 student", "Year 10, Summer School 2026" —
+  // shown under the name on the testimonial card.
+  role        String?
+  subject     String?
   quote       String
   rating      Int?
+  // Whether this testimonial is eligible to show on a course page's
+  // testimonials section. Lets admin keep old/unused quotes without
+  // deleting them.
+  featured    Boolean  @default(true)
   createdAt   DateTime @default(now())
 
   course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)

@@ -26,9 +26,12 @@ export default async function AdminTestimonialsPage() {
             testimonials={testimonials.map((t) => ({
               id: t.id,
               studentName: t.studentName,
+              role: t.role,
+              subject: t.subject,
               quote: t.quote,
               rating: t.rating,
               courseId: t.courseId,
+              featured: t.featured,
               createdAt: t.createdAt.toISOString(),
             }))}
             courses={courses}
