@@ -14,9 +14,22 @@ export const courseEnrollmentSchema = z.object({
   agreedToTerms: z.literal(true, {
     message: "You must agree to the Course Terms & Conditions to enrol.",
   }),
+  // Only required when booking as a guest (no account) — createCourseEnrollment
+  // checks that itself, since whether one's needed depends on the session,
+  // not on the shape of the input alone.
+  guestName: z.string().trim().min(2, "Enter your name").max(150).optional(),
+  guestEmail: z.string().trim().toLowerCase().email("Enter a valid email address").max(200).optional(),
+  guestPhone: z.string().trim().max(50).optional(),
 });
 
 export type CourseEnrollmentInput = z.infer<typeof courseEnrollmentSchema>;
+
+// Confirms a guest's identity on the pay-balance page — there's no access
+// token for a guest booking, so this email (matched against
+// CourseEnrollment.guestEmail) is what proves it's their booking.
+export const guestBalancePaymentSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Enter a valid email address"),
+});
 
 // Cross-checks childAnswers against COURSE_CHILD_QUESTIONS' required flags —
 // kept separate from the zod shape above since the question set (and which

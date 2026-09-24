@@ -646,9 +646,20 @@ model CourseDay {
 // deposit is paid immediately at signup, the balance via a payment link
 // emailed nearer Course.balanceDueDate (or paid early from the dashboard).
 model CourseEnrollment {
-  id       String @id @default(cuid())
+  id       String  @id @default(cuid())
   courseId String
-  clientId String
+  // Null for a guest checkout (no account) — see guestName/guestEmail/
+  // guestPhone below, which are set instead in that case.
+  clientId String?
+
+  // Set instead of clientId when someone books as a guest, without an
+  // account. There's no access token for these bookings — a guest who
+  // needs to pay their balance later enters this email address on the
+  // pay-balance page to confirm it's their booking (see
+  // requestGuestCourseBalancePayment).
+  guestName  String?
+  guestEmail String?
+  guestPhone String?
 
   // Answers to the "about your child" questions asked at signup — kept as
   // JSON (rather than fixed columns) since the question set is defined in
@@ -689,7 +700,7 @@ model CourseEnrollment {
   updatedAt DateTime @updatedAt
 
   course Course                @relation(fields: [courseId], references: [id])
-  client User                  @relation(fields: [clientId], references: [id])
+  client User?                 @relation(fields: [clientId], references: [id])
   days   CourseEnrollmentDay[]
 
   @@index([courseId])

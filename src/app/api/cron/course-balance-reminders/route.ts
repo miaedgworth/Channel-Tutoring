@@ -34,22 +34,30 @@ export async function GET(request: Request) {
 
   const results = await Promise.allSettled(
     due.map(async (enrollment) => {
+      const contactEmail = enrollment.client?.email ?? enrollment.guestEmail;
+      const contactName = enrollment.client?.name ?? enrollment.guestName ?? "there";
+      if (!contactEmail) return false;
+
       const claimed = await prisma.courseEnrollment.updateMany({
         where: { id: enrollment.id, balanceReminderSentAt: null },
         data: { balanceReminderSentAt: new Date() },
       });
       if (claimed.count === 0) return false;
 
+      const payLink = enrollment.clientId
+        ? `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/courses`
+        : `${process.env.NEXT_PUBLIC_APP_URL}/courses/pay-balance/${enrollment.id}`;
+
       await sendEmail({
-        to: enrollment.client.email,
+        to: contactEmail,
         subject: `Balance due — ${enrollment.course.title}`,
         html: baseEmailLayout(`
-          <p>Hi ${escapeHtml(enrollment.client.name)},</p>
+          <p>Hi ${escapeHtml(contactName)},</p>
           <p>The remaining balance of ${formatCurrency(enrollment.balancePence)} for
           ${escapeHtml(enrollment.childName)}'s place on
           <strong>${escapeHtml(enrollment.course.title)}</strong> is now due
           ${enrollment.course.balanceDueDate ? `(due ${formatDate(enrollment.course.balanceDueDate)})` : ""}.</p>
-          <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/courses" style="color:#C9A227;font-weight:bold;">Pay the balance</a></p>
+          <p><a href="${payLink}" style="color:#C9A227;font-weight:bold;">Pay the balance</a></p>
         `),
       });
       return true;

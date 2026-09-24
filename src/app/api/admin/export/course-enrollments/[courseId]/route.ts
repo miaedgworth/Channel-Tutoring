@@ -26,9 +26,9 @@ export async function GET(
 
   const rows = enrollments.map((e) => ({
     childName: e.childName,
-    parentName: e.client.name,
-    parentEmail: e.client.email,
-    parentPhone: e.client.phone ?? "",
+    parentName: e.client?.name ?? e.guestName ?? "",
+    parentEmail: e.client?.email ?? e.guestEmail ?? "",
+    parentPhone: e.client?.phone ?? e.guestPhone ?? "",
     days: e.days.map((d) => d.day.label).join("; "),
     totalPence: String(e.totalPence),
     depositStatus: e.depositStatus,

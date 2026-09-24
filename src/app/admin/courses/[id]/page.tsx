@@ -116,10 +116,15 @@ export default async function EditCoursePage({
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <p className="font-medium text-navy">
-                        {e.childName} <span className="text-navy/40">— {e.client.name}</span>
+                        {e.childName}{" "}
+                        <span className="text-navy/40">
+                          — {e.client?.name ?? e.guestName ?? "Guest"}
+                          {!e.client && " (guest)"}
+                        </span>
                       </p>
                       <p className="text-xs text-navy/50">
-                        {e.client.email} &middot; {e.days.map((d) => d.day.label).join(", ")}
+                        {e.client?.email ?? e.guestEmail ?? "—"} &middot;{" "}
+                        {e.days.map((d) => d.day.label).join(", ")}
                       </p>
                     </div>
                     <Badge variant={STATUS_BADGE[e.status] ?? "neutral"}>{e.status.replaceAll("_", " ")}</Badge>

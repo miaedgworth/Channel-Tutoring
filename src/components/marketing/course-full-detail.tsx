@@ -175,7 +175,6 @@ export async function CourseFullDetail({ course }: { course: Course & { days: Co
             </p>
             <div className="mt-5 rounded-xl bg-white p-5 shadow-lg sm:p-6">
               <CourseBookingWizard
-                courseTitle={course.title}
                 courseSlug={course.slug}
                 days={sortedDays.map((d) => ({
                   id: d.id,

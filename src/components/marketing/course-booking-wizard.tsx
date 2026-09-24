@@ -23,17 +23,15 @@ export interface WizardDay {
   spotsLeft: number | null;
 }
 
-type Phase = "authGate" | "days" | "details" | "terms";
+type Phase = "days" | "details" | "terms";
 
-const STEP_NUMBER: Record<Phase, number | null> = {
-  authGate: null,
+const STEP_NUMBER: Record<Phase, number> = {
   days: 1,
   details: 2,
   terms: 3,
 };
 
 export function CourseBookingWizard({
-  courseTitle,
   courseSlug,
   days,
   bundlePricePence,
@@ -42,7 +40,6 @@ export function CourseBookingWizard({
   balanceDueDate,
   isLoggedInClient,
 }: {
-  courseTitle: string;
   courseSlug: string;
   days: WizardDay[];
   bundlePricePence: number | null;
@@ -51,10 +48,13 @@ export function CourseBookingWizard({
   balanceDueDate: string | null;
   isLoggedInClient: boolean;
 }) {
-  const [phase, setPhase] = useState<Phase>(isLoggedInClient ? "days" : "authGate");
+  const [phase, setPhase] = useState<Phase>("days");
   const [selectedDayIds, setSelectedDayIds] = useState<string[]>([]);
   const [childName, setChildName] = useState("");
   const [childAnswers, setChildAnswers] = useState<Record<string, string>>({});
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
   const [termsSignedName, setTermsSignedName] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
@@ -83,7 +83,9 @@ export function CourseBookingWizard({
   );
   const detailsComplete =
     childName.trim().length > 0 &&
-    visibleQuestions.every((q) => !q.required || (childAnswers[q.id]?.trim() ?? "").length > 0);
+    visibleQuestions.every((q) => !q.required || (childAnswers[q.id]?.trim() ?? "").length > 0) &&
+    (isLoggedInClient ||
+      (guestName.trim().length > 1 && /\S+@\S+\.\S+/.test(guestEmail.trim())));
 
   function toggleDay(dayId: string) {
     if (days.find((d) => d.id === dayId)?.soldOut) return;
@@ -102,6 +104,13 @@ export function CourseBookingWizard({
         childAnswers,
         termsSignedName,
         agreedToTerms: agreed as true,
+        ...(isLoggedInClient
+          ? {}
+          : {
+              guestName,
+              guestEmail,
+              guestPhone: guestPhone || undefined,
+            }),
       });
       if ("error" in result) {
         setError(result.error);
@@ -115,33 +124,9 @@ export function CourseBookingWizard({
 
   return (
     <div>
-      {stepNumber && (
-        <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-navy/40">
-          Step {stepNumber} of 3
-        </p>
-      )}
-
-      {phase === "authGate" && (
-        <div className="rounded-xl border border-navy/10 bg-navy/[0.02] p-5">
-          <h3 className="font-heading text-base font-semibold text-navy">
-            Create an account to book your place
-          </h3>
-          <p className="mt-1.5 text-sm text-navy/70">
-            You&apos;ll need an account to book onto {courseTitle} and pay online.
-            It only takes a minute.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Link href={`/register?callbackUrl=${encodeURIComponent(returnUrl)}`}>
-              <Button type="button">Create an account</Button>
-            </Link>
-            <Link href={`/login?callbackUrl=${encodeURIComponent(returnUrl)}`}>
-              <Button type="button" variant="outline">
-                I already have an account
-              </Button>
-            </Link>
-          </div>
-        </div>
-      )}
+      <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-navy/40">
+        Step {stepNumber} of 3
+      </p>
 
       {phase === "days" && (
         <div className="space-y-6">
@@ -229,6 +214,59 @@ export function CourseBookingWizard({
             Booking: {selectedDays.map((d) => d.label).join(", ")} — total{" "}
             {formatCurrency(totalPence)}
           </p>
+
+          {!isLoggedInClient && (
+            <div className="space-y-4 rounded-xl border border-navy/10 bg-navy/[0.02] p-4">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="font-heading text-sm font-semibold text-navy">Your details</h3>
+                <Link
+                  href={`/login?callbackUrl=${encodeURIComponent(returnUrl)}`}
+                  className="text-xs font-medium text-navy/60 underline"
+                >
+                  Already have an account? Log in
+                </Link>
+              </div>
+              <div>
+                <label htmlFor="guestName" className="block text-sm font-medium text-navy">
+                  Your full name
+                </label>
+                <input
+                  id="guestName"
+                  required
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label htmlFor="guestEmail" className="block text-sm font-medium text-navy">
+                  Your email
+                </label>
+                <input
+                  id="guestEmail"
+                  type="email"
+                  required
+                  value={guestEmail}
+                  onChange={(e) => setGuestEmail(e.target.value)}
+                  className={inputClass}
+                />
+                <p className="mt-1 text-xs text-navy/50">
+                  We&apos;ll send your booking confirmation and payment link here.
+                </p>
+              </div>
+              <div>
+                <label htmlFor="guestPhone" className="block text-sm font-medium text-navy">
+                  Your phone <span className="font-normal text-navy/40">(optional)</span>
+                </label>
+                <input
+                  id="guestPhone"
+                  value={guestPhone}
+                  onChange={(e) => setGuestPhone(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+          )}
 
           <div>
             <label htmlFor="childName" className="block text-sm font-medium text-navy">

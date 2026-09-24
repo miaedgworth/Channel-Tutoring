@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
+import { auth } from "@/lib/auth";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { logAudit } from "@/lib/audit";
 import { region } from "@/lib/region";
@@ -11,6 +12,7 @@ import { computeCoursePrice, splitDepositAndBalance } from "@/lib/course-pricing
 import { getDaysAvailability } from "@/lib/course-capacity";
 import {
   courseEnrollmentSchema,
+  guestBalancePaymentSchema,
   findMissingRequiredAnswer,
   type CourseEnrollmentInput,
 } from "@/lib/validations/course-enrollment";
@@ -20,13 +22,34 @@ export async function createCourseEnrollment(
   courseSlug: string,
   input: CourseEnrollmentInput,
 ): Promise<{ error: string } | { url: string }> {
-  const user = await requireUser("CLIENT");
+  const session = await auth();
+  const isLoggedInClient =
+    session?.user?.role === "CLIENT" &&
+    session.user.status !== "SUSPENDED" &&
+    !session.user.sessionRevoked;
+  const clientId = isLoggedInClient ? session!.user.id : null;
 
   const parsed = courseEnrollmentSchema.safeParse(input);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const data = parsed.data;
+
+  let contactEmail: string;
+  let guestName: string | null = null;
+  let guestEmail: string | null = null;
+  let guestPhone: string | null = null;
+  if (clientId) {
+    contactEmail = session!.user.email;
+  } else {
+    if (!data.guestName || !data.guestEmail) {
+      return { error: "Enter your name and email to continue." };
+    }
+    guestName = data.guestName;
+    guestEmail = data.guestEmail;
+    guestPhone = data.guestPhone ?? null;
+    contactEmail = data.guestEmail;
+  }
 
   const course = await prisma.course.findUnique({
     where: { slug: courseSlug },
@@ -77,7 +100,10 @@ export async function createCourseEnrollment(
   const enrollment = await prisma.courseEnrollment.create({
     data: {
       courseId: course.id,
-      clientId: user.id,
+      clientId,
+      guestName,
+      guestEmail,
+      guestPhone,
       childName: data.childName,
       childAnswers: data.childAnswers,
       termsSignedAt: new Date(),
@@ -91,18 +117,18 @@ export async function createCourseEnrollment(
   });
 
   await logAudit({
-    actorId: user.id,
+    actorId: clientId,
     action: "COURSE_ENROLLMENT_STARTED",
     targetType: "CourseEnrollment",
     targetId: enrollment.id,
-    metadata: { courseId: course.id, totalPence, depositPence },
+    metadata: { courseId: course.id, totalPence, depositPence, guest: clientId === null },
   });
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
   const stripe = getStripe();
   const checkoutSession = await stripe.checkout.sessions.create({
     mode: "payment",
-    customer_email: user.email,
+    customer_email: contactEmail,
     line_items: [
       {
         quantity: 1,
@@ -120,7 +146,9 @@ export async function createCourseEnrollment(
       type: "course_deposit",
       enrollmentId: enrollment.id,
     },
-    success_url: `${appUrl}/dashboard/courses?checkout=success`,
+    success_url: clientId
+      ? `${appUrl}/dashboard/courses?checkout=success`
+      : `${appUrl}/courses/pay-balance/${enrollment.id}?checkout=deposit-success`,
     cancel_url: `${appUrl}/courses/${course.slug}?checkout=cancelled`,
   });
 
@@ -181,5 +209,74 @@ export async function requestCourseBalancePayment(
   });
 
   revalidatePath("/dashboard/courses");
+  return { url: checkoutSession.url! };
+}
+
+// Guest bookings have no account and no access token — a guest proves it's
+// their booking by typing the email they gave at signup, checked against
+// CourseEnrollment.guestEmail. Errors are deliberately generic so this
+// can't be used to probe for a booking's existence or its email.
+export async function requestGuestCourseBalancePayment(
+  enrollmentId: string,
+  email: string,
+): Promise<{ error: string } | { url: string }> {
+  const parsedEmail = guestBalancePaymentSchema.safeParse({ email });
+  if (!parsedEmail.success) {
+    return { error: "Enter a valid email address." };
+  }
+
+  const enrollment = await prisma.courseEnrollment.findUnique({
+    where: { id: enrollmentId },
+    include: { course: true },
+  });
+  if (
+    !enrollment ||
+    enrollment.clientId !== null ||
+    !enrollment.guestEmail ||
+    enrollment.guestEmail.toLowerCase() !== parsedEmail.data.email
+  ) {
+    return { error: "We couldn't find a booking with that email." };
+  }
+  if (enrollment.depositStatus !== "PAID") {
+    return { error: "The deposit for this booking hasn't been paid yet." };
+  }
+  if (enrollment.balanceStatus === "PAID") {
+    return { error: "The balance for this booking has already been paid." };
+  }
+  if (!isStripeConfigured()) {
+    return { error: "Payments are not configured in this environment yet." };
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const stripe = getStripe();
+  const checkoutSession = await stripe.checkout.sessions.create({
+    mode: "payment",
+    customer_email: parsedEmail.data.email,
+    line_items: [
+      {
+        quantity: 1,
+        price_data: {
+          currency: region.currency.toLowerCase(),
+          unit_amount: enrollment.balancePence,
+          product_data: {
+            name: `Balance: ${enrollment.course.title}`,
+            description: `${enrollment.childName} — remaining balance for this course booking`,
+          },
+        },
+      },
+    ],
+    metadata: {
+      type: "course_balance",
+      enrollmentId: enrollment.id,
+    },
+    success_url: `${appUrl}/courses/pay-balance/${enrollment.id}?checkout=success`,
+    cancel_url: `${appUrl}/courses/pay-balance/${enrollment.id}?checkout=cancelled`,
+  });
+
+  await prisma.courseEnrollment.update({
+    where: { id: enrollment.id },
+    data: { balanceCheckoutSessionId: checkoutSession.id },
+  });
+
   return { url: checkoutSession.url! };
 }

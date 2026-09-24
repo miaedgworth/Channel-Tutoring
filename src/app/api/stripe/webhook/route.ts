@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
 import { logAudit } from "@/lib/audit";
-import { formatLevel, formatCurrency, formatDate } from "@/lib/utils";
+import { formatLevel, formatCurrency, formatDate, escapeHtml } from "@/lib/utils";
 import { reserveTokensForUnpaidBookings } from "@/lib/actions/token-reservation";
 import { region } from "@/lib/region";
 
@@ -164,20 +164,27 @@ async function handleCourseDepositPaid(session: Stripe.Checkout.Session) {
     throw err;
   }
 
+  const contactEmail = enrollment.client?.email ?? enrollment.guestEmail;
+  const contactName = enrollment.client?.name ?? enrollment.guestName ?? "there";
+  if (!contactEmail) return;
+
   const dayLabels = enrollment.days.map((d) => d.day.label).join(", ");
+  const manageLink = enrollment.clientId
+    ? `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/courses`
+    : `${process.env.NEXT_PUBLIC_APP_URL}/courses/pay-balance/${enrollment.id}`;
   await sendEmail({
-    to: enrollment.client.email,
+    to: contactEmail,
     subject: `Your place on ${enrollment.course.title} is booked`,
     html: baseEmailLayout(`
-      <p>Hi ${enrollment.client.name},</p>
+      <p>Hi ${escapeHtml(contactName)},</p>
       <p>Thanks — we've received the deposit of ${formatCurrency(enrollment.depositPence)}
       for ${enrollment.childName}'s place on <strong>${enrollment.course.title}</strong>
       (${dayLabels}).</p>
       <p>The remaining balance of ${formatCurrency(enrollment.balancePence)} is due
       ${enrollment.course.balanceDueDate ? `by ${formatDate(enrollment.course.balanceDueDate)}` : "shortly"}.
       We'll email you a payment link nearer the time — you can also pay early any time
-      from your dashboard.</p>
-      <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/courses">View your booking</a></p>
+      ${enrollment.clientId ? "from your dashboard" : "using the link below"}.</p>
+      <p><a href="${manageLink}">${enrollment.clientId ? "View your booking" : "Manage your booking"}</a></p>
     `),
   }).catch(() => {});
 }
@@ -217,11 +224,15 @@ async function handleCourseBalancePaid(session: Stripe.Checkout.Session) {
     throw err;
   }
 
+  const contactEmail = enrollment.client?.email ?? enrollment.guestEmail;
+  const contactName = enrollment.client?.name ?? enrollment.guestName ?? "there";
+  if (!contactEmail) return;
+
   await sendEmail({
-    to: enrollment.client.email,
+    to: contactEmail,
     subject: `Balance paid — ${enrollment.course.title}`,
     html: baseEmailLayout(`
-      <p>Hi ${enrollment.client.name},</p>
+      <p>Hi ${escapeHtml(contactName)},</p>
       <p>We've received the remaining balance of ${formatCurrency(enrollment.balancePence)}
       for ${enrollment.childName}'s place on <strong>${enrollment.course.title}</strong>.
       Everything's paid in full — see you there!</p>
