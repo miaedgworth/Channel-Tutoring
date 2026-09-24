@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { Container } from "@/components/ui/container";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LinkButton } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import { region } from "@/lib/region";
 
@@ -62,30 +61,27 @@ export default async function CoursesPage() {
           ) : (
             <div className="mt-4 space-y-4">
               {upcoming.map((course) => (
-                <Card key={course.id}>
-                  <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-heading text-base font-semibold text-navy">
-                          {course.title}
+                <Link key={course.id} href={`/courses/${course.slug}`}>
+                  <Card className="transition-colors hover:border-navy/30">
+                    <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-heading text-base font-semibold text-navy">
+                            {course.title}
+                          </p>
+                          <Badge variant="success">Upcoming</Badge>
+                        </div>
+                        <p className="mt-1 text-sm text-navy/50">
+                          {dateRange(course.startDate, course.endDate)}
                         </p>
-                        <Badge variant="success">Upcoming</Badge>
+                        <p className="mt-2 text-sm text-navy/70">{course.description}</p>
                       </div>
-                      <p className="mt-1 text-sm text-navy/50">
-                        {dateRange(course.startDate, course.endDate)}
-                      </p>
-                      <p className="mt-2 text-sm text-navy/70">{course.description}</p>
-                    </div>
-                    <LinkButton
-                      href={`/courses/${course.slug}`}
-                      variant="gold"
-                      size="sm"
-                      className="shrink-0"
-                    >
-                      {course._count.days > 0 ? "View & Book" : "Express Interest"}
-                    </LinkButton>
-                  </CardContent>
-                </Card>
+                      <span className="inline-flex shrink-0 items-center justify-center rounded-md bg-gold px-3 py-1.5 text-sm font-semibold text-navy-dark">
+                        {course._count.days > 0 ? "View & Book" : "Express Interest"}
+                      </span>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
           )}
