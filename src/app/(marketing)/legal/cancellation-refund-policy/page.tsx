@@ -51,16 +51,16 @@ export default function CancellationRefundPolicyPage() {
         appropriate, cancel the session and refund your tokens.
       </p>
 
-      <h2>Course bookings</h2>
+      <h2>Course and camp bookings</h2>
       <p>
-        For a multi-day course booking, the deposit paid at checkout secures
-        your child&apos;s place and is non-refundable. If you cancel before
-        the balance due date shown at checkout, you won&apos;t be charged
-        the remaining balance. If you cancel after the balance has been
-        paid, contact us at{" "}
-        <a href={`mailto:${region.supportEmail}`}>{region.supportEmail}</a>{" "}
-        and we&apos;ll do our best to help, though refunds aren&apos;t
-        guaranteed close to the course start date.
+        Places on a multi-day course or holiday camp are limited and are
+        reserved on receipt of payment. Fees paid — the deposit and any
+        balance — are non-refundable, except where we cancel a session or
+        where required by law. If we&apos;re unable to run a session for
+        reasons within our control, we&apos;ll offer a full refund or a
+        transfer to an alternative date. If you haven&apos;t yet paid the
+        remaining balance by the time you need to cancel, you won&apos;t be
+        asked to pay it.
       </p>
 
       <h2>Failed or disputed token purchases</h2>

@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 
 // Shared by prisma/seed.ts (dev/test databases, alongside the fake
 // accounts) and scripts/launch-october-half-term-course.ts (a production
@@ -9,15 +9,15 @@ export async function upsertOctoberHalfTermCourse(prisma: PrismaClient) {
     where: { slug: "october-half-term-course" },
     update: {},
     create: {
-      title: "October Half Term Course",
+      title: "GCSE October Half Term Revision Camp",
       slug: "october-half-term-course",
       description:
-        "A week of small-group GCSE exam prep over October half term: choose a single day at £99, or take all 3 Sciences plus a Maths tier of your choice for £300. A 25% deposit secures your child's place; the balance is due 12 October.",
+        "Small-group GCSE revision over October half term: choose a single day at £99, or all 3 days for £300. A 25% deposit secures your child's place; the balance is due 12 October.",
       status: "UPCOMING",
       startDate: new Date("2026-10-26"),
       endDate: new Date("2026-10-30"),
-      venue: "EC",
-      timeLabel: "9am – 3pm each day",
+      venue: "Elizabeth College",
+      timeLabel: "9:00am – 3:00pm",
       bundlePricePence: 30000,
       bundleLabel: "All 3 Sciences + 1 Maths (4 days)",
       depositPercent: 25,
@@ -25,6 +25,9 @@ export async function upsertOctoberHalfTermCourse(prisma: PrismaClient) {
     },
   });
 
+  // 5 separate days, Monday to Friday — this is the structure Mia
+  // confirmed (the uploaded consent form's 3-combined-day version was an
+  // earlier draft and doesn't apply here).
   const days: { label: string; date: string; track: "MATHS" | "SCIENCE"; sortOrder: number }[] = [
     { label: "Foundation Maths", date: "2026-10-26", track: "MATHS", sortOrder: 1 },
     { label: "Higher Maths", date: "2026-10-27", track: "MATHS", sortOrder: 2 },
@@ -49,6 +52,20 @@ export async function upsertOctoberHalfTermCourse(prisma: PrismaClient) {
       await prisma.courseDay.update({ where: { id: existing.id }, data });
     } else {
       await prisma.courseDay.create({ data });
+    }
+  }
+
+  // Clean up any day from an earlier version of this fixture (e.g. the
+  // original 5-separate-days draft) that's no longer part of the program —
+  // unless a family has already booked onto it, in which case leave it
+  // alone rather than crash the script.
+  try {
+    await prisma.courseDay.deleteMany({
+      where: { courseId: course.id, label: { notIn: days.map((d) => d.label) } },
+    });
+  } catch (err) {
+    if (!(err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2003")) {
+      throw err;
     }
   }
 

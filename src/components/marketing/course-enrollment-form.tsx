@@ -53,6 +53,14 @@ export function CourseEnrollmentForm({
     () => computeCoursePrice({ bundlePricePence, days }, selectedDayIds),
     [bundlePricePence, days, selectedDayIds],
   );
+  const selectedTracks = useMemo(
+    () => new Set(days.filter((d) => selectedDayIds.includes(d.id)).map((d) => d.track)),
+    [days, selectedDayIds],
+  );
+  const visibleQuestions = useMemo(
+    () => COURSE_CHILD_QUESTIONS.filter((q) => !q.showIfTrack || selectedTracks.has(q.showIfTrack)),
+    [selectedTracks],
+  );
   const { depositPence, balancePence } = useMemo(
     () => splitDepositAndBalance(totalPence, effectiveDepositPercent),
     [totalPence, effectiveDepositPercent],
@@ -156,7 +164,7 @@ export function CourseEnrollmentForm({
         />
       </div>
 
-      {COURSE_CHILD_QUESTIONS.map((q) => (
+      {visibleQuestions.map((q) => (
         <div key={q.id}>
           <label htmlFor={q.id} className="block text-sm font-medium text-navy">
             {q.label}
@@ -172,6 +180,23 @@ export function CourseEnrollmentForm({
               onChange={(e) => setChildAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
               className={inputClass}
             />
+          ) : q.type === "select" ? (
+            <select
+              id={q.id}
+              required={q.required}
+              value={childAnswers[q.id] ?? ""}
+              onChange={(e) => setChildAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
+              className={inputClass}
+            >
+              <option value="" disabled>
+                Select an option
+              </option>
+              {q.options?.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
           ) : (
             <input
               id={q.id}

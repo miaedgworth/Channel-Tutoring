@@ -181,37 +181,165 @@ export const TUTOR_AGREEMENT_VERSION = "26 August 2026";
 // Same pattern as TUTOR_AGREEMENT_VERSION, for the Course Terms &
 // Conditions signed at course-enrollment checkout. Bump whenever the terms
 // text in src/components/legal/course-terms-content.tsx changes.
-export const COURSE_TERMS_VERSION = "24 September 2026";
+export const COURSE_TERMS_VERSION = "25 September 2026";
 
 // Used when a course doesn't set its own Course.depositPercent.
 export const DEFAULT_COURSE_DEPOSIT_PERCENT = 25;
 
 // Questions asked about the child at course-enrollment checkout, answered
-// into CourseEnrollment.childAnswers (keyed by id). PLACEHOLDER — Mia is
-// supplying the real question set; swap this array for it before this
-// flow goes live with real families.
+// into CourseEnrollment.childAnswers (keyed by id). Mirrors the "Parent/
+// Guardian Consent and Student Information Form" used for the October
+// Half Term Camp. A question with showIfTrack only appears (and is only
+// enforced as required) once the parent has selected a day of that track
+// — e.g. the Maths exam-board question only matters if they've booked
+// Foundation and/or Higher Maths.
 export interface CourseChildQuestion {
   id: string;
   label: string;
-  type: "text" | "textarea";
+  type: "text" | "textarea" | "select";
   required: boolean;
   placeholder?: string;
+  options?: string[];
+  showIfTrack?: "MATHS" | "SCIENCE";
 }
 
 export const COURSE_CHILD_QUESTIONS: CourseChildQuestion[] = [
-  { id: "yearGroup", label: "Child's school year", type: "text", required: true },
-  { id: "school", label: "Child's current school", type: "text", required: true },
+  { id: "dateOfBirth", label: "Date of birth", type: "text", required: true },
+  { id: "yearGroup", label: "Year group", type: "text", required: true },
+  { id: "school", label: "Current school", type: "text", required: true },
+  { id: "homeAddress", label: "Home address", type: "textarea", required: true },
   {
-    id: "medicalOrSen",
-    label: "Any medical conditions, allergies or SEN needs we should know about?",
+    id: "parentRelationship",
+    label: "Your relationship to the student (e.g. parent, guardian)",
+    type: "text",
+    required: true,
+  },
+  { id: "altPhone", label: "Alternative phone number", type: "text", required: false },
+  {
+    id: "emergencyContactName",
+    label: "Emergency contact name (if different from you)",
+    type: "text",
+    required: false,
+  },
+  {
+    id: "emergencyContactRelationship",
+    label: "Emergency contact's relationship to the student",
+    type: "text",
+    required: false,
+  },
+  {
+    id: "emergencyContactPhone",
+    label: "Emergency contact phone number",
+    type: "text",
+    required: false,
+  },
+  {
+    id: "collectionArrangement",
+    label: "How will the student leave at the end of each day? (e.g. collected by parent, walks home)",
+    type: "text",
+    required: true,
+  },
+  {
+    id: "photoConsent",
+    label: "Photography & media consent",
+    type: "select",
+    required: true,
+    options: [
+      "Yes — photos/videos may be used for promotional purposes",
+      "Yes — for internal records only",
+      "No — do not use identifiable photos or videos",
+    ],
+  },
+  {
+    id: "medicalConditions",
+    label:
+      "Any medical conditions, allergies, disabilities or dietary requirements staff should know about",
     type: "textarea",
     required: false,
     placeholder: "Leave blank if none",
   },
   {
-    id: "emergencyContact",
-    label: "Emergency contact name and phone number (if different from your own)",
+    id: "medication",
+    label:
+      "Any medication the student carries (e.g. inhaler, EpiPen), and whether they can self-administer it or need staff assistance",
+    type: "textarea",
+    required: false,
+    placeholder: "Leave blank if none",
+  },
+  {
+    id: "learningNeeds",
+    label:
+      "Any diagnosed or suspected learning difficulty/difference, preferred learning style, or Exam Access Arrangements (e.g. extra time) we should know about",
+    type: "textarea",
+    required: false,
+    placeholder: "Leave blank if none",
+  },
+  {
+    id: "mathsExamBoard",
+    label: "Maths exam board (e.g. AQA, Edexcel, OCR, WJEC)",
+    type: "text",
+    required: true,
+    showIfTrack: "MATHS",
+  },
+  {
+    id: "mathsSet",
+    label: "Maths set (e.g. Set 1, Set 2)",
     type: "text",
     required: false,
+    showIfTrack: "MATHS",
+  },
+  {
+    id: "mathsTier",
+    label: "Foundation or Higher tier Maths?",
+    type: "select",
+    required: true,
+    options: ["Foundation", "Higher", "Not yet decided"],
+    showIfTrack: "MATHS",
+  },
+  {
+    id: "mathsGrade",
+    label: "Current working/predicted grade in Maths",
+    type: "text",
+    required: false,
+    showIfTrack: "MATHS",
+  },
+  {
+    id: "mathsFocus",
+    label: "Any topics in Maths the student would particularly like to focus on",
+    type: "textarea",
+    required: false,
+    showIfTrack: "MATHS",
+  },
+  {
+    id: "scienceExamBoard",
+    label: "Science exam board(s) (e.g. AQA, Edexcel, OCR, WJEC)",
+    type: "text",
+    required: true,
+    showIfTrack: "SCIENCE",
+  },
+  {
+    id: "scienceTier",
+    label: "Double or Triple Science?",
+    type: "select",
+    required: true,
+    options: [
+      "Double Award (Combined Science)",
+      "Triple Award (Biology, Chemistry, Physics)",
+    ],
+    showIfTrack: "SCIENCE",
+  },
+  {
+    id: "scienceGrade",
+    label: "Current working/predicted grade in Science",
+    type: "text",
+    required: false,
+    showIfTrack: "SCIENCE",
+  },
+  {
+    id: "scienceFocus",
+    label: "Any topics in Biology, Chemistry or Physics the student would particularly like to focus on",
+    type: "textarea",
+    required: false,
+    showIfTrack: "SCIENCE",
   },
 ];

@@ -40,7 +40,10 @@ export async function createCourseEnrollment(
     return { error: "One of the selected days is no longer available." };
   }
 
-  const missing = findMissingRequiredAnswer(data.childAnswers);
+  const selectedTracks = new Set(
+    course.days.filter((d) => data.dayIds.includes(d.id)).map((d) => d.track),
+  );
+  const missing = findMissingRequiredAnswer(data.childAnswers, selectedTracks);
   if (missing) {
     return { error: `Please answer: ${missing}` };
   }

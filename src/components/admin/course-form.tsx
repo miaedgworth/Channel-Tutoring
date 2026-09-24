@@ -177,7 +177,7 @@ export function CourseForm({
             value={venue}
             onChange={(e) => setVenue(e.target.value)}
             className={inputClass}
-            placeholder="e.g. EC"
+            placeholder="e.g. Elizabeth College"
           />
         </div>
         <div>
