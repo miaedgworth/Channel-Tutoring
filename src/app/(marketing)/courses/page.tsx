@@ -32,6 +32,7 @@ export default async function CoursesPage() {
     prisma.course.findMany({
       where: { status: "UPCOMING" },
       orderBy: { startDate: "asc" },
+      include: { _count: { select: { days: true } } },
     }),
     prisma.course.findMany({
       where: { status: "PAST" },
@@ -81,7 +82,7 @@ export default async function CoursesPage() {
                       size="sm"
                       className="shrink-0"
                     >
-                      Express Interest
+                      {course._count.days > 0 ? "View & Book" : "Express Interest"}
                     </LinkButton>
                   </CardContent>
                 </Card>

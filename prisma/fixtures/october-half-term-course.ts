@@ -27,7 +27,8 @@ export async function upsertOctoberHalfTermCourse(prisma: PrismaClient) {
 
   // 5 separate days, Monday to Friday — this is the structure Mia
   // confirmed (the uploaded consent form's 3-combined-day version was an
-  // earlier draft and doesn't apply here).
+  // earlier draft and doesn't apply here). Each day is capped at 10
+  // students.
   const days: { label: string; date: string; track: "MATHS" | "SCIENCE"; sortOrder: number }[] = [
     { label: "Foundation Maths", date: "2026-10-26", track: "MATHS", sortOrder: 1 },
     { label: "Higher Maths", date: "2026-10-27", track: "MATHS", sortOrder: 2 },
@@ -35,6 +36,7 @@ export async function upsertOctoberHalfTermCourse(prisma: PrismaClient) {
     { label: "Chemistry", date: "2026-10-29", track: "SCIENCE", sortOrder: 4 },
     { label: "Physics", date: "2026-10-30", track: "SCIENCE", sortOrder: 5 },
   ];
+  const DAY_CAPACITY = 10;
 
   for (const day of days) {
     const existing = await prisma.courseDay.findFirst({
@@ -47,6 +49,7 @@ export async function upsertOctoberHalfTermCourse(prisma: PrismaClient) {
       track: day.track,
       pricePence: 9900,
       sortOrder: day.sortOrder,
+      capacity: DAY_CAPACITY,
     };
     if (existing) {
       await prisma.courseDay.update({ where: { id: existing.id }, data });

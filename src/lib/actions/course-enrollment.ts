@@ -8,6 +8,7 @@ import { logAudit } from "@/lib/audit";
 import { region } from "@/lib/region";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { computeCoursePrice, splitDepositAndBalance } from "@/lib/course-pricing";
+import { getDaysAvailability } from "@/lib/course-capacity";
 import {
   courseEnrollmentSchema,
   findMissingRequiredAnswer,
@@ -38,6 +39,16 @@ export async function createCourseEnrollment(
   const courseDayIds = new Set(course.days.map((d) => d.id));
   if (!data.dayIds.every((id) => courseDayIds.has(id))) {
     return { error: "One of the selected days is no longer available." };
+  }
+
+  const availability = await getDaysAvailability(
+    course.days.map((d) => ({ id: d.id, capacity: d.capacity })),
+  );
+  const soldOutDay = course.days.find(
+    (d) => data.dayIds.includes(d.id) && availability.get(d.id)?.soldOut,
+  );
+  if (soldOutDay) {
+    return { error: `${soldOutDay.label} is sold out.` };
   }
 
   const selectedTracks = new Set(

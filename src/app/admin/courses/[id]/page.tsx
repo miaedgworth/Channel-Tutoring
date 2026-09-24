@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { CourseForm } from "@/components/admin/course-form";
 import { CourseDaysEditor } from "@/components/admin/course-days-editor";
 import { MarkCourseBalancePaidButton } from "@/components/admin/mark-course-balance-paid-button";
+import { getDaysSpotsTaken } from "@/lib/course-capacity";
 import { formatDateTime, formatCurrency } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Edit Course" };
@@ -37,6 +38,8 @@ export default async function EditCoursePage({
     },
   });
   if (!course) notFound();
+
+  const spotsTakenByDay = await getDaysSpotsTaken(course.days.map((d) => d.id));
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -80,6 +83,8 @@ export default async function EditCoursePage({
                 track: d.track,
                 pricePence: d.pricePence,
                 sortOrder: d.sortOrder,
+                capacity: d.capacity,
+                spotsTaken: spotsTakenByDay.get(d.id) ?? 0,
               }))}
             />
           </div>

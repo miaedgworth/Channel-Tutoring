@@ -123,6 +123,7 @@ export async function createCourseDay(
       track: data.track,
       pricePence: Number(data.pricePence),
       sortOrder: data.sortOrder ? Number(data.sortOrder) : 0,
+      capacity: data.capacity ? Number(data.capacity) : null,
     },
   });
 
@@ -153,6 +154,7 @@ export async function updateCourseDay(
       track: data.track,
       pricePence: Number(data.pricePence),
       sortOrder: data.sortOrder ? Number(data.sortOrder) : 0,
+      capacity: data.capacity ? Number(data.capacity) : null,
     },
   });
 

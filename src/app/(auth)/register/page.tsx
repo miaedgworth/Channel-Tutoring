@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { RegisterForm } from "@/components/auth/register-form";
 
@@ -15,7 +16,9 @@ export default function RegisterPage() {
         Sign up as a client to browse tutors and book lessons.
       </p>
       <div className="mt-8">
-        <RegisterForm />
+        <Suspense fallback={null}>
+          <RegisterForm />
+        </Suspense>
       </div>
     </div>
   );

@@ -600,6 +600,11 @@ model CourseDay {
   label      String
   track      CourseDayTrack @default(OTHER)
   pricePence Int
+  // Max students who can book this day. Null means unlimited. Counted
+  // against CourseEnrollment rows with depositStatus PAID (see
+  // src/lib/course-capacity.ts) — a spot is only taken once someone has
+  // actually paid their deposit, not merely started checkout.
+  capacity   Int?
   sortOrder  Int            @default(0)
 
   course      Course                @relation(fields: [courseId], references: [id], onDelete: Cascade)

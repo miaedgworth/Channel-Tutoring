@@ -57,6 +57,7 @@ export const courseDaySchema = z.object({
     .optional()
     .or(z.literal(""))
     .refine((val) => !val || Number.isInteger(Number(val)), "Enter a whole number"),
+  capacity: optionalPositiveInt,
 });
 
 export type CourseDayInput = z.infer<typeof courseDaySchema>;

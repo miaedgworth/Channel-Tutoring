@@ -18,6 +18,8 @@ interface Day {
   track: Track;
   pricePence: number;
   sortOrder: number;
+  capacity: number | null;
+  spotsTaken: number;
 }
 
 function DayFields({
@@ -31,6 +33,8 @@ function DayFields({
   setPrice,
   sortOrder,
   setSortOrder,
+  capacity,
+  setCapacity,
 }: {
   date: string;
   setDate: (v: string) => void;
@@ -42,6 +46,8 @@ function DayFields({
   setPrice: (v: string) => void;
   sortOrder: string;
   setSortOrder: (v: string) => void;
+  capacity: string;
+  setCapacity: (v: string) => void;
 }) {
   return (
     <div className="grid gap-3 sm:grid-cols-5">
@@ -69,7 +75,13 @@ function DayFields({
         placeholder="Sort order (optional)"
         value={sortOrder}
         onChange={(e) => setSortOrder(e.target.value)}
-        className={`${inputClass} sm:col-span-5`}
+        className={inputClass}
+      />
+      <input
+        placeholder="Capacity (optional, e.g. 10)"
+        value={capacity}
+        onChange={(e) => setCapacity(e.target.value)}
+        className={`${inputClass} sm:col-span-4`}
       />
     </div>
   );
@@ -82,13 +94,21 @@ function EditDayRow({ day, onDone }: { day: Day; onDone: () => void }) {
   const [track, setTrack] = useState<Track>(day.track);
   const [price, setPrice] = useState(String(day.pricePence));
   const [sortOrder, setSortOrder] = useState(String(day.sortOrder));
+  const [capacity, setCapacity] = useState(day.capacity != null ? String(day.capacity) : "");
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   function handleSave() {
     setError(null);
     startTransition(async () => {
-      const result = await updateCourseDay(day.id, { date, label, track, pricePence: price, sortOrder });
+      const result = await updateCourseDay(day.id, {
+        date,
+        label,
+        track,
+        pricePence: price,
+        sortOrder,
+        capacity,
+      });
       if (result.error) {
         setError(result.error);
         return;
@@ -112,6 +132,8 @@ function EditDayRow({ day, onDone }: { day: Day; onDone: () => void }) {
         setPrice={setPrice}
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}
+        capacity={capacity}
+        setCapacity={setCapacity}
       />
       <div className="mt-3 flex gap-2">
         <Button type="button" size="sm" disabled={isPending} onClick={handleSave}>
@@ -136,13 +158,21 @@ export function CourseDaysEditor({ courseId, days }: { courseId: string; days: D
   const [track, setTrack] = useState<Track>("OTHER");
   const [price, setPrice] = useState("");
   const [sortOrder, setSortOrder] = useState("");
+  const [capacity, setCapacity] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   function handleAdd(e: FormEvent) {
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      const result = await createCourseDay(courseId, { date, label, track, pricePence: price, sortOrder });
+      const result = await createCourseDay(courseId, {
+        date,
+        label,
+        track,
+        pricePence: price,
+        sortOrder,
+        capacity,
+      });
       if (result.error) {
         setError(result.error);
         return;
@@ -152,6 +182,7 @@ export function CourseDaysEditor({ courseId, days }: { courseId: string; days: D
       setTrack("OTHER");
       setPrice("");
       setSortOrder("");
+      setCapacity("");
       setAdding(false);
       router.refresh();
     });
@@ -183,6 +214,11 @@ export function CourseDaysEditor({ courseId, days }: { courseId: string; days: D
                   <span className="font-medium text-navy">{day.label}</span>{" "}
                   <span className="text-navy/50">
                     — {formatDate(day.date)} · {day.track}
+                  </span>
+                  <span className="ml-2 text-xs text-navy/40">
+                    {day.capacity != null
+                      ? `${day.spotsTaken}/${day.capacity} booked${day.spotsTaken >= day.capacity ? " — sold out" : ""}`
+                      : `${day.spotsTaken} booked · unlimited capacity`}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -223,6 +259,8 @@ export function CourseDaysEditor({ courseId, days }: { courseId: string; days: D
             setPrice={setPrice}
             sortOrder={sortOrder}
             setSortOrder={setSortOrder}
+            capacity={capacity}
+            setCapacity={setCapacity}
           />
           <div className="mt-3 flex gap-2">
             <Button type="submit" size="sm" disabled={isPending}>
