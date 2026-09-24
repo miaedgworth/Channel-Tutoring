@@ -56,6 +56,18 @@ export function formatDate(date: Date | string) {
   }).format(new Date(date));
 }
 
+// Used wherever a Course's startDate/endDate are shown (marketing course
+// pages, admin course list) so the "single day vs range vs TBC" formatting
+// stays consistent in one place.
+export function formatDateRange(startDate: Date | string | null, endDate: Date | string | null) {
+  if (!startDate) return "Dates to be confirmed";
+  const start = new Date(startDate);
+  if (!endDate || new Date(endDate).getTime() === start.getTime()) {
+    return formatDate(start);
+  }
+  return `${formatDate(start)} – ${formatDate(endDate)}`;
+}
+
 export function formatDateTime(date: Date | string) {
   return new Intl.DateTimeFormat(region.dateLocale, {
     weekday: "short",

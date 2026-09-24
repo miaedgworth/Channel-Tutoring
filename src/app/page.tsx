@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/button";
 import { TutorCard } from "@/components/tutors/tutor-card";
 import { region, REGION } from "@/lib/region";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDateRange } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -47,14 +47,6 @@ const STEPS = [
   { step: "2", title: "Message and schedule", body: "Agree a time with your tutor, then confirm the lesson using credit." },
   { step: "3", title: "Start learning", body: "Message your tutor and track every session in your dashboard." },
 ];
-
-function dateRange(startDate: Date | null, endDate: Date | null) {
-  if (!startDate) return "Dates to be confirmed";
-  if (!endDate || endDate.getTime() === startDate.getTime()) {
-    return formatDate(startDate);
-  }
-  return `${formatDate(startDate)} – ${formatDate(endDate)}`;
-}
 
 export default async function HomePage() {
   const [featuredTutors, featuredCourse] = await Promise.all([
@@ -117,17 +109,12 @@ export default async function HomePage() {
                   Boost your child&apos;s confidence and grades ahead of their GCSEs.
                 </p>
                 <p className="mt-1 text-sm text-navy/60">
-                  {dateRange(featuredCourse.startDate, featuredCourse.endDate)}
+                  {formatDateRange(featuredCourse.startDate, featuredCourse.endDate)}
                   {featuredCourse.venue && ` · ${featuredCourse.venue}`}
                   {cheapestDayPrice != null && ` · from ${formatCurrency(cheapestDayPrice)}/day`}
                 </p>
               </div>
-              <LinkButton
-                href={`/courses/${featuredCourse.slug}`}
-                variant="gold"
-                size="lg"
-                className="shrink-0"
-              >
+              <LinkButton href="/courses" variant="gold" size="lg" className="shrink-0">
                 View &amp; Book
               </LinkButton>
             </div>

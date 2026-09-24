@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { Container } from "@/components/ui/container";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/lib/utils";
+import { CourseFullDetail } from "@/components/marketing/course-full-detail";
+import { formatDateRange } from "@/lib/utils";
 import { region } from "@/lib/region";
 
 export const metadata: Metadata = {
@@ -12,14 +13,6 @@ export const metadata: Metadata = {
   description: `Holiday courses and summer schools from ${region.brandName}, in ${region.country}.`,
 };
 export const dynamic = "force-dynamic";
-
-function dateRange(startDate: Date | null, endDate: Date | null) {
-  if (!startDate) return "Dates to be confirmed";
-  if (!endDate || endDate.getTime() === startDate.getTime()) {
-    return formatDate(startDate);
-  }
-  return `${formatDate(startDate)} – ${formatDate(endDate)}`;
-}
 
 // Past courses with a blog recap link to that instead of the course page.
 const COURSE_RECAP_POST_SLUGS: Record<string, string> = {
@@ -31,7 +24,7 @@ export default async function CoursesPage() {
     prisma.course.findMany({
       where: { status: "UPCOMING" },
       orderBy: { startDate: "asc" },
-      include: { _count: { select: { days: true } } },
+      include: { days: { orderBy: { sortOrder: "asc" } } },
     }),
     prisma.course.findMany({
       where: { status: "PAST" },
@@ -53,41 +46,23 @@ export default async function CoursesPage() {
         </div>
 
         <section className="mt-12">
-          <h2 className="font-heading text-xl font-bold text-navy">Upcoming</h2>
           {upcoming.length === 0 ? (
-            <p className="mt-3 text-sm text-navy/50">
-              No upcoming courses announced right now — check back soon.
-            </p>
+            <>
+              <h2 className="font-heading text-xl font-bold text-navy">Upcoming</h2>
+              <p className="mt-3 text-sm text-navy/50">
+                No upcoming courses announced right now — check back soon.
+              </p>
+            </>
           ) : (
-            <div className="mt-4 space-y-4">
+            <div className="space-y-16">
               {upcoming.map((course) => (
-                <Link key={course.id} href={`/courses/${course.slug}`}>
-                  <Card className="transition-colors hover:border-navy/30">
-                    <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-heading text-base font-semibold text-navy">
-                            {course.title}
-                          </p>
-                          <Badge variant="success">Upcoming</Badge>
-                        </div>
-                        <p className="mt-1 text-sm text-navy/50">
-                          {dateRange(course.startDate, course.endDate)}
-                        </p>
-                        <p className="mt-2 text-sm text-navy/70">{course.description}</p>
-                      </div>
-                      <span className="inline-flex shrink-0 items-center justify-center rounded-md bg-gold px-3 py-1.5 text-sm font-semibold text-navy-dark">
-                        {course._count.days > 0 ? "View & Book" : "Express Interest"}
-                      </span>
-                    </CardContent>
-                  </Card>
-                </Link>
+                <CourseFullDetail key={course.id} course={course} />
               ))}
             </div>
           )}
         </section>
 
-        <section className="mt-12">
+        <section className="mt-16 border-t border-navy/10 pt-12">
           <h2 className="font-heading text-xl font-bold text-navy">Past Courses</h2>
           {past.length === 0 ? (
             <p className="mt-3 text-sm text-navy/50">No past courses yet.</p>
@@ -97,22 +72,22 @@ export default async function CoursesPage() {
                 const recapSlug = COURSE_RECAP_POST_SLUGS[course.slug];
                 const href = recapSlug ? `/blog/${recapSlug}` : `/courses/${course.slug}`;
                 return (
-                <Link key={course.id} href={href}>
-                  <Card className="transition-colors hover:border-navy/30">
-                    <CardContent>
-                      <div className="flex items-center gap-2">
-                        <p className="font-heading text-base font-semibold text-navy">
-                          {course.title}
+                  <Link key={course.id} href={href}>
+                    <Card className="transition-colors hover:border-navy/30">
+                      <CardContent>
+                        <div className="flex items-center gap-2">
+                          <p className="font-heading text-base font-semibold text-navy">
+                            {course.title}
+                          </p>
+                          <Badge variant="neutral">Past</Badge>
+                        </div>
+                        <p className="mt-1 text-sm text-navy/50">
+                          {formatDateRange(course.startDate, course.endDate)}
                         </p>
-                        <Badge variant="neutral">Past</Badge>
-                      </div>
-                      <p className="mt-1 text-sm text-navy/50">
-                        {dateRange(course.startDate, course.endDate)}
-                      </p>
-                      <p className="mt-2 text-sm text-navy/70">{course.description}</p>
-                    </CardContent>
-                  </Card>
-                </Link>
+                        <p className="mt-2 text-sm text-navy/70">{course.description}</p>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 );
               })}
             </div>
