@@ -569,11 +569,29 @@ model Course {
   depositPercent   Int?
   balanceDueDate   DateTime?
 
-  interests   CourseInterest[]
-  days        CourseDay[]
-  enrollments CourseEnrollment[]
+  interests    CourseInterest[]
+  days         CourseDay[]
+  enrollments  CourseEnrollment[]
+  testimonials CourseTestimonial[]
 
   @@index([status])
+}
+
+// A quote from a past student/parent, added by admin (never generated) for
+// display on a course page. courseId is optional so a testimonial can also
+// be general (not tied to any specific course); onDelete SetNull keeps a
+// testimonial around even if the course it was about is later removed.
+model CourseTestimonial {
+  id          String   @id @default(cuid())
+  courseId    String?
+  studentName String
+  quote       String
+  rating      Int?
+  createdAt   DateTime @default(now())
+
+  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+
+  @@index([courseId])
 }
 
 model CourseInterest {

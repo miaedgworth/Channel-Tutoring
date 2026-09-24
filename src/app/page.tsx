@@ -113,7 +113,10 @@ export default async function HomePage() {
                 <h2 className="mt-1 font-heading text-xl font-bold text-navy sm:text-2xl">
                   {featuredCourse.title}
                 </h2>
-                <p className="mt-1.5 text-sm text-navy/60">
+                <p className="mt-1.5 text-sm font-semibold text-navy/80">
+                  Boost your child&apos;s confidence and grades ahead of their GCSEs.
+                </p>
+                <p className="mt-1 text-sm text-navy/60">
                   {dateRange(featuredCourse.startDate, featuredCourse.endDate)}
                   {featuredCourse.venue && ` · ${featuredCourse.venue}`}
                   {cheapestDayPrice != null && ` · from ${formatCurrency(cheapestDayPrice)}/day`}

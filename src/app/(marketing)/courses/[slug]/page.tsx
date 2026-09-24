@@ -6,6 +6,7 @@ import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
 import { CourseInterestForm } from "@/components/marketing/course-interest-form";
 import { CourseBookingWizard } from "@/components/marketing/course-booking-wizard";
+import { CourseTestimonialsSection } from "@/components/marketing/course-testimonials-section";
 import { getDaysAvailability } from "@/lib/course-capacity";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { region } from "@/lib/region";
@@ -43,9 +44,15 @@ export default async function CourseDetailPage({
   if (!course) notFound();
 
   const hasPaidDays = course.days.length > 0;
-  const [session, availability] = await Promise.all([
+  const [session, availability, summerCourseTestimonials] = await Promise.all([
     hasPaidDays ? auth() : Promise.resolve(null),
     getDaysAvailability(course.days.map((d) => ({ id: d.id, capacity: d.capacity }))),
+    hasPaidDays
+      ? prisma.courseTestimonial.findMany({
+          where: { course: { slug: "summer-school-2026" } },
+          orderBy: { createdAt: "desc" },
+        })
+      : Promise.resolve([]),
   ]);
   const isLoggedInClient = session?.user?.role === "CLIENT";
 
@@ -65,6 +72,11 @@ export default async function CourseDetailPage({
           {course.timeLabel && ` · ${course.timeLabel}`}
           {course.venue && ` · ${course.venue}`}
         </p>
+        {course.status === "UPCOMING" && hasPaidDays && (
+          <p className="mt-4 font-heading text-lg font-semibold text-navy">
+            Boost your child&apos;s confidence and grades ahead of their GCSEs.
+          </p>
+        )}
         <p className="mt-4 whitespace-pre-wrap text-navy/80">{course.description}</p>
 
         {course.status === "UPCOMING" && hasPaidDays && (
@@ -78,6 +90,13 @@ export default async function CourseDetailPage({
                   <span aria-hidden className="text-gold-dark">
                     &bull;
                   </span>
+                  Build real confidence and exam-ready skills, with visible
+                  progress your child can feel.
+                </li>
+                <li className="flex gap-2">
+                  <span aria-hidden className="text-gold-dark">
+                    &bull;
+                  </span>
                   Small-group GCSE revision sessions, run by experienced{" "}
                   {region.brandName} tutors.
                 </li>
@@ -86,7 +105,7 @@ export default async function CourseDetailPage({
                     &bull;
                   </span>
                   Focused, exam-board-aware teaching plus structured practice
-                  exam questions.
+                  exam questions to help lift their grades.
                 </li>
                 <li className="flex gap-2">
                   <span aria-hidden className="text-gold-dark">
@@ -154,6 +173,16 @@ export default async function CourseDetailPage({
                 </p>
               )}
             </section>
+
+            <CourseTestimonialsSection
+              heading="See what our students said about our summer course"
+              testimonials={summerCourseTestimonials.map((t) => ({
+                id: t.id,
+                studentName: t.studentName,
+                quote: t.quote,
+                rating: t.rating,
+              }))}
+            />
 
             <section className="mt-10 rounded-2xl border border-navy/10 bg-white p-6 shadow-sm sm:p-8">
               <h2 className="font-heading text-lg font-semibold text-navy">Book your place</h2>
