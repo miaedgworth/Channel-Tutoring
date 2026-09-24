@@ -207,7 +207,6 @@ export const COURSE_CHILD_QUESTIONS: CourseChildQuestion[] = [
   { id: "dateOfBirth", label: "Date of birth", type: "text", required: true },
   { id: "yearGroup", label: "Year group", type: "text", required: true },
   { id: "school", label: "Current school", type: "text", required: true },
-  { id: "homeAddress", label: "Home address", type: "textarea", required: true },
   {
     id: "parentRelationship",
     label: "Your relationship to the student (e.g. parent, guardian)",
@@ -232,12 +231,6 @@ export const COURSE_CHILD_QUESTIONS: CourseChildQuestion[] = [
     label: "Emergency contact phone number",
     type: "text",
     required: false,
-  },
-  {
-    id: "collectionArrangement",
-    label: "How will the student leave at the end of each day? (e.g. collected by parent, walks home)",
-    type: "text",
-    required: true,
   },
   {
     id: "photoConsent",

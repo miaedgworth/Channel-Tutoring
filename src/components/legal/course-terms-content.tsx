@@ -48,8 +48,7 @@ export function CourseTermsContent() {
         Please give us complete, accurate and up-to-date information about
         the student, including any medical conditions, allergies,
         disabilities, learning needs, medication or dietary requirements
-        staff should be aware of, and how they&apos;ll leave at the end of
-        each day.
+        staff should be aware of.
       </p>
 
       <h2>4. Emergency medical consent</h2>
