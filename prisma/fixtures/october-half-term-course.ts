@@ -9,10 +9,15 @@ export async function upsertOctoberHalfTermCourse(prisma: PrismaClient) {
     where: { slug: "october-half-term-course" },
     update: {},
     create: {
-      title: "GCSE October Half Term Revision Course",
+      title: "October Half Term GCSE Revision Intensive",
       slug: "october-half-term-course",
-      description:
-        "Small-group GCSE revision over October half term, designed to boost your child's confidence and grades: choose a single day at £99, or all 3 Sciences plus a Maths tier of your choice (4 days) for £300. A 25% deposit secures your child's place; the balance is due 12 October.",
+      description: [
+        "Give your child a real head start before the mock season. Our small-group GCSE revision days over October half term are built to do two things: lift grades and rebuild confidence. Rather than passively re-reading notes, students spend the day working through exam-style questions, uncovering the gaps in their knowledge and learning exactly how examiners award marks. They leave knowing what to revise, how to revise it, and how to tackle the paper on the day.",
+        "Sessions are led by a subject specialist who can support your child at every step, whether they're aiming to secure a pass or push for the top grades. Groups are kept deliberately small, so each student gets individual attention and the chance to ask the questions they might not ask in a full classroom. Sticking points are spotted early, explained clearly, and practised until they click.",
+        "Choose what suits your child:\n- Single day – £99. Pick the subject where your child needs the biggest boost.\n- Full Science & Maths package (4 days) – £300. Biology, Chemistry and Physics, plus a Maths day at the tier of your choice (Foundation or Higher). That's four days of focused, expert-led revision for the price of three, giving your child real momentum going into the winter term.",
+        "Places are strictly limited to keep groups small, and spots fill quickly at half term. A 25% deposit secures your child's place; the balance is due by 12 October.",
+        "Book now and let your child walk into their mocks feeling prepared, capable and calm.",
+      ].join("\n\n"),
       status: "UPCOMING",
       startDate: new Date("2026-10-26"),
       endDate: new Date("2026-10-30"),

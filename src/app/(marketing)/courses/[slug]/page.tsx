@@ -9,7 +9,6 @@ import { CourseBookingWizard } from "@/components/marketing/course-booking-wizar
 import { CourseTestimonialsSection } from "@/components/marketing/course-testimonials-section";
 import { getDaysAvailability } from "@/lib/course-capacity";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { region } from "@/lib/region";
 
 export const dynamic = "force-dynamic";
 
@@ -72,58 +71,10 @@ export default async function CourseDetailPage({
           {course.timeLabel && ` · ${course.timeLabel}`}
           {course.venue && ` · ${course.venue}`}
         </p>
-        {course.status === "UPCOMING" && hasPaidDays && (
-          <p className="mt-4 font-heading text-lg font-semibold text-navy">
-            Boost your child&apos;s confidence and grades ahead of their GCSEs.
-          </p>
-        )}
         <p className="mt-4 whitespace-pre-wrap text-navy/80">{course.description}</p>
 
         {course.status === "UPCOMING" && hasPaidDays && (
           <>
-            <section className="mt-10">
-              <h2 className="font-heading text-lg font-semibold text-navy">
-                What to expect
-              </h2>
-              <ul className="mt-3 space-y-2 text-sm text-navy/70">
-                <li className="flex gap-2">
-                  <span aria-hidden className="text-gold-dark">
-                    &bull;
-                  </span>
-                  Build real confidence and exam-ready skills, with visible
-                  progress your child can feel.
-                </li>
-                <li className="flex gap-2">
-                  <span aria-hidden className="text-gold-dark">
-                    &bull;
-                  </span>
-                  Small-group GCSE revision sessions, run by experienced{" "}
-                  {region.brandName} tutors.
-                </li>
-                <li className="flex gap-2">
-                  <span aria-hidden className="text-gold-dark">
-                    &bull;
-                  </span>
-                  Focused, exam-board-aware teaching plus structured practice
-                  exam questions to help lift their grades.
-                </li>
-                <li className="flex gap-2">
-                  <span aria-hidden className="text-gold-dark">
-                    &bull;
-                  </span>
-                  A lunch break each day — bring a water bottle and packed
-                  lunch or snack.
-                </li>
-                <li className="flex gap-2">
-                  <span aria-hidden className="text-gold-dark">
-                    &bull;
-                  </span>
-                  Choose any single day, or save with the multi-day bundle
-                  below.
-                </li>
-              </ul>
-            </section>
-
             <section className="mt-10">
               <h2 className="font-heading text-lg font-semibold text-navy">Schedule</h2>
               <div className="mt-3 overflow-x-auto rounded-xl border border-navy/10">
@@ -165,13 +116,6 @@ export default async function CourseDetailPage({
                   </tbody>
                 </table>
               </div>
-              {course.bundleLabel && course.bundlePricePence != null && (
-                <p className="mt-3 text-sm text-navy/70">
-                  <span className="font-semibold text-navy">{course.bundleLabel}:</span>{" "}
-                  {formatCurrency(course.bundlePricePence)} — a saving over booking those days
-                  individually.
-                </p>
-              )}
             </section>
 
             <CourseTestimonialsSection
