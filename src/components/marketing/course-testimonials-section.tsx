@@ -34,7 +34,7 @@ function Stars({ rating }: { rating: number }) {
 
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   return (
-    <div className="flex min-w-[82%] shrink-0 snap-center flex-col rounded-xl bg-white p-6 shadow-sm sm:min-w-0 sm:shrink">
+    <div className="flex min-w-[82%] shrink-0 snap-center flex-col rounded-xl bg-white p-6 shadow-sm sm:w-80 sm:min-w-0 sm:shrink-0">
       <QuoteMark />
       <p className="mt-3 flex-1 font-heading text-base italic leading-relaxed text-navy">
         &ldquo;{testimonial.quote}&rdquo;
@@ -70,7 +70,7 @@ export function CourseTestimonialsSection({
           role="region"
           aria-label="Testimonials"
           tabIndex={0}
-          className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0"
+          className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:flex-wrap sm:justify-center sm:overflow-visible sm:pb-0"
         >
           {testimonials.map((t) => (
             <TestimonialCard key={t.id} testimonial={t} />
