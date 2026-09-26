@@ -237,7 +237,6 @@ export function CourseBookingWizard({
               value={promoCode}
               onChange={(e) => setPromoCode(e.target.value)}
               className={`${inputClass} sm:max-w-xs`}
-              placeholder="e.g. CHANNEL10"
             />
             {promoCode.trim().length > 0 && !appliedPromo && (
               <p className="mt-1 text-xs text-red">That code isn&apos;t valid for this course.</p>
