@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { region } from "@/lib/region";
 
 const STORAGE_KEY = "ct-cookie-consent";
+// Shared with AnalyticsGate, which listens for this to start/stop Web
+// Analytics the moment a visitor makes a choice, not just on next page load.
+export const CONSENT_CHANGED_EVENT = "ct-cookie-consent-changed";
 
 export function CookieConsent() {
   const [visible, setVisible] = useState(false);
@@ -29,6 +32,9 @@ export function CookieConsent() {
     } catch {
       // ignore
     }
+    // Lets AnalyticsGate start (or stay off) immediately, without needing a
+    // page reload to notice the new localStorage value.
+    window.dispatchEvent(new CustomEvent(CONSENT_CHANGED_EVENT, { detail: value }));
     setVisible(false);
   }
 

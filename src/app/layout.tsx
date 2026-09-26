@@ -4,6 +4,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CookieConsent } from "@/components/layout/cookie-consent";
+import { AnalyticsGate } from "@/components/layout/analytics-gate";
 import { region } from "@/lib/region";
 
 const bodyFont = Inter({
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </main>
         <SiteFooter />
         <CookieConsent />
+        <AnalyticsGate />
       </body>
     </html>
   );
