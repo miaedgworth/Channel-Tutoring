@@ -49,6 +49,10 @@ export function computeCoursePrice(
   return { totalPence, bundleApplied: false };
 }
 
+export function applyPromoDiscount(totalPence: number, percentOff: number): number {
+  return Math.max(0, totalPence - Math.round((totalPence * percentOff) / 100));
+}
+
 export function splitDepositAndBalance(
   totalPence: number,
   depositPercent: number,

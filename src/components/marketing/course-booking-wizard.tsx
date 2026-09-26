@@ -5,8 +5,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CourseTermsContent } from "@/components/legal/course-terms-content";
 import { createCourseEnrollment } from "@/lib/actions/course-enrollment";
-import { computeCoursePrice, splitDepositAndBalance } from "@/lib/course-pricing";
-import { COURSE_CHILD_QUESTIONS, DEFAULT_COURSE_DEPOSIT_PERCENT } from "@/lib/constants";
+import { computeCoursePrice, splitDepositAndBalance, applyPromoDiscount } from "@/lib/course-pricing";
+import {
+  COURSE_CHILD_QUESTIONS,
+  DEFAULT_COURSE_DEPOSIT_PERCENT,
+  findCoursePromoCode,
+} from "@/lib/constants";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { CourseDayTrack } from "@prisma/client";
 
@@ -55,6 +59,7 @@ export function CourseBookingWizard({
   const [guestName, setGuestName] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
+  const [promoCode, setPromoCode] = useState("");
   const [termsSignedName, setTermsSignedName] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
@@ -68,6 +73,14 @@ export function CourseBookingWizard({
     () => computeCoursePrice({ bundlePricePence, days }, selectedDayIds),
     [bundlePricePence, days, selectedDayIds],
   );
+  const appliedPromo = useMemo(
+    () => findCoursePromoCode(promoCode, courseSlug),
+    [promoCode, courseSlug],
+  );
+  const discountedTotalPence = useMemo(
+    () => (appliedPromo ? applyPromoDiscount(totalPence, appliedPromo.percentOff) : totalPence),
+    [totalPence, appliedPromo],
+  );
   const selectedDays = useMemo(
     () => days.filter((d) => selectedDayIds.includes(d.id)),
     [days, selectedDayIds],
@@ -78,8 +91,8 @@ export function CourseBookingWizard({
     [selectedTracks],
   );
   const { depositPence, balancePence } = useMemo(
-    () => splitDepositAndBalance(totalPence, effectiveDepositPercent),
-    [totalPence, effectiveDepositPercent],
+    () => splitDepositAndBalance(discountedTotalPence, effectiveDepositPercent),
+    [discountedTotalPence, effectiveDepositPercent],
   );
   const detailsComplete =
     childName.trim().length > 0 &&
@@ -104,6 +117,7 @@ export function CourseBookingWizard({
         childAnswers,
         termsSignedName,
         agreedToTerms: agreed as true,
+        promoCode: promoCode.trim() || undefined,
         ...(isLoggedInClient
           ? {}
           : {
@@ -181,8 +195,26 @@ export function CourseBookingWizard({
                 <span className="text-navy/70">
                   Total {bundleApplied && "(bundle discount applied)"}
                 </span>
-                <span className="font-semibold text-navy">{formatCurrency(totalPence)}</span>
+                <span
+                  className={
+                    appliedPromo
+                      ? "text-navy/40 line-through"
+                      : "font-semibold text-navy"
+                  }
+                >
+                  {formatCurrency(totalPence)}
+                </span>
               </div>
+              {appliedPromo && (
+                <div className="mt-1 flex items-center justify-between">
+                  <span className="text-navy/70">
+                    Promo code {appliedPromo.code} ({appliedPromo.percentOff}% off)
+                  </span>
+                  <span className="font-semibold text-navy">
+                    {formatCurrency(discountedTotalPence)}
+                  </span>
+                </div>
+              )}
               <div className="mt-1 flex items-center justify-between">
                 <span className="text-navy/70">Deposit due today ({effectiveDepositPercent}%)</span>
                 <span className="font-semibold text-navy">{formatCurrency(depositPence)}</span>
@@ -195,6 +227,22 @@ export function CourseBookingWizard({
               </div>
             </div>
           )}
+
+          <div>
+            <label htmlFor="promoCode" className="block text-sm font-medium text-navy">
+              Promo code <span className="font-normal text-navy/40">(optional)</span>
+            </label>
+            <input
+              id="promoCode"
+              value={promoCode}
+              onChange={(e) => setPromoCode(e.target.value)}
+              className={`${inputClass} sm:max-w-xs`}
+              placeholder="e.g. CHANNEL10"
+            />
+            {promoCode.trim().length > 0 && !appliedPromo && (
+              <p className="mt-1 text-xs text-red">That code isn&apos;t valid for this course.</p>
+            )}
+          </div>
 
           <div className="flex gap-3">
             <Button
@@ -212,7 +260,7 @@ export function CourseBookingWizard({
         <div className="space-y-5">
           <p className="text-sm text-navy/60">
             Booking: {selectedDays.map((d) => d.label).join(", ")} — total{" "}
-            {formatCurrency(totalPence)}
+            {formatCurrency(discountedTotalPence)}
           </p>
 
           {!isLoggedInClient && (
@@ -348,7 +396,9 @@ export function CourseBookingWizard({
 
           <p className="text-sm text-navy/60">
             Booking: {selectedDays.map((d) => d.label).join(", ")} — total{" "}
-            {formatCurrency(totalPence)}, deposit {formatCurrency(depositPence)} due today.
+            {formatCurrency(discountedTotalPence)}
+            {appliedPromo && ` (${appliedPromo.code} applied)`}, deposit{" "}
+            {formatCurrency(depositPence)} due today.
           </p>
 
           <div className="rounded-xl border border-navy/10 p-4">

@@ -8,7 +8,7 @@ import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { logAudit } from "@/lib/audit";
 import { region } from "@/lib/region";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { computeCoursePrice, splitDepositAndBalance } from "@/lib/course-pricing";
+import { computeCoursePrice, splitDepositAndBalance, applyPromoDiscount } from "@/lib/course-pricing";
 import { getDaysAvailability } from "@/lib/course-capacity";
 import {
   courseEnrollmentSchema,
@@ -16,7 +16,11 @@ import {
   findMissingRequiredAnswer,
   type CourseEnrollmentInput,
 } from "@/lib/validations/course-enrollment";
-import { DEFAULT_COURSE_DEPOSIT_PERCENT, COURSE_TERMS_VERSION } from "@/lib/constants";
+import {
+  DEFAULT_COURSE_DEPOSIT_PERCENT,
+  COURSE_TERMS_VERSION,
+  findCoursePromoCode,
+} from "@/lib/constants";
 
 export async function createCourseEnrollment(
   courseSlug: string,
@@ -86,10 +90,22 @@ export async function createCourseEnrollment(
     return { error: "Payments are not configured in this environment yet." };
   }
 
-  const { totalPence } = computeCoursePrice(course, data.dayIds);
-  if (totalPence <= 0) {
+  const { totalPence: rawTotalPence } = computeCoursePrice(course, data.dayIds);
+  if (rawTotalPence <= 0) {
     return { error: "Select at least one day." };
   }
+
+  let totalPence = rawTotalPence;
+  let appliedPromoCode: string | null = null;
+  if (data.promoCode) {
+    const promo = findCoursePromoCode(data.promoCode, course.slug);
+    if (!promo) {
+      return { error: "That promo code isn't valid for this course." };
+    }
+    appliedPromoCode = promo.code;
+    totalPence = applyPromoDiscount(rawTotalPence, promo.percentOff);
+  }
+
   const depositPercent = course.depositPercent ?? DEFAULT_COURSE_DEPOSIT_PERCENT;
   const { depositPence, balancePence } = splitDepositAndBalance(totalPence, depositPercent);
 
@@ -121,7 +137,13 @@ export async function createCourseEnrollment(
     action: "COURSE_ENROLLMENT_STARTED",
     targetType: "CourseEnrollment",
     targetId: enrollment.id,
-    metadata: { courseId: course.id, totalPence, depositPence, guest: clientId === null },
+    metadata: {
+      courseId: course.id,
+      totalPence,
+      depositPence,
+      guest: clientId === null,
+      promoCode: appliedPromoCode,
+    },
   });
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
@@ -137,7 +159,7 @@ export async function createCourseEnrollment(
           unit_amount: depositPence,
           product_data: {
             name: `Deposit: ${course.title}`,
-            description: `${selectedDays.map((d) => d.label).join(", ")} — balance of ${formatCurrency(balancePence)} due ${course.balanceDueDate ? formatDate(course.balanceDueDate) : "later"}`,
+            description: `${selectedDays.map((d) => d.label).join(", ")} — balance of ${formatCurrency(balancePence)} due ${course.balanceDueDate ? formatDate(course.balanceDueDate) : "later"}${appliedPromoCode ? ` — promo code ${appliedPromoCode} applied` : ""}`,
           },
         },
       },

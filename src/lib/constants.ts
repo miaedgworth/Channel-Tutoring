@@ -186,6 +186,32 @@ export const COURSE_TERMS_VERSION = "25 September 2026";
 // Used when a course doesn't set its own Course.depositPercent.
 export const DEFAULT_COURSE_DEPOSIT_PERCENT = 25;
 
+// Promo codes for course bookings, scoped to a specific course by slug so
+// one doesn't silently carry over to a future course without a deliberate
+// decision to add it there too. Applied to the total booking price before
+// it's split into deposit/balance (see splitDepositAndBalance), so both the
+// deposit paid now and the balance paid later reflect the discount — not
+// just a Stripe coupon on the deposit line item. Not a secret: shared with
+// the client so the wizard can preview the discount before submitting, but
+// the server always re-validates and recomputes the price itself.
+export interface CoursePromoCode {
+  code: string;
+  percentOff: number;
+  courseSlug: string;
+}
+
+export const COURSE_PROMO_CODES: CoursePromoCode[] = [
+  { code: "CHANNEL10", percentOff: 10, courseSlug: "october-half-term-course" },
+];
+
+export function findCoursePromoCode(rawCode: string, courseSlug: string): CoursePromoCode | null {
+  const normalized = rawCode.trim().toUpperCase();
+  if (!normalized) return null;
+  return (
+    COURSE_PROMO_CODES.find((p) => p.code === normalized && p.courseSlug === courseSlug) ?? null
+  );
+}
+
 // Questions asked about the child at course-enrollment checkout, answered
 // into CourseEnrollment.childAnswers (keyed by id). Mirrors the "Parent/
 // Guardian Consent and Student Information Form" used for the October

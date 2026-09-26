@@ -20,6 +20,7 @@ export const courseEnrollmentSchema = z.object({
   guestName: z.string().trim().min(2, "Enter your name").max(150).optional(),
   guestEmail: z.string().trim().toLowerCase().email("Enter a valid email address").max(200).optional(),
   guestPhone: z.string().trim().max(50).optional(),
+  promoCode: z.string().trim().max(40).optional(),
 });
 
 export type CourseEnrollmentInput = z.infer<typeof courseEnrollmentSchema>;
