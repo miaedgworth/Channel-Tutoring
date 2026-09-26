@@ -94,11 +94,19 @@ export function CourseBookingWizard({
     () => splitDepositAndBalance(discountedTotalPence, effectiveDepositPercent),
     [discountedTotalPence, effectiveDepositPercent],
   );
-  const detailsComplete =
-    childName.trim().length > 0 &&
-    visibleQuestions.every((q) => !q.required || (childAnswers[q.id]?.trim() ?? "").length > 0) &&
-    (isLoggedInClient ||
-      (guestName.trim().length > 1 && /\S+@\S+\.\S+/.test(guestEmail.trim())));
+  const missingDetailsFields = useMemo(() => {
+    const missing: string[] = [];
+    if (!isLoggedInClient) {
+      if (guestName.trim().length <= 1) missing.push("Your full name");
+      if (!/\S+@\S+\.\S+/.test(guestEmail.trim())) missing.push("Your email");
+    }
+    if (childName.trim().length === 0) missing.push("Child's full name");
+    for (const q of visibleQuestions) {
+      if (q.required && !childAnswers[q.id]?.trim()) missing.push(q.label);
+    }
+    return missing;
+  }, [isLoggedInClient, guestName, guestEmail, childName, visibleQuestions, childAnswers]);
+  const detailsComplete = missingDetailsFields.length === 0;
 
   function toggleDay(dayId: string) {
     if (days.find((d) => d.id === dayId)?.soldOut) return;
@@ -243,6 +251,10 @@ export function CourseBookingWizard({
             )}
           </div>
 
+          {selectedDayIds.length === 0 && (
+            <p className="text-xs text-navy/50">Select at least one day to continue.</p>
+          )}
+
           <div className="flex gap-3">
             <Button
               type="button"
@@ -373,6 +385,12 @@ export function CourseBookingWizard({
               )}
             </div>
           ))}
+
+          {missingDetailsFields.length > 0 && (
+            <p className="text-xs text-navy/50">
+              Still needed before you can continue: {missingDetailsFields.join(", ")}
+            </p>
+          )}
 
           <div className="flex gap-3">
             <Button type="button" variant="ghost" onClick={() => setPhase("days")}>
