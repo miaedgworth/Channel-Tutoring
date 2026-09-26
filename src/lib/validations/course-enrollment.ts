@@ -3,7 +3,11 @@ import type { CourseDayTrack } from "@prisma/client";
 import { COURSE_CHILD_QUESTIONS } from "@/lib/constants";
 
 export const courseEnrollmentSchema = z.object({
-  dayIds: z.array(z.string().cuid()).min(1, "Select at least one day"),
+  // Not validated as a cuid here — some CourseDay rows were seeded with
+  // plain UUIDs rather than Prisma-generated cuids, so this only checks
+  // for a non-empty id. The real check is membership in the course's own
+  // day set, done server-side in createCourseEnrollment.
+  dayIds: z.array(z.string().min(1)).min(1, "Select at least one day"),
   childName: z.string().trim().min(2, "Please enter your child's name").max(150),
   childAnswers: z.record(z.string(), z.string().trim().max(2000)),
   termsSignedName: z
