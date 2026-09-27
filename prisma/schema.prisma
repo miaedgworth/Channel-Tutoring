@@ -653,10 +653,29 @@ model CourseDay {
   capacity   Int?
   sortOrder  Int            @default(0)
 
-  course      Course                @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  enrollments CourseEnrollmentDay[]
+  course        Course                @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  enrollments   CourseEnrollmentDay[]
+  topicRequests CourseTopicRequest[]
 
   @@index([courseId])
+}
+
+// A topic a student/parent has asked to have covered, logged by admin —
+// internal only, never shown on the public site. Tied to a specific
+// CourseDay (rather than a free-text subject) so it's automatically
+// subject-specific and can't drift from the day labels tutors actually see.
+model CourseTopicRequest {
+  id          String   @id @default(cuid())
+  dayId       String
+  topic       String
+  // Free text, e.g. "Alex Steele (parent, phone call)" or "Barney Ogier's
+  // enrolment form" — whoever told admin about this, in their own words.
+  requestedBy String
+  createdAt   DateTime @default(now())
+
+  day CourseDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+
+  @@index([dayId])
 }
 
 // A client's paid signup for one or more days of a course. Deposit and

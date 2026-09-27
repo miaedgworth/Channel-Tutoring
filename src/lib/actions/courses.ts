@@ -5,7 +5,14 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
-import { courseSchema, courseDaySchema, type CourseInput, type CourseDayInput } from "@/lib/validations/course";
+import {
+  courseSchema,
+  courseDaySchema,
+  courseTopicRequestSchema,
+  type CourseInput,
+  type CourseDayInput,
+  type CourseTopicRequestInput,
+} from "@/lib/validations/course";
 import {
   manualCourseEnrollmentSchema,
   type ManualCourseEnrollmentInput,
@@ -217,6 +224,50 @@ export async function deleteCourseDay(dayId: string) {
 
   revalidatePath(`/admin/courses/${day.courseId}`);
   revalidatePath(`/courses/${day.course.slug}`);
+}
+
+// Internal notes only — never shown on the public site. Tied to a specific
+// CourseDay so a "subject" is always one of the course's real days, not a
+// free-text field that could drift from what tutors actually see.
+export async function createCourseTopicRequest(
+  input: CourseTopicRequestInput,
+): Promise<{ error: string } | { error?: undefined }> {
+  await requireUser("ADMIN");
+
+  const parsed = courseTopicRequestSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+  const data = parsed.data;
+
+  const day = await prisma.courseDay.findUnique({ where: { id: data.dayId } });
+  if (!day) return { error: "Subject not found." };
+
+  await prisma.courseTopicRequest.create({
+    data: { dayId: data.dayId, topic: data.topic, requestedBy: data.requestedBy },
+  });
+
+  revalidatePath(`/admin/courses/${day.courseId}`);
+  return {};
+}
+
+export async function deleteCourseTopicRequest(topicRequestId: string) {
+  await requireUser("ADMIN");
+  const topicRequest = await prisma.courseTopicRequest.findUnique({
+    where: { id: topicRequestId },
+    include: { day: true },
+  });
+  if (!topicRequest) return;
+
+  try {
+    await prisma.courseTopicRequest.delete({ where: { id: topicRequestId } });
+  } catch (err) {
+    if (!(err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025")) {
+      throw err;
+    }
+  }
+
+  revalidatePath(`/admin/courses/${topicRequest.day.courseId}`);
 }
 
 export async function markCourseBalancePaidManually(

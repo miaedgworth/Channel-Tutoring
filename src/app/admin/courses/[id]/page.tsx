@@ -8,6 +8,7 @@ import { CourseDaysEditor } from "@/components/admin/course-days-editor";
 import { MarkCourseBalancePaidButton } from "@/components/admin/mark-course-balance-paid-button";
 import { AddManualCourseEnrollmentForm } from "@/components/admin/add-manual-course-enrollment-form";
 import { CourseTutorsEditor } from "@/components/admin/course-tutors-editor";
+import { CourseTopicRequests } from "@/components/admin/course-topic-requests";
 import { getDaysSpotsTaken } from "@/lib/course-capacity";
 import { formatDateTime, formatCurrency } from "@/lib/utils";
 
@@ -30,7 +31,10 @@ export default async function EditCoursePage({
       where: { id },
       include: {
         interests: { orderBy: { createdAt: "desc" } },
-        days: { orderBy: { sortOrder: "asc" } },
+        days: {
+          orderBy: { sortOrder: "asc" },
+          include: { topicRequests: { orderBy: { createdAt: "desc" } } },
+        },
         enrollments: {
           orderBy: { createdAt: "desc" },
           include: {
@@ -116,6 +120,35 @@ export default async function EditCoursePage({
               courseId={course.id}
               allTutors={allTutors.map((t) => ({ id: t.id, name: t.user.name, headline: t.headline }))}
               selectedTutorIds={course.tutors.map((ct) => ct.tutorId)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent>
+          <h2 className="font-heading text-lg font-semibold text-navy">
+            Topics students want covered
+          </h2>
+          <p className="mt-1 text-sm text-navy/60">
+            Internal notes for planning sessions — never shown on the public site.
+          </p>
+          <div className="mt-4">
+            <CourseTopicRequests
+              days={course.days.map((d) => ({ id: d.id, label: d.label }))}
+              topicRequests={course.days
+                .flatMap((d) =>
+                  d.topicRequests.map((t) => ({
+                    id: t.id,
+                    dayId: d.id,
+                    dayLabel: d.label,
+                    topic: t.topic,
+                    requestedBy: t.requestedBy,
+                    createdAt: t.createdAt,
+                  })),
+                )
+                .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                .map((t) => ({ ...t, createdAt: t.createdAt.toISOString() }))}
             />
           </div>
         </CardContent>

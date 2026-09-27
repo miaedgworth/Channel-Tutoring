@@ -62,6 +62,17 @@ export const courseDaySchema = z.object({
 
 export type CourseDayInput = z.infer<typeof courseDaySchema>;
 
+// Admin-only, never shown on the public site — a topic a student/parent
+// asked to have covered, tied to a specific CourseDay so it's inherently
+// subject-specific.
+export const courseTopicRequestSchema = z.object({
+  dayId: z.string().min(1, "Select a subject"),
+  topic: z.string().trim().min(2, "Enter the topic").max(500),
+  requestedBy: z.string().trim().min(1, "Enter who told you this").max(200),
+});
+
+export type CourseTopicRequestInput = z.infer<typeof courseTopicRequestSchema>;
+
 export const courseInterestSchema = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(100),
   email: z.string().trim().toLowerCase().email("Enter a valid email address"),
