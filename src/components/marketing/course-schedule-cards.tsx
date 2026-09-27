@@ -18,10 +18,15 @@ function AvailabilityBadge({ availability }: { availability: DayAvailability | u
       </span>
     );
   }
-  if (availability?.spotsLeft != null && availability.spotsLeft <= 3) {
+  if (availability?.spotsLeft != null) {
+    const few = availability.spotsLeft <= 3;
     return (
-      <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
-        Few left
+      <span
+        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+          few ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"
+        }`}
+      >
+        {availability.spotsLeft} {availability.spotsLeft === 1 ? "spot" : "spots"} left
       </span>
     );
   }
