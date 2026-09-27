@@ -77,15 +77,14 @@ export function CourseTestimonialsSection({
           ))}
         </div>
 
-        <div className="mx-auto mt-10 max-w-xl space-y-1.5 text-center text-sm text-white/70">
-          {REGION === "GG" && (
+        {REGION === "GG" && (
+          <div className="mx-auto mt-10 max-w-xl text-center text-sm text-white/70">
             <p>
               Backed by the University of Cambridge Homerton College Changemakers Catalyst Fund
               Award.
             </p>
-          )}
-          <p>Subject-specialist tutors, reviewed before they go live.</p>
-        </div>
+          </div>
+        )}
       </div>
     </section>
   );
