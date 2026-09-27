@@ -36,6 +36,24 @@ export const guestBalancePaymentSchema = z.object({
   email: z.string().trim().toLowerCase().email("Enter a valid email address"),
 });
 
+// Admin-entered booking for someone who paid/booked outside the website
+// (phone, in person, bank transfer) — a trimmed-down version of the public
+// wizard's fields, since there's no Stripe checkout or full consent form
+// involved. Price is still computed from the real day/bundle pricing (see
+// createManualCourseEnrollment), never typed in by the admin.
+export const manualCourseEnrollmentSchema = z.object({
+  dayIds: z.array(z.string().min(1)).min(1, "Select at least one day"),
+  childName: z.string().trim().min(2, "Enter the child's name").max(150),
+  guardianName: z.string().trim().min(2, "Enter the parent/guardian's name").max(150),
+  guardianEmail: z.string().trim().max(200).optional(),
+  guardianPhone: z.string().trim().max(50).optional(),
+  notes: z.string().trim().max(2000).optional(),
+  depositStatus: z.enum(["PENDING", "PAID"]),
+  balanceStatus: z.enum(["PENDING", "PAID"]),
+});
+
+export type ManualCourseEnrollmentInput = z.infer<typeof manualCourseEnrollmentSchema>;
+
 // Cross-checks childAnswers against COURSE_CHILD_QUESTIONS' required flags —
 // kept separate from the zod shape above since the question set (and which
 // answers are required) is data-driven, not fixed at the schema level. A

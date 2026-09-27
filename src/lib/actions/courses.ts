@@ -6,8 +6,14 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { courseSchema, courseDaySchema, type CourseInput, type CourseDayInput } from "@/lib/validations/course";
+import {
+  manualCourseEnrollmentSchema,
+  type ManualCourseEnrollmentInput,
+} from "@/lib/validations/course-enrollment";
 import { uniqueCourseSlug } from "@/lib/slug";
 import { logAudit } from "@/lib/audit";
+import { computeCoursePrice, splitDepositAndBalance } from "@/lib/course-pricing";
+import { DEFAULT_COURSE_DEPOSIT_PERCENT, COURSE_TERMS_VERSION } from "@/lib/constants";
 
 export async function createCourse(
   input: CourseInput,
@@ -208,6 +214,86 @@ export async function markCourseBalancePaidManually(
   });
 
   revalidatePath(`/admin/courses/${enrollment.courseId}`);
+  return {};
+}
+
+// For a booking made outside the site (phone, in person, bank transfer) —
+// no Stripe checkout, no client account. Price is still computed from the
+// course's real day/bundle pricing, same as the public wizard, so it can
+// never drift from what everyone else pays for the same days.
+export async function createManualCourseEnrollment(
+  courseId: string,
+  input: ManualCourseEnrollmentInput,
+): Promise<{ error: string } | { error?: undefined }> {
+  const admin = await requireUser("ADMIN");
+
+  const parsed = manualCourseEnrollmentSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+  const data = parsed.data;
+
+  const course = await prisma.course.findUnique({ where: { id: courseId }, include: { days: true } });
+  if (!course) return { error: "Course not found." };
+
+  const courseDayIds = new Set(course.days.map((d) => d.id));
+  if (!data.dayIds.every((id) => courseDayIds.has(id))) {
+    return { error: "One of the selected days doesn't belong to this course." };
+  }
+
+  const { totalPence } = computeCoursePrice(course, data.dayIds);
+  if (totalPence <= 0) {
+    return { error: "Select at least one day." };
+  }
+  const depositPercent = course.depositPercent ?? DEFAULT_COURSE_DEPOSIT_PERCENT;
+  const { depositPence, balancePence } = splitDepositAndBalance(totalPence, depositPercent);
+
+  const now = new Date();
+  const enrollment = await prisma.courseEnrollment.create({
+    data: {
+      courseId: course.id,
+      clientId: null,
+      guestName: data.guardianName,
+      guestEmail: data.guardianEmail || null,
+      guestPhone: data.guardianPhone || null,
+      childName: data.childName,
+      childAnswers: data.notes ? { notes: data.notes } : {},
+      termsSignedAt: now,
+      termsSignedName: data.guardianName,
+      termsVersion: COURSE_TERMS_VERSION,
+      totalPence,
+      depositPence,
+      balancePence,
+      depositStatus: data.depositStatus,
+      depositPaidAt: data.depositStatus === "PAID" ? now : null,
+      balanceStatus: data.balanceStatus,
+      balancePaidAt: data.balanceStatus === "PAID" ? now : null,
+      balancePaidManuallyByName: data.balanceStatus === "PAID" ? admin.name : null,
+      status:
+        data.balanceStatus === "PAID"
+          ? "PAID_IN_FULL"
+          : data.depositStatus === "PAID"
+            ? "DEPOSIT_PAID"
+            : "AWAITING_DEPOSIT",
+      days: { create: data.dayIds.map((dayId) => ({ dayId })) },
+    },
+  });
+
+  await logAudit({
+    actorId: admin.id,
+    action: "COURSE_ENROLLMENT_ADDED_MANUALLY",
+    targetType: "CourseEnrollment",
+    targetId: enrollment.id,
+    metadata: {
+      courseId: course.id,
+      totalPence,
+      depositPence,
+      depositStatus: data.depositStatus,
+      balanceStatus: data.balanceStatus,
+    },
+  });
+
+  revalidatePath(`/admin/courses/${course.id}`);
   return {};
 }
 

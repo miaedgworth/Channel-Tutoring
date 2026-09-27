@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { CourseForm } from "@/components/admin/course-form";
 import { CourseDaysEditor } from "@/components/admin/course-days-editor";
 import { MarkCourseBalancePaidButton } from "@/components/admin/mark-course-balance-paid-button";
+import { AddManualCourseEnrollmentForm } from "@/components/admin/add-manual-course-enrollment-form";
 import { getDaysSpotsTaken } from "@/lib/course-capacity";
 import { formatDateTime, formatCurrency } from "@/lib/utils";
 
@@ -119,7 +120,8 @@ export default async function EditCoursePage({
                         {e.childName}{" "}
                         <span className="text-navy/40">
                           — {e.client?.name ?? e.guestName ?? "Guest"}
-                          {!e.client && " (guest)"}
+                          {!e.client &&
+                            (e.depositCheckoutSessionId ? " (guest)" : " (added manually)")}
                         </span>
                       </p>
                       <p className="text-xs text-navy/50">
@@ -141,6 +143,22 @@ export default async function EditCoursePage({
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {course.days.length > 0 && (
+            <div className="mt-4">
+              <AddManualCourseEnrollmentForm
+                courseId={course.id}
+                days={course.days.map((d) => ({
+                  id: d.id,
+                  label: d.label,
+                  track: d.track,
+                  pricePence: d.pricePence,
+                }))}
+                bundlePricePence={course.bundlePricePence}
+                depositPercent={course.depositPercent}
+              />
             </div>
           )}
         </CardContent>
