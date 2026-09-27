@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
+import { decryptText } from "@/lib/encryption";
 import { MessageThread } from "@/components/messaging/message-thread";
 
 export const metadata: Metadata = { title: "Messages" };
@@ -38,7 +39,7 @@ export default async function TutorConversationPage({
           conversationId={conversation.id}
           currentUserId={user.id}
           otherPartyName={conversation.client.name}
-          messages={conversation.messages}
+          messages={conversation.messages.map((m) => ({ ...m, body: decryptText(m.body) }))}
         />
       </div>
     </div>

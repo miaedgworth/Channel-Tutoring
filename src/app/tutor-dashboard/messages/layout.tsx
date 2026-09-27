@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
+import { decryptText } from "@/lib/encryption";
 import { ConversationList } from "@/components/messaging/conversation-list";
 
 export default async function TutorMessagesLayout({
@@ -30,7 +31,7 @@ export default async function TutorMessagesLayout({
     id: c.id,
     otherPartyName: c.client.name,
     lastMessageAt: c.lastMessageAt,
-    lastMessagePreview: c.messages[0]?.body ?? null,
+    lastMessagePreview: c.messages[0] ? decryptText(c.messages[0].body) : null,
     unreadCount: c._count.messages,
   }));
 

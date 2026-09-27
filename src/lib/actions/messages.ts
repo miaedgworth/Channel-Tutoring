@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/current-user";
 import { containsContactInfo } from "@/lib/moderation";
+import { encryptText } from "@/lib/encryption";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
 import { escapeHtml } from "@/lib/utils";
@@ -70,6 +71,9 @@ export async function sendMessage(
   if (!participant.conversation) return { error: participant.error ?? "Conversation not found." };
   const conversation = participant.conversation;
 
+  // Scan the plaintext for contact info/off-platform requests before
+  // encrypting — the stored body is ciphertext, so this check has to happen
+  // now or it could never run again.
   const flagged = containsContactInfo(trimmed);
 
   await prisma.$transaction([
@@ -77,7 +81,7 @@ export async function sendMessage(
       data: {
         conversationId,
         senderId: user.id,
-        body: trimmed,
+        body: encryptText(trimmed),
         flagged,
         attachmentUrl: attachment?.url,
         attachmentName: attachment?.name,

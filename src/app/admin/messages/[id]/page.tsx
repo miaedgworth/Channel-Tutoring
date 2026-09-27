@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { decryptText } from "@/lib/encryption";
 import { MessageThread } from "@/components/messaging/message-thread";
 
 export const metadata: Metadata = { title: "Conversation" };
@@ -27,7 +28,7 @@ export default async function AdminConversationPage({
         conversationId={conversation.id}
         currentUserId=""
         otherPartyName={`${conversation.client.name} ↔ ${conversation.tutorUser.name}`}
-        messages={conversation.messages}
+        messages={conversation.messages.map((m) => ({ ...m, body: decryptText(m.body) }))}
         readOnly
       />
     </div>
