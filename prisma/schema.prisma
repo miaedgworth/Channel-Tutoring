@@ -283,6 +283,7 @@ model TutorProfile {
   ledgerEntries  TutorLedgerEntry[]
   payouts        Payout[]
   spotlightPosts Post[]                  @relation("TutorSpotlightPosts")
+  courses        CourseTutor[]
 
   @@index([isPublished])
 }
@@ -573,8 +574,27 @@ model Course {
   days         CourseDay[]
   enrollments  CourseEnrollment[]
   testimonials CourseTestimonial[]
+  tutors       CourseTutor[]
 
   @@index([status])
+}
+
+// Which tutor(s) are running a course — shown as a "Meet your tutors"
+// section on the course page. One shared list per course (not per day), so
+// it just links a course to whichever published TutorProfile rows admin
+// picks, in display order.
+model CourseTutor {
+  id        String   @id @default(cuid())
+  courseId  String
+  tutorId   String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  course Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  tutor  TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, tutorId])
+  @@index([tutorId])
 }
 
 // A quote from a past student/parent, added by admin (never generated) for

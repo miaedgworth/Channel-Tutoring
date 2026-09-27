@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { CourseInterestForm } from "@/components/marketing/course-interest-form";
 import { CourseBookingWizard } from "@/components/marketing/course-booking-wizard";
 import { CourseTestimonialsSection } from "@/components/marketing/course-testimonials-section";
+import { CourseTutorsSection } from "@/components/marketing/course-tutors-section";
 import { CourseHero } from "@/components/marketing/course-hero";
 import { CourseWhyItWorks } from "@/components/marketing/course-why-it-works";
 import { CoursePricingCards } from "@/components/marketing/course-pricing-cards";
@@ -25,13 +26,20 @@ export async function CourseFullDetail({ course }: { course: Course & { days: Co
   const hasPaidDays = course.days.length > 0;
   const isUpcomingPaidCourse = course.status === "UPCOMING" && hasPaidDays;
 
-  const [session, availability, summerCourseTestimonials] = await Promise.all([
+  const [session, availability, summerCourseTestimonials, courseTutors] = await Promise.all([
     hasPaidDays ? auth() : Promise.resolve(null),
     getDaysAvailability(course.days.map((d) => ({ id: d.id, capacity: d.capacity }))),
     isUpcomingPaidCourse
       ? prisma.courseTestimonial.findMany({
           where: { course: { slug: "summer-school-2026" }, featured: true },
           orderBy: { createdAt: "desc" },
+        })
+      : Promise.resolve([]),
+    isUpcomingPaidCourse
+      ? prisma.courseTutor.findMany({
+          where: { courseId: course.id },
+          orderBy: { sortOrder: "asc" },
+          include: { tutor: { include: { user: { select: { name: true } } } } },
         })
       : Promise.resolve([]),
   ]);
@@ -121,6 +129,8 @@ export async function CourseFullDetail({ course }: { course: Course & { days: Co
       <Container className="max-w-3xl py-10">
         <p className="whitespace-pre-wrap text-navy/80">{course.description}</p>
       </Container>
+
+      <CourseTutorsSection tutors={courseTutors.map((ct) => ct.tutor)} />
 
       <CourseWhyItWorks />
 

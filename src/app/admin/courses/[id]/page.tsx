@@ -7,6 +7,7 @@ import { CourseForm } from "@/components/admin/course-form";
 import { CourseDaysEditor } from "@/components/admin/course-days-editor";
 import { MarkCourseBalancePaidButton } from "@/components/admin/mark-course-balance-paid-button";
 import { AddManualCourseEnrollmentForm } from "@/components/admin/add-manual-course-enrollment-form";
+import { CourseTutorsEditor } from "@/components/admin/course-tutors-editor";
 import { getDaysSpotsTaken } from "@/lib/course-capacity";
 import { formatDateTime, formatCurrency } from "@/lib/utils";
 
@@ -24,20 +25,31 @@ export default async function EditCoursePage({
   params,
 }: PageProps<"/admin/courses/[id]">) {
   const { id } = await params;
-  const course = await prisma.course.findUnique({
-    where: { id },
-    include: {
-      interests: { orderBy: { createdAt: "desc" } },
-      days: { orderBy: { sortOrder: "asc" } },
-      enrollments: {
-        orderBy: { createdAt: "desc" },
-        include: {
-          client: { select: { name: true, email: true } },
-          days: { include: { day: true }, orderBy: { day: { sortOrder: "asc" } } },
+  const [course, allTutors] = await Promise.all([
+    prisma.course.findUnique({
+      where: { id },
+      include: {
+        interests: { orderBy: { createdAt: "desc" } },
+        days: { orderBy: { sortOrder: "asc" } },
+        enrollments: {
+          orderBy: { createdAt: "desc" },
+          include: {
+            client: { select: { name: true, email: true } },
+            days: { include: { day: true }, orderBy: { day: { sortOrder: "asc" } } },
+          },
+        },
+        tutors: {
+          orderBy: { sortOrder: "asc" },
+          include: { tutor: { include: { user: { select: { name: true } } } } },
         },
       },
-    },
-  });
+    }),
+    prisma.tutorProfile.findMany({
+      where: { isPublished: true },
+      orderBy: { user: { name: "asc" } },
+      select: { id: true, headline: true, user: { select: { name: true } } },
+    }),
+  ]);
   if (!course) notFound();
 
   const spotsTakenByDay = await getDaysSpotsTaken(course.days.map((d) => d.id));
@@ -87,6 +99,23 @@ export default async function EditCoursePage({
                 capacity: d.capacity,
                 spotsTaken: spotsTakenByDay.get(d.id) ?? 0,
               }))}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent>
+          <h2 className="font-heading text-lg font-semibold text-navy">Tutors running this course</h2>
+          <p className="mt-1 text-sm text-navy/60">
+            Shown in a &quot;Meet your tutors&quot; section on the course page, pulling each
+            tutor&apos;s existing profile (photo, bio, subjects).
+          </p>
+          <div className="mt-4">
+            <CourseTutorsEditor
+              courseId={course.id}
+              allTutors={allTutors.map((t) => ({ id: t.id, name: t.user.name, headline: t.headline }))}
+              selectedTutorIds={course.tutors.map((ct) => ct.tutorId)}
             />
           </div>
         </CardContent>

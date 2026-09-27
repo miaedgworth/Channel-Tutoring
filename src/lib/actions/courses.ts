@@ -107,6 +107,39 @@ export async function updateCourse(
   return {};
 }
 
+// Replaces the whole set of tutors shown on a course's "Meet your tutors"
+// section — simpler than diffing since it's a short, admin-picked list, not
+// something written to concurrently.
+export async function updateCourseTutors(
+  courseId: string,
+  tutorIds: string[],
+): Promise<{ error: string } | { error?: undefined }> {
+  await requireUser("ADMIN");
+
+  const course = await prisma.course.findUnique({ where: { id: courseId } });
+  if (!course) return { error: "Course not found." };
+
+  const validTutors = await prisma.tutorProfile.findMany({
+    where: { id: { in: tutorIds } },
+    select: { id: true },
+  });
+  if (validTutors.length !== new Set(tutorIds).size) {
+    return { error: "One of the selected tutors no longer exists." };
+  }
+
+  await prisma.$transaction([
+    prisma.courseTutor.deleteMany({ where: { courseId } }),
+    prisma.courseTutor.createMany({
+      data: tutorIds.map((tutorId, index) => ({ courseId, tutorId, sortOrder: index })),
+    }),
+  ]);
+
+  revalidatePath(`/admin/courses/${courseId}`);
+  revalidatePath(`/courses/${course.slug}`);
+  revalidatePath("/courses");
+  return {};
+}
+
 export async function createCourseDay(
   courseId: string,
   input: CourseDayInput,
