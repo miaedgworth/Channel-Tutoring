@@ -7,6 +7,7 @@ import { LinkButton } from "@/components/ui/button";
 import { UserStatusToggle } from "@/components/admin/user-status-toggle";
 import { PublishTutorToggle } from "@/components/admin/publish-tutor-toggle";
 import { ResendSetupEmailButton } from "@/components/admin/resend-setup-email-button";
+import { SendTutorPolicyReminderButton } from "@/components/admin/send-tutor-policy-reminder-button";
 import { formatLevel } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Tutors" };
@@ -21,7 +22,8 @@ export default async function AdminTutorsPage() {
   return (
     <Card>
       <CardContent className="overflow-x-auto">
-        <div className="mb-4 flex justify-end">
+        <div className="mb-4 flex flex-wrap items-center justify-end gap-3">
+          <SendTutorPolicyReminderButton tutorCount={tutors.length} />
           <LinkButton href="/admin/tutors/new" variant="primary" size="sm">
             Add Tutor
           </LinkButton>

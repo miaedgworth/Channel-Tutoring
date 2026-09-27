@@ -189,3 +189,59 @@ export async function resendTutorSetupEmail(
 
   return {};
 }
+
+// One-off reminder of Tutor Agreement §6 (all communication, scheduling and
+// payment must stay on the platform — no personal contact details, no
+// off-platform arrangement) to every registered tutor. Failures per tutor
+// don't stop the rest from sending — same pattern as other bulk email jobs
+// (see the balance-reminder cron).
+export async function sendTutorCommunicationPolicyReminder(): Promise<
+  { error: string } | { sentCount: number }
+> {
+  const admin = await requireUser("ADMIN");
+
+  const tutors = await prisma.user.findMany({
+    where: { role: "TUTOR" },
+    select: { id: true, name: true, email: true },
+  });
+  if (tutors.length === 0) {
+    return { error: "There are no registered tutors to email." };
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const results = await Promise.allSettled(
+    tutors.map((tutor) =>
+      sendEmail({
+        to: tutor.email,
+        subject: "A reminder about keeping communication on the platform",
+        html: baseEmailLayout(`
+          <p>Hi ${tutor.name},</p>
+          <p>A quick reminder of Section 6 of your Tutor Agreement: all
+          communication with clients — including arranging or rescheduling
+          sessions — must take place through the ${region.brandName}
+          messaging system. Personal contact details shouldn't be requested
+          or shared, and sessions or payment shouldn't be arranged outside
+          the platform.</p>
+          <p>This isn't just paperwork — it's what lets us keep a full
+          audit trail and step in quickly if a safeguarding concern is ever
+          raised, for your protection as much as the student's.</p>
+          <p>You can review your signed Tutor Agreement any time from your
+          compliance page:</p>
+          <p><a href="${appUrl}/tutor-dashboard/compliance" style="color:#C9A227;font-weight:bold;">Review your Tutor Agreement</a></p>
+          <p>Any questions about this, just reply to this email or contact
+          us at ${region.supportEmail}.</p>
+        `),
+      }),
+    ),
+  );
+  const sentCount = results.filter((r) => r.status === "fulfilled").length;
+
+  await logAudit({
+    actorId: admin.id,
+    action: "TUTOR_COMMUNICATION_POLICY_REMINDER_SENT",
+    targetType: "User",
+    metadata: { tutorCount: tutors.length, sentCount },
+  });
+
+  return { sentCount };
+}
