@@ -60,11 +60,21 @@ export async function POST(request: Request) {
         throw new Error("USED");
       }
 
+      const user = await tx.user.findUniqueOrThrow({ where: { id: resetToken.userId } });
+
       await tx.user.update({
         where: { id: resetToken.userId },
-        // passwordChangedAt invalidates any other session issued before
-        // this reset, on that user's next request — see auth.ts.
-        data: { passwordHash, passwordChangedAt: new Date() },
+        data: {
+          passwordHash,
+          // passwordChangedAt invalidates any other session issued before
+          // this reset, on that user's next request — see auth.ts.
+          passwordChangedAt: new Date(),
+          // Using a link emailed to this address proves the same thing a
+          // verification code would — this is how an admin/tutor-invited
+          // account (which never goes through /register) clears the
+          // EMAIL_NOT_VERIFIED gate in auth.ts.
+          emailVerifiedAt: user.emailVerifiedAt ?? new Date(),
+        },
       });
 
       // A password reset supersedes any other still-outstanding reset

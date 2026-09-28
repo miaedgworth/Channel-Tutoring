@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations/auth";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { subscribeEmail } from "@/lib/newsletter";
+import { issueVerificationCode } from "@/lib/email-verification";
 
 export async function POST(request: Request) {
   const ip = getClientIp(request.headers);
@@ -89,6 +90,8 @@ export async function POST(request: Request) {
       // Newsletter provider issues shouldn't block account creation.
     });
   }
+
+  await issueVerificationCode(user.id, user.name, user.email);
 
   return NextResponse.json({ id: user.id, email: user.email });
 }

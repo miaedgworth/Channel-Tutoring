@@ -14,12 +14,14 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [needsVerification, setNeedsVerification] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setNeedsVerification(false);
 
     const res = await signIn("credentials", {
       email,
@@ -30,6 +32,11 @@ export function LoginForm() {
     setLoading(false);
 
     if (!res || res.error) {
+      if (res?.error === "EMAIL_NOT_VERIFIED") {
+        setNeedsVerification(true);
+        setError("Please verify your email before logging in.");
+        return;
+      }
       setError(
         res?.error === "ACCOUNT_SUSPENDED"
           ? "This account has been suspended. Please contact us for help."
@@ -50,6 +57,17 @@ export function LoginForm() {
           className="rounded-md bg-red/10 px-4 py-3 text-sm text-red"
         >
           {error}
+          {needsVerification && (
+            <>
+              {" "}
+              <Link
+                href={`/verify-email?email=${encodeURIComponent(email)}`}
+                className="font-semibold underline"
+              >
+                Verify now
+              </Link>
+            </>
+          )}
         </p>
       )}
 

@@ -22,6 +22,57 @@ export function RegisterForm() {
   const [addressPostcode, setAddressPostcode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<"form" | "verify">("form");
+  const [code, setCode] = useState("");
+  const [resending, setResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
+
+  async function handleVerify(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    const res = await fetch("/api/auth/verify-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, code }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.error ?? "Something went wrong. Please try again.");
+      setLoading(false);
+      return;
+    }
+
+    const signInRes = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    setLoading(false);
+
+    if (signInRes?.error) {
+      router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+      return;
+    }
+
+    router.push(callbackUrl);
+    router.refresh();
+  }
+
+  async function handleResend() {
+    setResending(true);
+    setResendMessage(null);
+    await fetch("/api/auth/resend-verification", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    setResending(false);
+    setResendMessage("A new code is on its way, if it hasn't already arrived.");
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -56,27 +107,70 @@ export function RegisterForm() {
     });
     const data = await res.json();
 
-    if (!res.ok) {
-      setError(data.error ?? "Something went wrong. Please try again.");
-      setLoading(false);
-      return;
-    }
-
-    const signInRes = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-
     setLoading(false);
 
-    if (signInRes?.error) {
-      router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+    if (!res.ok) {
+      setError(data.error ?? "Something went wrong. Please try again.");
       return;
     }
 
-    router.push(callbackUrl);
-    router.refresh();
+    setStep("verify");
+  }
+
+  if (step === "verify") {
+    return (
+      <form onSubmit={handleVerify} className="space-y-5" noValidate>
+        <p className="text-sm text-navy/70">
+          We&apos;ve sent a 6-digit code to <strong>{email}</strong>. Enter it
+          below to finish creating your account.
+        </p>
+
+        {error && (
+          <p role="alert" className="rounded-md bg-red/10 px-4 py-3 text-sm text-red">
+            {error}
+          </p>
+        )}
+        {resendMessage && (
+          <p className="rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            {resendMessage}
+          </p>
+        )}
+
+        <div>
+          <label htmlFor="code" className="block text-sm font-medium text-navy">
+            Verification code
+          </label>
+          <input
+            id="code"
+            type="text"
+            inputMode="numeric"
+            pattern="\d{6}"
+            maxLength={6}
+            required
+            autoComplete="one-time-code"
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            className="mt-1.5 block w-full rounded-md border border-navy/20 px-3 py-2.5 text-center text-lg tracking-[0.5em] focus:border-gold-dark focus:outline-none focus:ring-1 focus:ring-gold-dark"
+          />
+        </div>
+
+        <Button type="submit" variant="primary" className="w-full" disabled={loading || code.length !== 6}>
+          {loading ? "Verifying..." : "Verify & continue"}
+        </Button>
+
+        <p className="text-center text-sm text-navy/60">
+          Didn&apos;t get a code?{" "}
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={resending}
+            className="font-semibold text-navy underline disabled:opacity-50"
+          >
+            {resending ? "Sending..." : "Resend code"}
+          </button>
+        </p>
+      </form>
+    );
   }
 
   return (

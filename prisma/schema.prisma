@@ -172,19 +172,20 @@ model User {
   addressPostcode    String?
   addressRequestedAt DateTime?
 
-  tutorProfile          TutorProfile?
-  tutorApplication      TutorApplication?
-  bookingsAsClient      Booking[]            @relation("ClientBookings")
-  conversationsAsClient Conversation[]       @relation("ClientConversations")
-  conversationsAsTutor  Conversation[]       @relation("TutorConversations")
-  messagesSent          Message[]            @relation("SentMessages")
-  reviewsWritten        Review[]             @relation("ClientReviews")
-  passwordResetTokens   PasswordResetToken[]
-  auditLogsAsActor      AuditLog[]           @relation("ActorAuditLogs")
-  contactMessages       ContactMessage[]
-  tokenBalances         TokenBalance[]
-  tokenTransactions     TokenTransaction[]
-  courseEnrollments     CourseEnrollment[]
+  tutorProfile           TutorProfile?
+  tutorApplication       TutorApplication?
+  bookingsAsClient       Booking[]               @relation("ClientBookings")
+  conversationsAsClient  Conversation[]          @relation("ClientConversations")
+  conversationsAsTutor   Conversation[]          @relation("TutorConversations")
+  messagesSent           Message[]               @relation("SentMessages")
+  reviewsWritten         Review[]                @relation("ClientReviews")
+  passwordResetTokens    PasswordResetToken[]
+  emailVerificationCodes EmailVerificationCode[]
+  auditLogsAsActor       AuditLog[]              @relation("ActorAuditLogs")
+  contactMessages        ContactMessage[]
+  tokenBalances          TokenBalance[]
+  tokenTransactions      TokenTransaction[]
+  courseEnrollments      CourseEnrollment[]
 
   @@index([role])
 }
@@ -194,6 +195,24 @@ model PasswordResetToken {
   token     String    @unique
   userId    String
   expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// A 6-digit code emailed to a client at self-registration to prove they
+// control that inbox before the account can sign in (see EMAIL_NOT_VERIFIED
+// in auth.ts). Admin/tutor-invited accounts prove the same thing by using
+// their emailed reset-password link instead — see reset-password/route.ts.
+model EmailVerificationCode {
+  id        String    @id @default(cuid())
+  userId    String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int       @default(0)
   usedAt    DateTime?
   createdAt DateTime  @default(now())
 
