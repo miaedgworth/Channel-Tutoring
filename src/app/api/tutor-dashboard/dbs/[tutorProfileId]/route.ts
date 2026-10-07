@@ -27,7 +27,11 @@ export async function GET(
     return NextResponse.json({ error: "Not found." }, { status: 404 });
   }
 
-  const result = await get(profile.dbsCheckUrl, { access: "private" });
+  // Must match the token used to upload — see dbs-upload/route.ts.
+  const result = await get(profile.dbsCheckUrl, {
+    access: "private",
+    token: process.env.DBS_BLOB_READ_WRITE_TOKEN,
+  });
   if (!result || result.statusCode !== 200) {
     return NextResponse.json({ error: "Not found." }, { status: 404 });
   }
