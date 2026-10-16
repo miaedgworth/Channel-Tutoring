@@ -6,6 +6,7 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { sendEmail, baseEmailLayout } from "@/lib/email";
 import { escapeHtml } from "@/lib/utils";
 import { region } from "@/lib/region";
+import { CONTACT_NOTIFICATION_EMAIL } from "@/lib/constants";
 
 export async function POST(request: Request) {
   const ip = getClientIp(request.headers);
@@ -42,6 +43,17 @@ export async function POST(request: Request) {
       your message and will get back to you as soon as possible.</p>
       <p><strong>Your message:</strong></p>
       <p>${escapeHtml(message).replace(/\n/g, "<br />")}</p>
+    `),
+  }).catch(() => {});
+
+  await sendEmail({
+    to: CONTACT_NOTIFICATION_EMAIL,
+    subject: `New enquiry: ${subject}`,
+    html: baseEmailLayout(`
+      <p><strong>${escapeHtml(name)}</strong> (${escapeHtml(email)}) sent a message
+      through the contact form:</p>
+      <p>${escapeHtml(message).replace(/\n/g, "<br />")}</p>
+      <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/contact-messages" style="color:#C9A227;font-weight:bold;">View in admin</a></p>
     `),
   }).catch(() => {});
 

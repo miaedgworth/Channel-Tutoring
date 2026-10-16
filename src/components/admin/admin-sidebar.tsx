@@ -14,6 +14,7 @@ const NAV = [
   { href: "/admin/payouts", label: "Tutor Payouts" },
   { href: "/admin/stripe-payouts", label: "Stripe Payouts" },
   { href: "/admin/messages", label: "Messages" },
+  { href: "/admin/contact-messages", label: "Contact Enquiries" },
   { href: "/admin/feedback", label: "Feedback" },
   { href: "/admin/revenue", label: "Revenue" },
   { href: "/admin/content", label: "Content" },

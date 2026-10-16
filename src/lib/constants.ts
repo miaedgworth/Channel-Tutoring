@@ -186,6 +186,11 @@ export const COURSE_TERMS_VERSION = "25 September 2026";
 // Used when a course doesn't set its own Course.depositPercent.
 export const DEFAULT_COURSE_DEPOSIT_PERCENT = 25;
 
+// Where new /contact form submissions are emailed — Mia's own inbox, kept
+// separate from region.supportEmail (the "from"/reply address shown to
+// clients) so a notification going here never changes what clients see.
+export const CONTACT_NOTIFICATION_EMAIL = "channel.tutoring@hotmail.com";
+
 // Questions asked about the child at course-enrollment checkout, answered
 // into CourseEnrollment.childAnswers (keyed by id). Mirrors the "Parent/
 // Guardian Consent and Student Information Form" used for the October
